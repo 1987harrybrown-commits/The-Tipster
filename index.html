@@ -371,6 +371,15 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:48px
   <div class="wrap">
     <div class="sec-label">Verified Track Record</div>
     <h2 class="sec-title">EVERY TIP. EVERY RESULT.</h2>
+
+    <!-- P&L TABS -->
+    <div style="display:flex;gap:8px;margin-bottom:24px;">
+      <button class="tab on" id="plTab-all" onclick="switchPLTab('all')">All Tips</button>
+      <button class="tab" id="plTab-free" onclick="switchPLTab('free')">Free Tips</button>
+      <button class="tab" id="plTab-pro" onclick="switchPLTab('pro')">Pro Tips</button>
+    </div>
+
+    <!-- SUMMARY STATS -->
     <div class="pl-summary" id="plSummary">
       <div class="pl-s-cell"><div class="pl-s-label">Settled</div><div class="pl-s-val" id="ps-settled" style="color:var(--text)">—</div></div>
       <div class="pl-s-cell"><div class="pl-s-label">Won</div><div class="pl-s-val" id="ps-won" style="color:var(--green)">—</div></div>
@@ -378,15 +387,16 @@ footer { background:var(--bg2); border-top:1px solid var(--border); padding:48px
       <div class="pl-s-cell"><div class="pl-s-label">Win Rate</div><div class="pl-s-val" id="ps-rate" style="color:var(--green)">—</div></div>
       <div class="pl-s-cell"><div class="pl-s-label">Total P&L</div><div class="pl-s-val" id="ps-pl">—</div></div>
     </div>
+
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
             <th>Date</th><th>Sport</th><th>Event</th><th>Selection</th>
-            <th>Odds</th><th>Stake</th><th>Result</th><th>P&L</th><th>Running P&L</th>
+            <th>Tier</th><th>Odds</th><th>Stake</th><th>Result</th><th>P&L</th><th>Running P&L</th>
           </tr>
         </thead>
-        <tbody id="plBody"><tr><td colspan="9" style="text-align:center;color:var(--muted);padding:40px">Loading results...</td></tr></tbody>
+        <tbody id="plBody"><tr><td colspan="10" style="text-align:center;color:var(--muted);padding:40px">Loading results...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -680,21 +690,14 @@ function renderTicker() {
   `).join('');
 }
 
-// ─── SPORTS GRID ─────────────────────────────
+// ─── SPORTS GRID ─────────────────────────────────────────
 function renderSportsGrid() {
   const sportCounts = {};
-  allTips.forEach(t => {
-    sportCounts[t.sport] = (sportCounts[t.sport] || 0) + 1;
-  });
-
-  const allSports = [
-    'Football','Basketball','Tennis','NFL','Baseball',
-    'Ice Hockey','Horse Racing','Boxing / MMA','Golf','Rugby','Cricket','Snooker'
-  ];
-
+  allTips.forEach(t => { sportCounts[t.sport] = (sportCounts[t.sport] || 0) + 1; });
+  const allSports = ['Football','Basketball','Tennis','NFL','Baseball','Ice Hockey','Boxing / MMA','Golf','Rugby','Cricket','Snooker'];
   const grid = document.getElementById('sportsGrid');
   grid.innerHTML = allSports.map(s => `
-    <div class="sport-pill">
+    <div class="sport-pill" onclick="filterBySport('${s}')" style="cursor:pointer">
       <div class="sp-icon">${sportIcon(s)}</div>
       <div class="sp-name">${s}</div>
       <div class="sp-count">${sportCounts[s] || 0} tips today</div>
@@ -702,40 +705,93 @@ function renderSportsGrid() {
   `).join('');
 }
 
-// ─── P&L HISTORY TABLE ───────────────────────
+function filterBySport(sport) {
+  document.getElementById('tips').scrollIntoView({ behavior: 'smooth' });
+  activeFilter = sport;
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.remove('on');
+    if (t.textContent.trim().includes(sport)) t.classList.add('on');
+  });
+  renderTips();
+  document.querySelectorAll('.sport-pill').forEach(p => {
+    const isActive = p.querySelector('.sp-name').textContent === sport;
+    p.style.borderColor = isActive ? 'rgba(24,224,122,0.6)' : '';
+    p.style.background = isActive ? 'rgba(24,224,122,0.05)' : '';
+  });
+}
+
+// ─── P&L HISTORY TABLE ───────────────────────────────────────────
+let allHistory = [];
+let activePLTab = 'all';
+
 async function loadHistory() {
   const { data, error } = await db
     .from('results_history')
     .select('*')
     .order('settled_at', { ascending: false })
-    .limit(50);
+    .limit(200);
+  if (error) return;
+  allHistory = data || [];
+  renderHistory();
+}
 
+function switchPLTab(tab) {
+  activePLTab = tab;
+  document.querySelectorAll('[id^="plTab-"]').forEach(t => t.classList.remove('on'));
+  document.getElementById('plTab-' + tab).classList.add('on');
+  renderHistory();
+}
+
+function renderHistory() {
   const tbody = document.getElementById('plBody');
+  const filtered = allHistory;
 
-  if (error || !data?.length) {
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:40px">No settled results yet — tips are pending. Check back after today's events complete.</td></tr>`;
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:40px">No settled results yet — check back after today\'s events complete.</td></tr>';
+    updatePLSummary(filtered);
     return;
   }
 
-  tbody.innerHTML = data.map(r => {
-    const date = new Date(r.settled_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  let running = 0;
+  tbody.innerHTML = filtered.map(r => {
     const pl = parseFloat(r.profit_loss);
-    const rpl = parseFloat(r.running_pl);
-    const plStr = pl >= 0 ? `+${pl.toFixed(2)}u` : `${pl.toFixed(2)}u`;
-    const rplStr = (rpl >= 0 ? '+' : '') + rpl.toFixed(2) + 'u';
+    running = parseFloat((running + pl).toFixed(2));
+    const date = new Date(r.settled_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    const plStr = (pl >= 0 ? '+' : '') + pl.toFixed(2) + 'u';
+    const rplStr = (running >= 0 ? '+' : '') + running.toFixed(2) + 'u';
     const resClass = r.result === 'WON' ? 'w' : 'l';
-    return `<tr>
-      <td style="color:var(--muted);font-family:'Space Mono',monospace;font-size:12px">${date}</td>
-      <td style="font-size:12px">${r.sport}</td>
-      <td style="font-weight:600">${r.event}</td>
-      <td>${r.selection}</td>
-      <td class="odds-td">${parseFloat(r.odds).toFixed(2)}</td>
-      <td style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted)">${r.stake}u</td>
-      <td><span class="res-pill ${resClass}">${r.result}</span></td>
-      <td class="${pl >= 0 ? 'pl-plus' : 'pl-minus'}">${plStr}</td>
-      <td class="${rpl >= 0 ? 'pl-plus' : 'pl-minus'}">${rplStr}</td>
-    </tr>`;
+    const tier = r.tier || 'free';
+    return '<tr>' +
+      '<td style="color:var(--muted);font-family:Space Mono,monospace;font-size:12px">' + date + '</td>' +
+      '<td style="font-size:12px">' + (r.sport||'') + '</td>' +
+      '<td style="font-weight:600">' + (r.event||'') + '</td>' +
+      '<td>' + (r.selection||'') + '</td>' +
+      '<td><span class="tcard-badge ' + tier + '">' + tier.toUpperCase() + '</span></td>' +
+      '<td class="odds-td">' + parseFloat(r.odds).toFixed(2) + '</td>' +
+      '<td style="font-family:Space Mono,monospace;font-size:12px;color:var(--muted)">' + r.stake + 'u</td>' +
+      '<td><span class="res-pill ' + resClass + '">' + r.result + '</span></td>' +
+      '<td class="' + (pl >= 0 ? 'pl-plus' : 'pl-minus') + '">' + plStr + '</td>' +
+      '<td class="' + (running >= 0 ? 'pl-plus' : 'pl-minus') + '">' + rplStr + '</td>' +
+    '</tr>';
   }).join('');
+
+  updatePLSummary(filtered);
+}
+
+function updatePLSummary(data) {
+  const won = data.filter(r => r.result === 'WON').length;
+  const lost = data.filter(r => r.result === 'LOST').length;
+  const total = won + lost;
+  const pl = data.reduce((sum, r) => sum + parseFloat(r.profit_loss || 0), 0);
+  const rate = total > 0 ? ((won/total)*100).toFixed(1) : '0.0';
+  const plStr = (pl >= 0 ? '+' : '') + pl.toFixed(2) + 'u';
+  document.getElementById('ps-settled').textContent = total;
+  document.getElementById('ps-won').textContent = won;
+  document.getElementById('ps-lost').textContent = lost;
+  document.getElementById('ps-rate').textContent = rate + '%';
+  const pspl = document.getElementById('ps-pl');
+  pspl.textContent = plStr;
+  pspl.style.color = pl >= 0 ? 'var(--green)' : 'var(--red)';
 }
 
 // ─── REAL-TIME SUBSCRIPTIONS ─────────────────
