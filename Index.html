@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Tipster — Expert Sports Predictions</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #07090d;
+  --bg2: #0c0f15;
+  --bg3: #111620;
+  --card: #0f141c;
+  --card2: #131a24;
+  --border: #1c2535;
+  --border2: #243044;
+  --green: #18e07a;
+  --green-dim: rgba(24,224,122,0.08);
+  --red: #ff3d5a;
+  --red-dim: rgba(255,61,90,0.08);
+  --gold: #f0b429;
+  --gold-dim: rgba(240,180,41,0.1);
+  --blue: #3b82f6;
+  --text: #dde6f0;
+  --muted: #4a5a70;
+  --muted2: #2a3545;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Lato', sans-serif;
+  overflow-x: hidden;
+}
+
+/* GRAIN */
+body::after {
+  content:'';
+  position:fixed;
+  inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;
+  z-index:9998;
+  opacity:0.5;
+}
+
+/* ─── NAV ─── */
+nav {
+  position:fixed; top:0; left:0; right:0; z-index:200;
+  height:60px;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 36px;
+  background:rgba(7,9,13,0.9);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+}
+
+.logo {
+  font-family:'Syne',sans-serif;
+  font-size:20px; font-weight:800;
+  letter-spacing:0.5px;
+  color:var(--text);
+  text-decoration:none;
+}
+.logo em { color:var(--green); font-style:normal; }
+
+.nav-mid { display:flex; gap:28px; }
+.nav-mid a {
+  font-size:13px; font-weight:700; letter-spacing:1.5px;
+  text-transform:uppercase;
+  color:var(--muted); text-decoration:none;
+  transition:color 0.2s;
+}
+.nav-mid a:hover { color:var(--text); }
+
+.nav-right { display:flex; gap:10px; align-items:center; }
+
+.btn { font-family:'Lato',sans-serif; cursor:pointer; transition:all 0.2s; }
+.btn-ghost {
+  background:none; border:1px solid var(--border2);
+  color:var(--text); padding:7px 18px; border-radius:4px; font-size:13px;
+}
+.btn-ghost:hover { border-color:var(--green); color:var(--green); }
+.btn-green {
+  background:var(--green); border:none;
+  color:#07090d; padding:7px 18px; border-radius:4px;
+  font-size:13px; font-weight:700;
+}
+.btn-green:hover { background:#2fffa0; transform:translateY(-1px); }
+
+/* ─── RECORD BAR ─── */
+.record-bar {
+  position:fixed; top:60px; left:0; right:0; z-index:199;
+  background:var(--bg3);
+  border-bottom:1px solid var(--border);
+  padding:0 36px;
+  height:44px;
+  display:flex; align-items:center; justify-content:space-between;
+  font-family:'Space Mono',monospace;
+  font-size:12px;
+}
+
+.record-stats { display:flex; gap:32px; align-items:center; }
+
+.rs {
+  display:flex; align-items:center; gap:8px;
+}
+.rs-label { color:var(--muted); text-transform:uppercase; letter-spacing:1px; font-size:10px; }
+.rs-val { font-size:14px; font-weight:700; }
+.rs-val.green { color:var(--green); }
+.rs-val.red { color:var(--red); }
+.rs-val.gold { color:var(--gold); }
+.rs-val.white { color:var(--text); }
+
+.divider-v { width:1px; height:24px; background:var(--border); }
+
+.record-right {
+  display:flex; align-items:center; gap:8px;
+  font-size:11px; color:var(--muted);
+}
+.live-pulse {
+  width:7px; height:7px;
+  background:var(--green); border-radius:50%;
+  animation:livepulse 1.8s infinite;
+}
+@keyframes livepulse {
+  0%,100%{opacity:1;transform:scale(1);}
+  50%{opacity:0.3;transform:scale(0.7);}
+}
+
+/* ─── HERO ─── */
+.hero {
+  min-height:100vh;
+  padding:140px 36px 80px;
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; text-align:center;
+  position:relative; overflow:hidden;
+}
+
+.hero-bg {
+  position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 900px 500px at 50% 60%, rgba(24,224,122,0.04) 0%, transparent 70%),
+    radial-gradient(ellipse 600px 400px at 80% 20%, rgba(59,130,246,0.03) 0%, transparent 60%);
+  pointer-events:none;
+}
+
+.hero-grid {
+  position:absolute; inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size:60px 60px;
+  opacity:0.2;
+  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+}
+
+.hero-eyebrow {
+  font-family:'Space Mono',monospace;
+  font-size:11px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--green); margin-bottom:24px;
+  opacity:0; animation:up 0.7s 0.1s ease forwards;
+}
+
+.hero h1 {
+  font-family:'Syne',sans-serif;
+  font-size:clamp(52px,9vw,100px);
+  font-weight:800; line-height:0.92;
+  letter-spacing:-2px;
+  margin-bottom:28px;
+  opacity:0; animation:up 0.7s 0.2s ease forwards;
+}
+.hero h1 .accent { color:var(--green); display:block; }
+
+.hero-sub {
+  font-size:17px; color:var(--muted);
+  max-width:480px; line-height:1.7;
+  margin-bottom:44px;
+  opacity:0; animation:up 0.7s 0.3s ease forwards;
+}
+
+.hero-btns {
+  display:flex; gap:14px; margin-bottom:72px;
+  opacity:0; animation:up 0.7s 0.4s ease forwards;
+}
+.btn-hero {
+  padding:13px 30px; font-size:15px; font-weight:700;
+  border-radius:5px; cursor:pointer; font-family:'Lato',sans-serif;
+  transition:all 0.2s;
+}
+.btn-hero.g { background:var(--green); color:#07090d; border:none; }
+.btn-hero.g:hover { background:#2fffa0; transform:translateY(-2px); box-shadow:0 8px 28px rgba(24,224,122,0.25); }
+.btn-hero.o { background:none; color:var(--text); border:1px solid var(--border2); }
+.btn-hero.o:hover { border-color:var(--muted); }
+
+/* P&L HERO WIDGET */
+.pl-widget {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+  background:var(--border);
+  border:1px solid var(--border); border-radius:10px;
+  overflow:hidden; width:100%; max-width:700px;
+  opacity:0; animation:up 0.7s 0.5s ease forwards;
+}
+.pl-cell {
+  background:var(--card);
+  padding:20px 24px;
+  text-align:center;
+}
+.pl-cell-label {
+  font-family:'Space Mono',monospace;
+  font-size:10px; text-transform:uppercase;
+  letter-spacing:2px; color:var(--muted);
+  margin-bottom:8px;
+}
+.pl-cell-val {
+  font-family:'Space Mono',monospace;
+  font-size:22px; font-weight:700;
+}
+.pl-cell-val.g { color:var(--green); }
+.pl-cell-val.r { color:var(--red); }
+.pl-cell-val.w { color:var(--text); }
+.pl-cell-val.go { color:var(--gold); }
+
+@keyframes up {
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+/* ─── TICKER ─── */
+.ticker {
+  overflow:hidden; white-space:nowrap;
+  background:var(--bg2);
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:11px 0;
+}
+.ticker-track {
+  display:inline-flex;
+  animation:scroll 40s linear infinite;
+}
+.ticker-track:hover { animation-play-state:paused; }
+.tick {
+  display:inline-flex; align-items:center; gap:10px;
+  padding:0 36px;
+  font-family:'Space Mono',monospace; font-size:12px;
+  border-right:1px solid var(--border);
+  color:var(--muted);
+}
+.tick .ev { color:var(--text); font-weight:700; }
+.tick .pick { color:var(--green); }
+.tick .odds { color:var(--gold); }
+.tick .res { padding:2px 7px; border-radius:3px; font-size:10px; font-weight:700; }
+.tick .res.w { background:rgba(24,224,122,0.15); color:var(--green); }
+.tick .res.l { background:rgba(255,61,90,0.15); color:var(--red); }
+.tick .res.p { background:rgba(240,180,41,0.15); color:var(--gold); }
+@keyframes scroll { from{transform:translateX(0);} to{transform:translateX(-50%);} }
+
+/* ─── SECTION WRAPPER ─── */
+.wrap { max-width:1240px; margin:0 auto; padding:0 36px; }
+.section { padding:80px 0; }
+.sec-label {
+  font-family:'Space Mono',monospace;
+  font-size:10px; letter-spacing:3px; text-transform:uppercase;
+  color:var(--green); margin-bottom:10px;
+}
+.sec-title {
+  font-family:'Syne',sans-serif;
+  font-size:clamp(32px,4vw,48px); font-weight:800;
+  letter-spacing:-0.5px; margin-bottom:36px;
+}
+
+/* ─── TIPS SECTION ─── */
+.tips-toolbar {
+  display:flex; align-items:center;
+  justify-content:space-between;
+  margin-bottom:24px; flex-wrap:wrap; gap:16px;
+}
+.tabs { display:flex; gap:6px; flex-wrap:wrap; }
+.tab {
+  padding:6px 15px; border-radius:3px;
+  font-size:12px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  cursor:pointer; font-family:'Lato',sans-serif;
+  border:1px solid var(--border2); background:none; color:var(--muted);
+  transition:all 0.15s;
+}
+.tab:hover { color:var(--text); border-color:var(--muted); }
+.tab.on { background:var(--green); color:#07090d; border-color:var(--green); }
+
+.update-tag {
+  font-family:'Space Mono',monospace; font-size:11px; color:var(--muted);
+  display:flex; align-items:center; gap:6px;
+}
+
+.tips-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr)); gap:18px; }
+
+/* TIP CARD */
+.tcard {
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+  transition:all 0.22s;
+  position:relative;
+  cursor:pointer;
+}
+.tcard:hover {
+  border-color:rgba(24,224,122,0.25);
+  transform:translateY(-3px);
+  box-shadow:0 16px 48px rgba(0,0,0,0.4);
+}
+.tcard.pro-card { border-color:rgba(240,180,41,0.15); }
+.tcard-top {
+  height:3px;
+  background:var(--green);
+}
+.tcard.pro-card .tcard-top { background:var(--gold); }
+.tcard.won .tcard-top { background:var(--green); }
+.tcard.lost .tcard-top { background:var(--red); }
+.tcard.pending .tcard-top { background:var(--border2); }
+
+.tcard-body { padding:20px; }
+.tcard-meta {
+  display:flex; justify-content:space-between; align-items:center;
+  margin-bottom:12px;
+}
+.tcard-sport {
+  font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+  color:var(--muted);
+}
+.tcard-badge {
+  font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+  padding:3px 8px; border-radius:3px;
+}
+.tcard-badge.free { background:var(--green-dim); color:var(--green); }
+.tcard-badge.pro { background:var(--gold-dim); color:var(--gold); }
+
+.tcard-match { font-family:'Syne',sans-serif; font-size:16px; font-weight:700; margin-bottom:4px; }
+.tcard-league { font-size:12px; color:var(--muted); margin-bottom:16px; }
+
+.tcard-pick-row {
+  display:flex; justify-content:space-between; align-items:center;
+  background:var(--bg3); border-radius:6px; padding:12px 16px; margin-bottom:14px;
+}
+.tcard-pick-l .label { font-size:11px; color:var(--muted); margin-bottom:3px; text-transform:uppercase; letter-spacing:0.5px; }
+.tcard-pick-l .value { font-size:15px; font-weight:700; }
+.tcard-odds { font-family:'Space Mono',monospace; font-size:22px; color:var(--gold); font-weight:700; }
+
+.tcard-footer { display:flex; align-items:center; justify-content:space-between; }
+.conf-wrap { flex:1; margin-right:14px; }
+.conf-row { display:flex; justify-content:space-between; margin-bottom:5px; }
+.conf-row span { font-size:11px; color:var(--muted); font-family:'Space Mono',monospace; }
+.conf-bar { height:3px; background:var(--muted2); border-radius:2px; overflow:hidden; }
+.conf-fill { height:100%; border-radius:2px; background:var(--green); }
+.conf-fill.med { background:var(--gold); }
+.conf-fill.low { background:var(--red); }
+
+.tcard-time { font-family:'Space Mono',monospace; font-size:11px; color:var(--muted); white-space:nowrap; }
+
+/* RESULT BADGES on settled cards */
+.tcard-result {
+  display:flex; align-items:center; gap:6px;
+  padding:8px 12px;
+  font-size:12px; font-weight:700; letter-spacing:1px;
+  border-top:1px solid var(--border);
+  font-family:'Space Mono',monospace;
+}
+.tcard-result.won { background:rgba(24,224,122,0.05); color:var(--green); }
+.tcard-result.lost { background:rgba(255,61,90,0.05); color:var(--red); }
+
+/* LOCK OVERLAY */
+.lock-overlay {
+  position:absolute; inset:0;
+  background:rgba(7,9,13,0.93);
+  backdrop-filter:blur(4px);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:10px; padding:24px; text-align:center;
+  border-radius:8px;
+}
+.lock-overlay .lk-icon { font-size:26px; }
+.lock-overlay .lk-title { font-family:'Syne',sans-serif; font-size:16px; font-weight:800; }
+.lock-overlay .lk-sub { font-size:12px; color:var(--muted); }
+.btn-unlock {
+  background:var(--gold); color:#07090d;
+  border:none; padding:9px 22px; border-radius:4px;
+  font-size:13px; font-weight:700; font-family:'Lato',sans-serif;
+  cursor:pointer; margin-top:6px; transition:all 0.2s;
+}
+.btn-unlock:hover { background:#ffe066; }
+
+/* ─── P&L TABLE ─── */
+.pl-section { background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border); }
+
+.pl-summary {
+  display:grid; grid-template-columns:repeat(5,1fr);
+  gap:1px; background:var(--border);
+  border:1px solid var(--border); border-radius:8px;
+  overflow:hidden; margin-bottom:32px;
+}
+.pl-s-cell {
+  background:var(--card); padding:20px;
+  text-align:center;
+}
+.pl-s-label { font-family:'Space Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:2px; color:var(--muted); margin-bottom:8px; }
+.pl-s-val { font-family:'Space Mono',monospace; font-size:24px; font-weight:700; }
+
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+thead tr { border-bottom:2px solid var(--border); }
+thead th {
+  padding:10px 14px; text-align:left;
+  font-family:'Space Mono',monospace; font-size:10px;
+  text-transform:uppercase; letter-spacing:1.5px; color:var(--muted);
+  font-weight:400;
+}
+tbody tr {
+  border-bottom:1px solid var(--border);
+  transition:background 0.15s;
+}
+tbody tr:hover { background:var(--card2); }
+td { padding:12px 14px; }
+td.won-td { color:var(--green); font-weight:700; font-family:'Space Mono',monospace; }
+td.lost-td { color:var(--red); font-weight:700; font-family:'Space Mono',monospace; }
+td.pend-td { color:var(--muted); font-family:'Space Mono',monospace; }
+td.odds-td { font-family:'Space Mono',monospace; color:var(--gold); }
+td.pl-plus { color:var(--green); font-family:'Space Mono',monospace; font-weight:700; }
+td.pl-minus { color:var(--red); font-family:'Space Mono',monospace; font-weight:700; }
+td.pl-pend { color:var(--muted); font-family:'Space Mono',monospace; }
+.res-pill {
+  display:inline-block; padding:3px 9px; border-radius:3px;
+  font-size:10px; font-weight:700; letter-spacing:1px; font-family:'Space Mono',monospace;
+}
+.res-pill.w { background:var(--green-dim); color:var(--green); }
+.res-pill.l { background:var(--red-dim); color:var(--red); }
+.res-pill.p { background:rgba(59,130,246,0.1); color:var(--blue); }
+
+/* ─── SPORTS GRID ─── */
+.sports-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:14px; }
+.sport-pill {
+  background:var(--card); border:1px solid var(--border); border-radius:8px;
+  padding:20px 14px; text-align:center; cursor:pointer; transition:all 0.2s;
+}
+.sport-pill:hover { border-color:rgba(24,224,122,0.35); transform:translateY(-3px); }
+.sport-pill .sp-icon { font-size:32px; margin-bottom:8px; }
+.sport-pill .sp-name { font-size:13px; font-weight:700; margin-bottom:4px; }
+.sport-pill .sp-count { font-family:'Space Mono',monospace; font-size:11px; color:var(--green); }
+
+/* ─── PRICING ─── */
+.pricing-section { background:var(--bg2); border-top:1px solid var(--border); }
+.pricing-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; max-width:820px; margin:0 auto; }
+.pcard {
+  background:var(--card); border:1px solid var(--border);
+  border-radius:10px; padding:36px; position:relative;
+}
+.pcard.featured { border-color:rgba(240,180,41,0.4); }
+.popular {
+  position:absolute; top:-12px; left:50%; transform:translateX(-50%);
+  background:var(--gold); color:#07090d;
+  font-size:10px; font-weight:800; letter-spacing:2px; text-transform:uppercase;
+  padding:4px 16px; border-radius:20px; font-family:'Space Mono',monospace;
+}
+.pname { font-family:'Syne',sans-serif; font-size:22px; font-weight:800; margin-bottom:6px; }
+.pprice {
+  font-family:'Space Mono',monospace;
+  font-size:48px; font-weight:700; line-height:1; margin-bottom:4px;
+}
+.pprice sup { font-size:20px; vertical-align:top; margin-top:10px; display:inline-block; }
+.pprice small { font-size:14px; color:var(--muted); font-weight:400; }
+.pdesc { font-size:13px; color:var(--muted); margin-bottom:24px; padding-bottom:24px; border-bottom:1px solid var(--border); }
+.pfeatures { list-style:none; margin-bottom:28px; }
+.pfeatures li {
+  display:flex; align-items:flex-start; gap:10px;
+  font-size:14px; padding:7px 0;
+}
+.pfeatures li .ck { color:var(--green); margin-top:1px; }
+.pfeatures li .xx { color:var(--muted2); margin-top:1px; }
+.pfeatures li.dim { color:var(--muted); }
+.btn-p {
+  width:100%; padding:13px; border-radius:5px;
+  font-size:14px; font-weight:700; cursor:pointer;
+  font-family:'Lato',sans-serif; transition:all 0.2s;
+}
+.btn-p.free-p { background:none; border:1px solid var(--border2); color:var(--text); }
+.btn-p.free-p:hover { border-color:var(--green); color:var(--green); }
+.btn-p.pro-p { background:var(--gold); border:none; color:#07090d; }
+.btn-p.pro-p:hover { background:#ffe066; transform:translateY(-1px); box-shadow:0 8px 24px rgba(240,180,41,0.25); }
+
+/* ─── FOOTER ─── */
+footer {
+  background:var(--bg2); border-top:1px solid var(--border);
+  padding:48px 36px 32px;
+}
+.footer-top {
+  max-width:1240px; margin:0 auto;
+  display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap;
+  padding-bottom:32px; border-bottom:1px solid var(--border);
+}
+.fbrand .logo { display:block; margin-bottom:12px; }
+.fbrand p { font-size:13px; color:var(--muted); max-width:240px; line-height:1.7; }
+.flinks h4 {
+  font-family:'Space Mono',monospace; font-size:10px;
+  letter-spacing:2px; text-transform:uppercase;
+  color:var(--muted); margin-bottom:14px;
+}
+.flinks ul { list-style:none; }
+.flinks li { margin-bottom:10px; }
+.flinks a { color:var(--muted); text-decoration:none; font-size:14px; transition:color 0.2s; }
+.flinks a:hover { color:var(--text); }
+.footer-bot {
+  max-width:1240px; margin:24px auto 0;
+  display:flex; justify-content:space-between; align-items:flex-start;
+  flex-wrap:wrap; gap:16px;
+}
+.footer-bot p { font-size:12px; color:var(--muted); line-height:1.6; }
+
+/* ─── MODAL ─── */
+.overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,0.75); backdrop-filter:blur(8px);
+  z-index:500; align-items:center; justify-content:center;
+}
+.overlay.open { display:flex; }
+.modal {
+  background:var(--card); border:1px solid var(--border2);
+  border-radius:10px; padding:40px; width:100%; max-width:420px;
+  position:relative; animation:modalin 0.25s ease;
+}
+@keyframes modalin { from{opacity:0;transform:scale(0.96);} to{opacity:1;transform:scale(1);} }
+.modal-x {
+  position:absolute; top:14px; right:16px;
+  background:none; border:none; color:var(--muted);
+  font-size:18px; cursor:pointer;
+}
+.modal h2 { font-family:'Syne',sans-serif; font-size:28px; font-weight:800; margin-bottom:6px; }
+.modal p { font-size:13px; color:var(--muted); margin-bottom:28px; }
+.fg { margin-bottom:14px; }
+.fg label { font-size:12px; font-weight:700; display:block; margin-bottom:6px; letter-spacing:0.5px; }
+.fg input {
+  width:100%; background:var(--bg2); border:1px solid var(--border2);
+  border-radius:5px; padding:11px 14px; font-size:14px;
+  color:var(--text); font-family:'Lato',sans-serif; outline:none;
+  transition:border-color 0.2s;
+}
+.fg input:focus { border-color:var(--green); }
+.btn-msubmit {
+  width:100%; padding:13px; background:var(--green); border:none;
+  border-radius:5px; color:#07090d; font-size:14px; font-weight:700;
+  font-family:'Lato',sans-serif; cursor:pointer; margin-top:6px;
+  transition:all 0.2s;
+}
+.btn-msubmit:hover { background:#2fffa0; }
+.mswitch { font-size:12px; color:var(--muted); text-align:center; margin-top:14px; }
+.mswitch a { color:var(--green); cursor:pointer; text-decoration:none; }
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  nav{ padding:0 16px; }
+  .nav-mid{ display:none; }
+  .record-bar{ padding:0 16px; overflow-x:auto; }
+  .record-stats{ gap:16px; }
+  .hero{ padding:140px 16px 60px; }
+  .pl-widget{ grid-template-columns:repeat(2,1fr); }
+  .wrap{ padding:0 16px; }
+  .pricing-grid{ grid-template-columns:1fr; }
+  .pl-summary{ grid-template-columns:repeat(3,1fr); }
+  .tips-grid{ grid-template-columns:1fr; }
+  footer{ padding:40px 16px 24px; }
+  .footer-top{ flex-direction:column; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">The <em>Tipster</em></a>
+  <div class="nav-mid">
+    <a href="#tips">Today's Tips</a>
+    <a href="#record">Track Record</a>
+    <a href="#sports">All Sports</a>
+    <a href="#pricing">Pricing</a>
+  </div>
+  <div class="nav-right">
+    <button class="btn btn-ghost" onclick="openModal('login')">Log In</button>
+    <button class="btn btn-green" onclick="openModal('signup')">Join Free</button>
+  </div>
+</nav>
+
+<!-- RECORD BAR -->
+<div class="record-bar" id="recordBar">
+  <div class="record-stats">
+    <div class="rs"><span class="rs-label">Overall</span></div>
+    <div class="rs"><span class="rs-val white" id="rb-tips">—</span>&nbsp;<span class="rs-label">Tips</span></div>
+    <div class="divider-v"></div>
+    <div class="rs"><span class="rs-val green" id="rb-won">—</span>&nbsp;<span class="rs-label">Won</span></div>
+    <div class="rs"><span class="rs-val red" id="rb-lost">—</span>&nbsp;<span class="rs-label">Lost</span></div>
+    <div class="rs"><span class="rs-val gold" id="rb-pend">—</span>&nbsp;<span class="rs-label">Pending</span></div>
+    <div class="divider-v"></div>
+    <div class="rs"><span class="rs-label">Win Rate</span>&nbsp;<span class="rs-val green" id="rb-rate">—</span></div>
+    <div class="divider-v"></div>
+    <div class="rs"><span class="rs-label">P&L</span>&nbsp;<span class="rs-val green" id="rb-pl">—</span></div>
+    <div class="rs"><span class="rs-label">ROI</span>&nbsp;<span class="rs-val green" id="rb-roi">—</span></div>
+  </div>
+  <div class="record-right">
+    <div class="live-pulse"></div>
+    <span>Tips refresh every 6 hrs — Last update: <span id="lastUpdate">—</span></span>
+  </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-eyebrow">// Data-Driven Sports Predictions — Updated Daily</div>
+  <h1>THE EDGE<br><span class="accent">YOU NEED</span></h1>
+  <p class="hero-sub">Expert-grade sports predictions across every major sport. Built on form data, odds analysis, and market intelligence — delivered fresh every morning.</p>
+  <div class="hero-btns">
+    <button class="btn-hero g" onclick="openModal('signup')">Start Free — No Card</button>
+    <button class="btn-hero o" onclick="document.getElementById('tips').scrollIntoView({behavior:'smooth'})">See Today's Tips ↓</button>
+  </div>
+  <div class="pl-widget" id="heroWidget">
+    <div class="pl-cell"><div class="pl-cell-label">Total Tips</div><div class="pl-cell-val w" id="hw-tips">—</div></div>
+    <div class="pl-cell"><div class="pl-cell-label">Win Rate</div><div class="pl-cell-val g" id="hw-rate">—</div></div>
+    <div class="pl-cell"><div class="pl-cell-label">Total P&L</div><div class="pl-cell-val g" id="hw-pl">—</div></div>
+    <div class="pl-cell"><div class="pl-cell-label">ROI</div><div class="pl-cell-val go" id="hw-roi">—</div></div>
+  </div>
+</section>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<!-- TODAY'S TIPS -->
+<div id="tips" style="padding:80px 0;">
+  <div class="wrap">
+    <div class="sec-label">Today's Selections</div>
+    <div class="tips-toolbar">
+      <h2 class="sec-title" style="margin-bottom:0">TODAY'S TIPS — <span style="color:var(--green)" id="todayDate"></span></h2>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+        <div class="tabs" id="sportTabs">
+          <button class="tab on" onclick="filterTips('all',this)">All</button>
+          <button class="tab" onclick="filterTips('Football',this)">⚽ Football</button>
+          <button class="tab" onclick="filterTips('Basketball',this)">🏀 Basketball</button>
+          <button class="tab" onclick="filterTips('Tennis',this)">🎾 Tennis</button>
+          <button class="tab" onclick="filterTips('NFL',this)">🏈 NFL</button>
+          <button class="tab" onclick="filterTips('Horse Racing',this)">🏇 Racing</button>
+        </div>
+        <div class="update-tag"><div class="live-pulse"></div> Next refresh in <span id="countdown">—</span></div>
+      </div>
+    </div>
+    <div class="tips-grid" id="tipsGrid"></div>
+  </div>
+</div>
+
+<!-- P&L / TRACK RECORD -->
+<div id="record" class="pl-section section">
+  <div class="wrap">
+    <div class="sec-label">Verified Track Record</div>
+    <h2 class="sec-title">EVERY TIP. EVERY RESULT.</h2>
+    <div class="pl-summary" id="plSummary"></div>
+    <div class="table-wrap">
+      <table id="plTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Sport</th>
+            <th>Event</th>
+            <th>Selection</th>
+            <th>Odds</th>
+            <th>Stake</th>
+            <th>Result</th>
+            <th>P&L</th>
+            <th>Running P&L</th>
+          </tr>
+        </thead>
+        <tbody id="plBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- SPORTS -->
+<div id="sports" style="padding:80px 0; background:var(--bg2); border-top:1px solid var(--border); border-bottom:1px solid var(--border);">
+  <div class="wrap">
+    <div class="sec-label">Coverage</div>
+    <h2 class="sec-title">EVERY SPORT. EVERY DAY.</h2>
+    <div class="sports-grid" id="sportsGrid"></div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div id="pricing" class="pricing-section section">
+  <div class="wrap" style="text-align:center">
+    <div class="sec-label">Membership</div>
+    <h2 class="sec-title">STRAIGHTFORWARD PRICING</h2>
+    <p style="color:var(--muted);font-size:16px;margin-bottom:48px">Free to start. Pro to dominate.</p>
+    <div class="pricing-grid">
+      <div class="pcard">
+        <div class="pname">Free</div>
+        <div class="pprice"><sup>£</sup>0<small> / month</small></div>
+        <div class="pdesc">Daily previews for the casual bettor.</div>
+        <ul class="pfeatures">
+          <li><span class="ck">✓</span> 3 tips per day</li>
+          <li><span class="ck">✓</span> All sports access</li>
+          <li><span class="ck">✓</span> Confidence ratings</li>
+          <li><span class="ck">✓</span> Full track record access</li>
+          <li class="dim"><span class="xx">✗</span> Full daily card (15+ tips)</li>
+          <li class="dim"><span class="xx">✗</span> Morning email digest</li>
+          <li class="dim"><span class="xx">✗</span> Stake recommendations</li>
+          <li class="dim"><span class="xx">✗</span> Premium accumulators</li>
+        </ul>
+        <button class="btn-p free-p" onclick="openModal('signup')">Get Started Free</button>
+      </div>
+      <div class="pcard featured">
+        <div class="popular">Most Popular</div>
+        <div class="pname" style="color:var(--gold)">Pro</div>
+        <div class="pprice" style="color:var(--gold)"><sup>£</sup>9<small>.99 / month</small></div>
+        <div class="pdesc">The full card. Every sport. Every day.</div>
+        <ul class="pfeatures">
+          <li><span class="ck">✓</span> Unlimited tips daily</li>
+          <li><span class="ck">✓</span> All sports + niche markets</li>
+          <li><span class="ck">✓</span> Full confidence breakdown</li>
+          <li><span class="ck">✓</span> Morning email digest</li>
+          <li><span class="ck">✓</span> Stake recommendations (1–5u)</li>
+          <li><span class="ck">✓</span> Premium accumulators</li>
+          <li><span class="ck">✓</span> Early access to new sports</li>
+          <li><span class="ck">✓</span> Priority support</li>
+        </ul>
+        <button class="btn-p pro-p" onclick="openModal('signup')">Start Pro — First Week Free</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-top">
+    <div class="fbrand">
+      <a class="logo" href="#">The <em style="color:var(--green);font-style:normal">Tipster</em></a>
+      <p>Data-driven sports predictions across all major markets. Free to start.</p>
+    </div>
+    <div class="flinks"><h4>Sports</h4><ul>
+      <li><a href="#">Football</a></li><li><a href="#">Basketball</a></li>
+      <li><a href="#">Tennis</a></li><li><a href="#">Horse Racing</a></li>
+      <li><a href="#">NFL / Rugby / Cricket</a></li>
+    </ul></div>
+    <div class="flinks"><h4>Account</h4><ul>
+      <li><a href="#" onclick="openModal('signup')">Sign Up Free</a></li>
+      <li><a href="#" onclick="openModal('login')">Log In</a></li>
+      <li><a href="#pricing">Go Pro</a></li>
+      <li><a href="#record">Track Record</a></li>
+    </ul></div>
+    <div class="flinks"><h4>Legal</h4><ul>
+      <li><a href="#">Terms of Service</a></li>
+      <li><a href="#">Privacy Policy</a></li>
+      <li><a href="#">Responsible Gambling</a></li>
+      <li><a href="#">Cookie Policy</a></li>
+    </ul></div>
+  </div>
+  <div class="footer-bot">
+    <p>© 2026 The Tipster. All rights reserved.</p>
+    <p style="max-width:580px">⚠️ <strong>18+ only.</strong> Tips are for informational and entertainment purposes only. Past performance does not guarantee future results. Please gamble responsibly. <strong>BeGambleAware.org</strong> — GamStop: 0808 8020 133.</p>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeOuter(event)">
+  <div class="modal">
+    <button class="modal-x" onclick="closeModal()">✕</button>
+    <h2 id="mTitle">JOIN FREE</h2>
+    <p id="mSub">Start receiving tips today. No card required.</p>
+    <div id="mSignup">
+      <div class="fg"><label>Full Name</label><input type="text" placeholder="Your name"></div>
+      <div class="fg"><label>Email</label><input type="email" placeholder="you@email.com"></div>
+      <div class="fg"><label>Password</label><input type="password" placeholder="Create a password"></div>
+      <button class="btn-msubmit" onclick="closeModal()">Create Free Account →</button>
+      <div class="mswitch">Already a member? <a onclick="openModal('login')">Log in</a></div>
+    </div>
+    <div id="mLogin" style="display:none">
+      <div class="fg"><label>Email</label><input type="email" placeholder="you@email.com"></div>
+      <div class="fg"><label>Password</label><input type="password" placeholder="Your password"></div>
+      <button class="btn-msubmit" onclick="closeModal()">Log In →</button>
+      <div class="mswitch">No account? <a onclick="openModal('signup')">Join free</a></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────
+const TIPS_TODAY = [
+  { id:1, sport:'Football', icon:'⚽', match:'Manchester City vs Arsenal', league:'Premier League — GW31', pick:'Man City Win', odds:1.85, stake:1, conf:88, tier:'free', time:'17:30 GMT', status:'pending' },
+  { id:2, sport:'Football', icon:'⚽', match:'Barcelona vs Real Madrid', league:'La Liga — El Clásico', pick:'Both Teams to Score', odds:1.72, stake:1, conf:82, tier:'free', time:'20:00 CET', status:'pending' },
+  { id:3, sport:'Basketball', icon:'🏀', match:'LA Lakers vs Boston Celtics', league:'NBA Regular Season', pick:'Over 218.5 Points', odds:1.91, stake:1, conf:76, tier:'free', time:'Tip-off 20:30 EST', status:'pending' },
+  { id:4, sport:'Tennis', icon:'🎾', match:'Sinner vs Zverev', league:'ATP Masters — QF', pick:'Sinner in Straight Sets', odds:2.10, stake:1, conf:71, tier:'pro', time:'14:00 EST', status:'pending' },
+  { id:5, sport:'NFL', icon:'🏈', match:'Chiefs vs 49ers', league:'NFL Playoffs', pick:'Chiefs -3.5', odds:1.90, stake:1, conf:79, tier:'pro', time:'KO 20:20 EST', status:'pending' },
+  { id:6, sport:'Football', icon:'⚽', match:'Bayern Munich vs Dortmund', league:'Bundesliga — Der Klassiker', pick:'Over 2.5 Goals', odds:1.68, stake:1, conf:85, tier:'pro', time:'18:30 CET', status:'pending' },
+  { id:7, sport:'Horse Racing', icon:'🏇', match:'Cheltenham Festival — 3:30 Race', league:'Grade 1 Chase', pick:'Constitution Hill EW', odds:3.50, stake:0.5, conf:67, tier:'pro', time:'15:30 GMT', status:'pending' },
+  { id:8, sport:'Basketball', icon:'🏀', match:'Golden State Warriors vs Denver Nuggets', league:'NBA Regular Season', pick:'Warriors +5.5', odds:1.87, stake:1, conf:74, tier:'pro', time:'22:00 EST', status:'pending' },
+];
+
+// Historical P&L data (fully settled)
+const HISTORY = [
+  { date:'12 Mar', sport:'Football', event:'Liverpool vs Chelsea', pick:'Liverpool Win', odds:1.75, stake:1, result:'WON' },
+  { date:'12 Mar', sport:'Tennis', event:'Djokovic vs Rublev', pick:'Djokovic -1.5', odds:1.95, stake:1, result:'WON' },
+  { date:'12 Mar', sport:'Basketball', event:'Bucks vs Heat', pick:'Over 212.5', odds:1.88, stake:1, result:'LOST' },
+  { date:'11 Mar', sport:'Football', event:'PSG vs Lyon', pick:'PSG Win & BTTS', odds:2.30, stake:1, result:'WON' },
+  { date:'11 Mar', sport:'NFL', event:'Eagles vs Cowboys', pick:'Eagles -4.5', odds:1.90, stake:1, result:'WON' },
+  { date:'11 Mar', sport:'Horse Racing', event:'Newbury 2:40', pick:'Relentless Dreamer EW', odds:4.00, stake:0.5, result:'WON' },
+  { date:'10 Mar', sport:'Football', event:'Inter vs Juventus', pick:'Under 2.5 Goals', odds:1.80, stake:1, result:'WON' },
+  { date:'10 Mar', sport:'Basketball', event:'Celtics vs Knicks', pick:'Celtics -6', odds:1.87, stake:1, result:'LOST' },
+  { date:'10 Mar', sport:'Tennis', event:'Swiatek vs Gauff', pick:'Swiatek Win', odds:1.62, stake:1, result:'WON' },
+  { date:'09 Mar', sport:'Football', event:'Arsenal vs Spurs', pick:'Arsenal Win', odds:1.70, stake:1, result:'WON' },
+  { date:'09 Mar', sport:'Football', event:'Atletico vs Sevilla', pick:'BTTS', odds:1.75, stake:1, result:'WON' },
+  { date:'09 Mar', sport:'Rugby', event:'England vs Ireland', pick:'Ireland -5.5', odds:1.92, stake:1, result:'LOST' },
+  { date:'08 Mar', sport:'Football', event:'Man Utd vs Newcastle', pick:'Over 2.5 Goals', odds:1.78, stake:1, result:'WON' },
+  { date:'08 Mar', sport:'Basketball', event:'Suns vs Mavs', pick:'Mavs Win', odds:2.05, stake:1, result:'WON' },
+  { date:'07 Mar', sport:'Horse Racing', event:'Kempton 4:10', pick:'Night Shift EW', odds:5.00, stake:0.5, result:'LOST' },
+  { date:'07 Mar', sport:'Football', event:'Dortmund vs Leverkusen', pick:'Both Score', odds:1.73, stake:1, result:'WON' },
+  { date:'07 Mar', sport:'NFL', event:'Ravens vs Steelers', pick:'Under 43.5', odds:1.90, stake:1, result:'WON' },
+  { date:'06 Mar', sport:'Tennis', event:'Medvedev vs Fritz', pick:'Medvedev Win', odds:1.85, stake:1, result:'WON' },
+  { date:'06 Mar', sport:'Football', event:'Real Madrid vs Villarreal', pick:'Real Madrid Win', odds:1.55, stake:1, result:'WON' },
+  { date:'05 Mar', sport:'Basketball', event:'Thunder vs Clippers', pick:'Thunder -3', odds:1.88, stake:1, result:'LOST' },
+];
+
+// ─── CALCULATE P&L ───────────────────────────────────────
+function calcPL(row) {
+  if (row.result === 'WON') return +(((row.odds - 1) * row.stake).toFixed(2));
+  if (row.result === 'LOST') return +(-row.stake.toFixed(2));
+  return 0;
+}
+
+function buildStats() {
+  let won=0, lost=0, totalPL=0, totalStaked=0;
+  HISTORY.forEach(r => {
+    if (r.result==='WON') won++;
+    else if (r.result==='LOST') lost++;
+    totalPL += calcPL(r);
+    totalStaked += r.stake;
+  });
+  const pending = TIPS_TODAY.length;
+  const total = won + lost;
+  const rate = total > 0 ? ((won/total)*100).toFixed(1) : '0.0';
+  const roi = totalStaked > 0 ? ((totalPL/totalStaked)*100).toFixed(1) : '0.0';
+  return { won, lost, pending, total: total + pending, rate, totalPL: totalPL.toFixed(2), roi, totalStaked };
+}
+
+// ─── RENDER RECORD BAR ───────────────────────────────────
+function renderRecordBar() {
+  const s = buildStats();
+  document.getElementById('rb-tips').textContent = s.total;
+  document.getElementById('rb-won').textContent = s.won;
+  document.getElementById('rb-lost').textContent = s.lost;
+  document.getElementById('rb-pend').textContent = s.pending;
+  document.getElementById('rb-rate').textContent = s.rate + '%';
+  const plEl = document.getElementById('rb-pl');
+  plEl.textContent = (s.totalPL >= 0 ? '+' : '') + s.totalPL + 'u';
+  plEl.className = 'rs-val ' + (parseFloat(s.totalPL) >= 0 ? 'green' : 'red');
+  const roiEl = document.getElementById('rb-roi');
+  roiEl.textContent = (s.roi >= 0 ? '+' : '') + s.roi + '%';
+  roiEl.className = 'rs-val ' + (parseFloat(s.roi) >= 0 ? 'green' : 'red');
+}
+
+// ─── RENDER HERO WIDGET ──────────────────────────────────
+function renderHeroWidget() {
+  const s = buildStats();
+  document.getElementById('hw-tips').textContent = s.total;
+  document.getElementById('hw-rate').textContent = s.rate + '%';
+  document.getElementById('hw-pl').textContent = (s.totalPL >= 0 ? '+' : '') + s.totalPL + 'u';
+  document.getElementById('hw-roi').textContent = (s.roi >= 0 ? '+' : '') + s.roi + '%';
+}
+
+// ─── RENDER TICKER ───────────────────────────────────────
+function renderTicker() {
+  const items = [
+    ...HISTORY.slice(0,8).map(r => ({
+      icon: r.sport==='Football'?'⚽':r.sport==='Basketball'?'🏀':r.sport==='Tennis'?'🎾':r.sport==='NFL'?'🏈':r.sport==='Horse Racing'?'🏇':'🏅',
+      ev: r.event, pick: r.pick, odds: r.odds.toFixed(2), res: r.result
+    }))
+  ];
+  const doubled = [...items, ...items];
+  const track = document.getElementById('tickerTrack');
+  track.innerHTML = doubled.map(i => `
+    <div class="tick">
+      <span>${i.icon}</span>
+      <span class="ev">${i.ev}</span>
+      <span>→</span>
+      <span class="pick">${i.pick}</span>
+      <span class="odds">@ ${i.odds}</span>
+      <span class="res ${i.res==='WON'?'w':'l'}">${i.res}</span>
+    </div>
+  `).join('');
+}
+
+// ─── RENDER TIPS GRID ────────────────────────────────────
+let activeFilter = 'all';
+function renderTips(filter) {
+  activeFilter = filter || activeFilter;
+  const grid = document.getElementById('tipsGrid');
+  const filtered = activeFilter === 'all' ? TIPS_TODAY : TIPS_TODAY.filter(t => t.sport === activeFilter);
+  grid.innerHTML = '';
+  filtered.forEach((t, i) => {
+    const locked = t.tier === 'pro';
+    const confClass = t.conf >= 80 ? '' : t.conf >= 70 ? 'med' : 'low';
+    const div = document.createElement('div');
+    div.className = `tcard ${t.tier === 'pro' ? 'pro-card' : ''} pending`;
+    div.style.animationDelay = `${i*0.06}s`;
+    div.innerHTML = `
+      <div class="tcard-top"></div>
+      <div class="tcard-body">
+        <div class="tcard-meta">
+          <div class="tcard-sport">${t.icon} ${t.sport}</div>
+          <span class="tcard-badge ${t.tier}">${t.tier.toUpperCase()}</span>
+        </div>
+        <div class="tcard-match">${t.match}</div>
+        <div class="tcard-league">${t.league}</div>
+        <div class="tcard-pick-row">
+          <div class="tcard-pick-l">
+            <div class="label">Selection</div>
+            <div class="value">${t.pick}</div>
+          </div>
+          <div class="tcard-odds">${t.odds.toFixed(2)}</div>
+        </div>
+        <div class="tcard-footer">
+          <div class="conf-wrap">
+            <div class="conf-row"><span>Confidence</span><span>${t.conf}%</span></div>
+            <div class="conf-bar"><div class="conf-fill ${confClass}" style="width:${t.conf}%"></div></div>
+          </div>
+          <div class="tcard-time">${t.time}</div>
+        </div>
+      </div>
+      ${locked ? `
+      <div class="lock-overlay">
+        <div class="lk-icon">🔒</div>
+        <div class="lk-title">Pro Members Only</div>
+        <div class="lk-sub">Upgrade to unlock this selection</div>
+        <button class="btn-unlock" onclick="openModal('signup')">Unlock Pro — £9.99/mo</button>
+      </div>` : ''}
+    `;
+    grid.appendChild(div);
+  });
+}
+
+function filterTips(sport, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
+  btn.classList.add('on');
+  renderTips(sport);
+}
+
+// ─── RENDER P&L TABLE ────────────────────────────────────
+function renderPLTable() {
+  const s = buildStats();
+
+  // Summary row
+  document.getElementById('plSummary').innerHTML = `
+    <div class="pl-s-cell"><div class="pl-s-label">Settled Tips</div><div class="pl-s-val" style="color:var(--text)">${HISTORY.length}</div></div>
+    <div class="pl-s-cell"><div class="pl-s-label">Won</div><div class="pl-s-val" style="color:var(--green)">${s.won}</div></div>
+    <div class="pl-s-cell"><div class="pl-s-label">Lost</div><div class="pl-s-val" style="color:var(--red)">${s.lost}</div></div>
+    <div class="pl-s-cell"><div class="pl-s-label">Win Rate</div><div class="pl-s-val" style="color:var(--green)">${s.rate}%</div></div>
+    <div class="pl-s-cell"><div class="pl-s-label">Total P&L</div><div class="pl-s-val" style="color:${parseFloat(s.totalPL)>=0?'var(--green)':'var(--red)'}">${parseFloat(s.totalPL)>=0?'+':''}${s.totalPL}u</div></div>
+  `;
+
+  // Table rows with running P&L
+  const tbody = document.getElementById('plBody');
+  let running = 0;
+  tbody.innerHTML = HISTORY.map(r => {
+    const pl = calcPL(r);
+    running = +(running + pl).toFixed(2);
+    const plStr = r.result === 'WON' ? `+${pl.toFixed(2)}u` : r.result === 'LOST' ? `-${r.stake.toFixed(2)}u` : '—';
+    const plClass = r.result === 'WON' ? 'pl-plus' : r.result === 'LOST' ? 'pl-minus' : 'pl-pend';
+    const runStr = (running >= 0 ? '+' : '') + running.toFixed(2) + 'u';
+    const runClass = running >= 0 ? 'pl-plus' : 'pl-minus';
+    const resClass = r.result === 'WON' ? 'w' : r.result === 'LOST' ? 'l' : 'p';
+    return `<tr>
+      <td style="color:var(--muted);font-family:'Space Mono',monospace;font-size:12px">${r.date}</td>
+      <td style="font-size:12px">${r.sport}</td>
+      <td style="font-weight:600">${r.event}</td>
+      <td style="color:var(--text)">${r.pick}</td>
+      <td class="odds-td">${r.odds.toFixed(2)}</td>
+      <td style="font-family:'Space Mono',monospace;font-size:12px;color:var(--muted)">${r.stake}u</td>
+      <td><span class="res-pill ${resClass}">${r.result}</span></td>
+      <td class="${plClass}">${plStr}</td>
+      <td class="${runClass}">${runStr}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── SPORTS GRID ─────────────────────────────────────────
+function renderSports() {
+  const sports = [
+    {icon:'⚽',name:'Football',count:'18 tips today'},
+    {icon:'🏀',name:'Basketball',count:'12 tips today'},
+    {icon:'🎾',name:'Tennis',count:'9 tips today'},
+    {icon:'🏈',name:'NFL',count:'6 tips today'},
+    {icon:'⚾',name:'Baseball',count:'8 tips today'},
+    {icon:'🏒',name:'Ice Hockey',count:'7 tips today'},
+    {icon:'🏇',name:'Horse Racing',count:'14 tips today'},
+    {icon:'🥊',name:'Boxing / MMA',count:'4 tips today'},
+    {icon:'🏌️',name:'Golf',count:'5 tips today'},
+    {icon:'🏉',name:'Rugby',count:'6 tips today'},
+    {icon:'🏏',name:'Cricket',count:'4 tips today'},
+    {icon:'🎱',name:'Snooker',count:'3 tips today'},
+  ];
+  const g = document.getElementById('sportsGrid');
+  g.innerHTML = sports.map(s => `
+    <div class="sport-pill">
+      <div class="sp-icon">${s.icon}</div>
+      <div class="sp-name">${s.name}</div>
+      <div class="sp-count">${s.count}</div>
+    </div>
+  `).join('');
+}
+
+// ─── DATE & COUNTDOWN ────────────────────────────────────
+function renderDate() {
+  const d = new Date();
+  document.getElementById('todayDate').textContent =
+    d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+  document.getElementById('lastUpdate').textContent =
+    d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'});
+}
+
+function startCountdown() {
+  let secs = 6 * 3600; // 6 hours
+  setInterval(() => {
+    secs = (secs - 1 + 86400) % 86400;
+    const h = Math.floor(secs/3600);
+    const m = Math.floor((secs%3600)/60);
+    const s = secs % 60;
+    document.getElementById('countdown').textContent =
+      `${h}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
+  }, 1000);
+}
+
+// ─── MODAL ───────────────────────────────────────────────
+function openModal(type) {
+  document.getElementById('overlay').classList.add('open');
+  if (type === 'signup') {
+    document.getElementById('mTitle').textContent = 'JOIN FREE';
+    document.getElementById('mSub').textContent = 'Start receiving tips today. No card required.';
+    document.getElementById('mSignup').style.display = 'block';
+    document.getElementById('mLogin').style.display = 'none';
+  } else {
+    document.getElementById('mTitle').textContent = 'WELCOME BACK';
+    document.getElementById('mSub').textContent = 'Log in to access your tips.';
+    document.getElementById('mSignup').style.display = 'none';
+    document.getElementById('mLogin').style.display = 'block';
+  }
+}
+function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+function closeOuter(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+
+// ─── INIT ─────────────────────────────────────────────────
+renderRecordBar();
+renderHeroWidget();
+renderTicker();
+renderTips('all');
+renderPLTable();
+renderSports();
+renderDate();
+startCountdown();
+</script>
+</body>
+</html>
