@@ -1,10 +1,127 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB" itemscope itemtype="https://schema.org/WebPage">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Tipster — Sports Betting Intelligence</title>
+
+<!-- ═══════════════════════════════════════
+     PRIMARY SEO META TAGS
+     Target keywords: free football tips, sports betting tips today,
+     best betting tips, football predictions today, value bets
+     ═══════════════════════════════════════ -->
+<title>Free Football Tips & Sports Betting Predictions Today | The Tipster</title>
+<meta name="description" content="Data-driven sports betting tips updated every 15 minutes. Free football tips, football predictions and value bets across Premier League, La Liga, NBA, NHL and more. Verified track record with full P&L history.">
+<meta name="keywords" content="free football tips, football predictions today, sports betting tips, value bets, betting tips today, premier league predictions, football tips today, best betting tips, free betting tips, sports predictions">
+<meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+<meta name="author" content="The Tipster">
+<link rel="canonical" href="https://the-tipster.vercel.app/">
+
+<!-- ═══════════════════════════════════════
+     OPEN GRAPH — Social sharing & Google preview
+     ═══════════════════════════════════════ -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Free Football Tips & Sports Betting Predictions | The Tipster">
+<meta property="og:description" content="Data-driven betting tips updated every 15 minutes. Free football tips, value bets and predictions across all major sports. Verified P&L track record.">
+<meta property="og:url" content="https://the-tipster.vercel.app/">
+<meta property="og:site_name" content="The Tipster">
+<meta property="og:locale" content="en_GB">
+
+<!-- ═══════════════════════════════════════
+     TWITTER CARD
+     ═══════════════════════════════════════ -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Free Football Tips & Sports Betting Predictions | The Tipster">
+<meta name="twitter:description" content="Data-driven betting tips updated every 15 minutes. Verified track record. Free to start.">
+<meta name="twitter:site" content="@TheTipsterApp">
+
+<!-- ═══════════════════════════════════════
+     STRUCTURED DATA — JSON-LD
+     Schema types: WebSite, SportsOrganization, FAQPage
+     Enables rich snippets in Google Search
+     ═══════════════════════════════════════ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://the-tipster.vercel.app/#website",
+      "url": "https://the-tipster.vercel.app/",
+      "name": "The Tipster",
+      "description": "Data-driven sports betting tips and football predictions updated every 15 minutes.",
+      "publisher": {
+        "@id": "https://the-tipster.vercel.app/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://the-tipster.vercel.app/?s={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@type": "Organization",
+      "@id": "https://the-tipster.vercel.app/#organization",
+      "name": "The Tipster",
+      "url": "https://the-tipster.vercel.app/",
+      "description": "Independent sports betting intelligence platform providing data-driven tips and predictions.",
+      "foundingDate": "2026",
+      "knowsAbout": ["Football Betting Tips", "Sports Predictions", "Value Betting", "Football Tips Today", "Premier League Predictions", "NBA Predictions"]
+    },
+    {
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "Are the football tips free?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Yes. The top 3 highest-confidence tips every day are completely free with no account required. Pro members get access to the full daily card across all sports."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How often are tips updated?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Tips are refreshed every 15 minutes, pulling live odds from over 40 bookmakers to identify value across Premier League, La Liga, Bundesliga, NBA, NHL and more."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "How is the win rate calculated?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Every tip is tracked from the moment it is published. Results are recorded automatically when fixtures complete and the win rate reflects every settled bet in the database — nothing is excluded."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "What sports are covered?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Football (Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions League), Basketball (NBA), American Football (NFL), Ice Hockey (NHL), Baseball (MLB) and more."
+          }
+        }
+      ]
+    }
+  ]
+}
+</script>
+
+<!-- ═══════════════════════════════════════
+     PERFORMANCE — Preconnect to external resources
+     Reduces DNS lookup time for Google PageSpeed
+     ═══════════════════════════════════════ -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://eyhlzzaaxrwisrtwyoyh.supabase.co">
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+
+<!-- ═══════════════════════════════════════
+     FONTS — Non-blocking load
+     ═══════════════════════════════════════ -->
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root {
@@ -307,6 +424,30 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 /* Disclaimer */
 .tm-disclaimer{margin:0 20px 20px;font-size:10px;color:var(--muted);line-height:1.5;padding-top:12px;border-top:1px solid var(--border);}
 
+
+/* ── FAQ SECTION ── */
+.faq-item { border-bottom:1px solid var(--border); }
+.faq-item:last-child { border-bottom:none; }
+.faq-q {
+  width:100%; display:flex; justify-content:space-between; align-items:center;
+  padding:18px 20px; background:var(--card); border:none; cursor:pointer;
+  font-family:'Lato',sans-serif; font-size:14px; font-weight:700;
+  color:var(--text); text-align:left; gap:12px; transition:background 0.15s;
+}
+.faq-q:hover { background:var(--card2); }
+.faq-q[aria-expanded="true"] { color:var(--green); }
+.faq-q[aria-expanded="true"] .faq-icon { transform:rotate(45deg); color:var(--green); }
+.faq-icon {
+  font-size:20px; font-weight:300; color:var(--muted);
+  transition:transform 0.2s, color 0.2s; flex-shrink:0; line-height:1;
+}
+.faq-a {
+  display:none; padding:0 20px 18px;
+  background:var(--card);
+}
+.faq-a.open { display:block; }
+.faq-a p { font-size:13px; color:var(--muted); line-height:1.7; }
+
 /* RESPONSIVE */
 @media(max-width:900px){
   .kpi-grid{grid-template-columns:repeat(3,1fr);}
@@ -427,12 +568,13 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 </head>
 <body>
 
-<nav>
+<nav role="navigation" aria-label="Main navigation">
   <a class="logo" href="#">The <em>Tipster</em></a>
   <div class="nav-mid">
     <a href="#performance">Performance</a>
     <a href="#tips">Today's Tips</a>
     <a href="#record">Results</a>
+    <a href="#faq">FAQ</a>
     <a href="#pricing">Pro</a>
   </div>
   <div class="nav-right">
@@ -453,7 +595,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
   <div class="lb-item"><span class="lb-label">ROI&nbsp;</span><span class="lb-val g" id="lb-roi">—</span></div>
 </div>
 
-<div class="page">
+<main id="main-content" class="page" role="main">
 
   <div class="ticker"><div class="ticker-track" id="tickerTrack"><div class="tick"><span>Loading...</span></div></div></div>
 
@@ -462,7 +604,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
        Live data: stats_cache + results_history
        Rolling periods + streaks from results_history
        ═══════════════════════════════════ -->
-  <section id="performance" class="perf-section">
+  <section id="performance" class="perf-section" aria-label="Performance statistics and track record">
     <div class="wrap">
 
       <div class="perf-header">
@@ -591,6 +733,82 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
     </div>
   </div>
 
+  <!-- ═══════════════════════════════════════
+       FAQ SECTION
+       Feeds FAQPage schema — enables rich snippets
+       Targets: "are betting tips free", "how often updated" etc.
+       ═══════════════════════════════════════ -->
+  <section id="faq" aria-label="Frequently asked questions" style="padding:60px 0;border-top:1px solid var(--border);">
+    <div class="wrap">
+      <div class="sec-label">FAQ</div>
+      <h2 class="sec-title">COMMON QUESTIONS</h2>
+      <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;" itemscope itemtype="https://schema.org/FAQPage">
+
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+            <span itemprop="name">Are the football tips free?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">Yes. The top 3 highest-confidence tips every day are completely free — no account required. Free members see the selection, odds, confidence rating and value edge on every pick. Pro members unlock the full daily card across all sports, plus stake recommendations and morning email digests.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+            <span itemprop="name">How often are the tips updated?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">Tips are refreshed every 15 minutes, pulling live odds from over 40 bookmakers. When odds move, the analysis updates automatically. You will always see the most current market data, not stale picks from the morning.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+            <span itemprop="name">How is the win rate calculated?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">Every tip is logged the moment it is published. Results are recorded automatically when fixtures complete — nothing is deleted and nothing is excluded. The win rate, P&L and ROI you see on this page reflects every single settled bet in our database, good and bad.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+            <span itemprop="name">What sports are covered?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">Football is our primary sport — we cover Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League daily. We also cover NBA basketball, NFL American football, NHL ice hockey and MLB baseball. More sports are added as data coverage improves.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+            <span itemprop="name">What does value edge mean?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">Value edge is the difference between our model's estimated probability of a result and the probability implied by the bookmaker's odds. A positive edge means we believe the selection is more likely to win than the market price suggests — this is the core of profitable betting over time.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+            <span itemprop="name">How much does Pro cost?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">Pro membership costs £9.99 per month with the first week free. You can cancel at any time. Pro gives you unlimited tips across all sports, stake recommendations, morning email digests and full value edge data on every selection.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
   <!-- PRICING -->
   <div id="pricing" class="pricing-section section">
     <div class="wrap" style="text-align:center">
@@ -638,8 +856,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
   <footer>
     <div class="footer-top">
       <div class="fbrand">
-        <a class="logo" href="#">The <em style="color:var(--green);font-style:normal">Tipster</em></a>
-        <p>Data-driven sports predictions across all major markets. Free to start.</p>
+        <a class="logo" href="/" aria-label="The Tipster - Free football tips and sports predictions">The <em style="color:var(--green);font-style:normal">Tipster</em></a>
+        <p>Free football tips and sports betting predictions updated every 15 minutes. Covering Premier League, La Liga, NBA, NFL and more. Verified P&amp;L track record published in full.</p>
       </div>
       <div class="flinks"><h4>Sports</h4><ul>
         <li><a href="#">Football</a></li><li><a href="#">Basketball</a></li>
@@ -658,6 +876,15 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         <li><a href="#">Cookie Policy</a></li>
       </ul></div>
     </div>
+    <div style="max-width:1200px;margin:0 auto 0;padding:24px 0 0;border-top:1px solid var(--border);">
+      <p style="font-size:11px;color:var(--muted);line-height:1.8;max-width:900px;">
+        The Tipster provides free football tips, value bets and sports predictions across all major leagues.
+        Our football tips today cover Premier League predictions, La Liga tips, Bundesliga picks and Champions League analysis.
+        Free betting tips are refreshed every 15 minutes using live odds data.
+        All tips include confidence ratings, value edge analysis and a verified win/loss track record.
+        Bet responsibly. 18+ only. <a href="#faq" style="color:var(--muted);text-decoration:underline;">See FAQ</a>.
+      </p>
+    </div>
     <div class="footer-bot">
       <p>© 2026 The Tipster. All rights reserved.</p>
       <p style="max-width:540px">⚠️ <strong>18+ only.</strong> Tips are for informational and entertainment purposes only. Past performance does not guarantee future results. Please gamble responsibly. <strong>BeGambleAware.org</strong></p>
@@ -666,7 +893,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 
 </div>
 
-</div><!-- /page -->
+</main><!-- /main-content -->
 
 <!-- TIP DETAIL MODAL -->
 <div class="tip-overlay" id="tipOverlay" onclick="closeTipOuter(event)">
@@ -1288,6 +1515,21 @@ function openModal(type){
 }
 function closeModal(){document.getElementById('overlay').classList.remove('open');}
 function closeOuter(e){if(e.target===document.getElementById('overlay'))closeModal();}
+
+// -- FAQ TOGGLE ─────────────────────────────────────────────
+function toggleFaq(btn) {
+  const expanded = btn.getAttribute('aria-expanded') === 'true';
+  document.querySelectorAll('.faq-q').forEach(b => {
+    b.setAttribute('aria-expanded','false');
+    const a = b.nextElementSibling;
+    if (a) a.classList.remove('open');
+  });
+  if (!expanded) {
+    btn.setAttribute('aria-expanded','true');
+    const ans = btn.nextElementSibling;
+    if (ans) ans.classList.add('open');
+  }
+}
 
 // -- INIT ----------------------------------------------
 (async()=>{
