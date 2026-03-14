@@ -941,24 +941,66 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 
 
 
+<!-- AUTH MODAL — signup / login / forgot password -->
 <div class="overlay" id="overlay" onclick="closeOuter(event)">
-  <div class="modal">
-    <button class="modal-x" onclick="closeModal()">✕</button>
-    <h2 id="mTitle">JOIN FREE</h2>
-    <p id="mSub">Start receiving tips today. No card required.</p>
+  <div class="modal" style="max-width:440px;">
+    <button class="modal-x" onclick="closeModal()">&#x2715;</button>
+
+    <!-- SIGNUP PANEL -->
     <div id="mSignup">
-      <div class="fg"><label>Full Name</label><input type="text" placeholder="Your name"></div>
-      <div class="fg"><label>Email</label><input type="email" placeholder="you@email.com"></div>
-      <div class="fg"><label>Password</label><input type="password" placeholder="Create a password"></div>
-      <button class="btn-msubmit" onclick="closeModal()">Create Free Account →</button>
-      <div class="mswitch">Already a member? <a onclick="openModal('login')">Log in</a></div>
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-family:Space Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:3px;color:var(--green);margin-bottom:8px;">Free Access</div>
+        <h2 style="font-family:'Syne',sans-serif;font-size:21px;font-weight:800;line-height:1.2;margin-bottom:8px;">Join the daily edge<br>before the market moves</h2>
+        <p style="font-size:12px;color:var(--muted);line-height:1.6;">Data-driven tips and value edge analysis delivered to your inbox every morning.</p>
+      </div>
+      <div style="background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px 14px;margin-bottom:16px;">
+        <div style="display:flex;flex-direction:column;gap:6px;">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="color:var(--green);">&#10003;</span> Daily Bet of the Day at 08:30</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="color:var(--green);">&#10003;</span> Saturday Weekend Accumulator</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span style="color:var(--green);">&#10003;</span> Value edge data on every pick</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);"><span style="color:var(--gold);">&#x2605;</span> Full card + premium analysis with Pro</div>
+        </div>
+      </div>
+      <div class="alert" id="signupAlert"></div>
+      <div class="fg"><label>First Name (optional)</label><input type="text" id="su-name" placeholder="Your first name" autocomplete="given-name"></div>
+      <div class="fg"><label>Email</label><input type="email" id="su-email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="fg"><label>Password</label><input type="password" id="su-pw" placeholder="Minimum 8 characters" autocomplete="new-password"></div>
+      <button class="btn-msubmit" onclick="doSignup()" id="suBtn">Create Free Account &#x2192;</button>
+      <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:9px;line-height:1.5;">By signing up you agree to receive daily tips by email. Unsubscribe any time. 18+ only.</div>
+      <div class="mswitch" style="margin-top:11px;">Already a member? <a onclick="openModal('login')">Log in</a></div>
     </div>
+
+    <!-- LOGIN PANEL -->
     <div id="mLogin" style="display:none">
-      <div class="fg"><label>Email</label><input type="email" placeholder="you@email.com"></div>
-      <div class="fg"><label>Password</label><input type="password" placeholder="Your password"></div>
-      <button class="btn-msubmit" onclick="closeModal()">Log In →</button>
-      <div class="mswitch">No account? <a onclick="openModal('signup')">Join free</a></div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Welcome back</h2>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:20px;">Log in to access your tips and preferences.</p>
+      <div class="alert" id="loginAlert"></div>
+      <div class="fg"><label>Email</label><input type="email" id="li-email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="fg"><label>Password</label><input type="password" id="li-pw" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <button class="btn-msubmit" onclick="doLogin()" id="liBtn">Log In &#x2192;</button>
+      <div class="mswitch" style="margin-top:9px;"><a onclick="openModal('forgot')" style="color:var(--muted);">Forgot password?</a></div>
+      <div class="mswitch" style="margin-top:7px;">No account? <a onclick="openModal('signup')">Join free</a></div>
     </div>
+
+    <!-- FORGOT PASSWORD PANEL -->
+    <div id="mForgot" style="display:none">
+      <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Reset password</h2>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:20px;">Enter your email and we will send you a reset link.</p>
+      <div class="alert" id="forgotAlert"></div>
+      <div class="fg"><label>Email</label><input type="email" id="fo-email" placeholder="you@email.com"></div>
+      <button class="btn-msubmit" onclick="doForgot()" id="foBtn">Send Reset Link &#x2192;</button>
+      <div class="mswitch" style="margin-top:9px;"><a onclick="openModal('login')">&#x2190; Back to login</a></div>
+    </div>
+
+    <!-- SUCCESS PANEL -->
+    <div id="mSuccess" style="display:none;text-align:center;padding:16px 0;">
+      <div style="font-size:36px;margin-bottom:12px;">&#x2709;&#xfe0f;</div>
+      <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:7px;">Check your inbox</h2>
+      <p style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:16px;">We sent a verification email to <strong id="successEmail" style="color:var(--text);"></strong>. Click the link to activate your account.</p>
+      <p style="font-size:11px;color:var(--muted);">Your first Bet of the Day arrives tomorrow at 08:30.</p>
+      <button class="btn-msubmit" onclick="closeModal()" style="margin-top:16px;">Got it</button>
+    </div>
+
   </div>
 </div>
 
@@ -1504,38 +1546,117 @@ function closeTipOuter(e) {
   if (e.target === document.getElementById('tipOverlay')) closeTipModal();
 }
 
-// -- MODAL ---------------------------------------------
-function openModal(type){
-  document.getElementById('overlay').classList.add('open');
-  const s=type==='signup';
-  document.getElementById('mTitle').textContent=s?'JOIN FREE':'WELCOME BACK';
-  document.getElementById('mSub').textContent=s?'Start receiving tips today. No card required.':'Log in to access your tips.';
-  document.getElementById('mSignup').style.display=s?'block':'none';
-  document.getElementById('mLogin').style.display=s?'none':'block';
-}
-function closeModal(){document.getElementById('overlay').classList.remove('open');}
-function closeOuter(e){if(e.target===document.getElementById('overlay'))closeModal();}
-
-// -- FAQ TOGGLE ─────────────────────────────────────────────
-function toggleFaq(btn) {
-  const expanded = btn.getAttribute('aria-expanded') === 'true';
-  document.querySelectorAll('.faq-q').forEach(b => {
-    b.setAttribute('aria-expanded','false');
-    const a = b.nextElementSibling;
-    if (a) a.classList.remove('open');
+// -- AUTH MODAL ─────────────────────────────────────────────
+function showPanel(name) {
+  ['mSignup','mLogin','mForgot','mSuccess'].forEach(p => {
+    const el = document.getElementById(p);
+    if (el) el.style.display = p === name ? 'block' : 'none';
   });
-  if (!expanded) {
-    btn.setAttribute('aria-expanded','true');
-    const ans = btn.nextElementSibling;
-    if (ans) ans.classList.add('open');
+}
+
+function openModal(type) {
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  if (type === 'login') showPanel('mLogin');
+  else if (type === 'forgot') showPanel('mForgot');
+  else showPanel('mSignup');
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  ['signupAlert','loginAlert','forgotAlert'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.className = 'alert';
+  });
+}
+
+function closeOuter(e) {
+  if (e.target === document.getElementById('overlay')) closeModal();
+}
+
+async function doSignup() {
+  const btn   = document.getElementById('suBtn');
+  const alert = document.getElementById('signupAlert');
+  const name  = document.getElementById('su-name').value.trim();
+  const email = document.getElementById('su-email').value.trim();
+  const pw    = document.getElementById('su-pw').value;
+  if (!email) { showMAlert(alert,'Please enter your email.','error'); return; }
+  if (pw.length < 8) { showMAlert(alert,'Password must be at least 8 characters.','error'); return; }
+  btn.disabled = true; btn.textContent = 'Creating account...';
+  const { data, error } = await db.auth.signUp({
+    email, password: pw,
+    options: { data: { first_name: name || null } }
+  });
+  btn.disabled = false; btn.textContent = 'Create Free Account \u2192';
+  if (error) { showMAlert(alert, error.message, 'error'); return; }
+  document.getElementById('successEmail').textContent = email;
+  showPanel('mSuccess');
+  updateNavAuth();
+}
+
+async function doLogin() {
+  const btn   = document.getElementById('liBtn');
+  const alert = document.getElementById('loginAlert');
+  const email = document.getElementById('li-email').value.trim();
+  const pw    = document.getElementById('li-pw').value;
+  if (!email || !pw) { showMAlert(alert,'Enter your email and password.','error'); return; }
+  btn.disabled = true; btn.textContent = 'Logging in...';
+  const { error } = await db.auth.signInWithPassword({ email, password: pw });
+  btn.disabled = false; btn.textContent = 'Log In \u2192';
+  if (error) { showMAlert(alert, error.message, 'error'); return; }
+  closeModal();
+  updateNavAuth();
+}
+
+async function doForgot() {
+  const btn   = document.getElementById('foBtn');
+  const alert = document.getElementById('forgotAlert');
+  const email = document.getElementById('fo-email').value.trim();
+  if (!email) { showMAlert(alert,'Enter your email address.','error'); return; }
+  btn.disabled = true; btn.textContent = 'Sending...';
+  const { error } = await db.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/account.html'
+  });
+  btn.disabled = false; btn.textContent = 'Send Reset Link \u2192';
+  if (error) { showMAlert(alert, error.message, 'error'); return; }
+  showMAlert(alert, 'Reset link sent. Check your inbox.', 'success');
+}
+
+async function handleLogout() {
+  await db.auth.signOut();
+  updateNavAuth();
+}
+
+async function updateNavAuth() {
+  const { data: { session } } = await db.auth.getSession();
+  const rightEl = document.querySelector('.nav-right');
+  if (!rightEl) return;
+  if (session) {
+    rightEl.innerHTML =
+      '<a href="/account.html" class="btn btn-ghost" style="text-decoration:none;font-size:13px;padding:7px 16px;border-radius:4px;border:1px solid var(--border2);color:var(--text);">My Account</a>' +
+      '<button class="btn btn-ghost" onclick="handleLogout()">Log Out</button>';
+  } else {
+    rightEl.innerHTML =
+      '<button class="btn btn-ghost" onclick="openModal(&quot;login&quot;)">Log In</button>' +
+      '<button class="btn btn-green" onclick="openModal(&quot;signup&quot;)">Join Free</button>';
   }
+}
+
+function showMAlert(el, msg, type) {
+  if (!el) return;
+  el.textContent = msg;
+  el.className = 'alert ' + type + ' show';
 }
 
 // -- INIT ----------------------------------------------
 (async()=>{
+  await updateNavAuth();
   await loadLiveBar();
   await loadHistory();
   await loadTips();
+  // Check URL for auth redirect
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('auth') === 'login') openModal('login');
 })();
 </script>
 
