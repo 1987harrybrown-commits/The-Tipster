@@ -74,14 +74,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:60px;display:flex;ali
 .perf-eyebrow{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:6px;}
 .perf-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.3px;}
 .period-tabs{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px;}
-.ptab{padding:6px 13px;border-radius:4px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;cursor:pointer;color:var(--muted);background:none;border:none;transition:all 0.15s;}
+.ptab{padding:8px 14px;border-radius:4px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;cursor:pointer;color:var(--muted);background:none;border:none;transition:all 0.15s;min-height:36px;}
 .ptab:hover{color:var(--text);}
 .ptab.active{background:var(--border2);color:var(--text);}
 
 /* KPI GRID */
 .kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
 .kpi-cell{background:var(--card);padding:18px 16px;}
-.kpi-label{font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:8px;}
+.kpi-label{font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px;}
 .kpi-val{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;line-height:1;margin-bottom:4px;}
 .kpi-val.g{color:var(--green);}
 .kpi-val.r{color:var(--red);}
@@ -91,7 +91,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:60px;display:flex;ali
 
 /* BOTTOM ROW */
 .perf-bottom{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
-.pcard-base{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:18px 20px;}
+.pcard-base{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px 22px;}
 .pcard-label{font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:12px;}
 
 /* Win rate card */
@@ -318,7 +318,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 
       <div class="perf-header">
         <div>
-          <div class="perf-eyebrow">// Verified Performance</div>
+          <div class="perf-eyebrow">Verified Performance</div>
           <div class="perf-title">Track Record</div>
         </div>
         <div class="period-tabs">
@@ -372,8 +372,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         <div class="pcard-base">
           <div class="pcard-label" id="sum-period-label">All Time Summary</div>
           <div class="sum-row"><span class="sum-key">Bets placed</span><span class="sum-val w" id="sum-bets">—</span></div>
-          <div class="sum-row"><span class="sum-key">Units staked</span><span class="sum-val w" id="sum-staked">—</span></div>
-          <div class="sum-row"><span class="sum-key">Units returned</span><span class="sum-val g" id="sum-returned">—</span></div>
+          <div class="sum-row"><span class="sum-key">Staked</span><span class="sum-val w" id="sum-staked">—</span></div>
+          <div class="sum-row"><span class="sum-key">Returned</span><span class="sum-val g" id="sum-returned">—</span></div>
           <div class="sum-row"><span class="sum-key">Net profit</span><span class="sum-val" id="sum-net">—</span></div>
           <div class="sum-row"><span class="sum-key">Avg odds</span><span class="sum-val go" id="sum-avgodds">—</span></div>
         </div>
@@ -560,9 +560,11 @@ document.getElementById('todayDate').textContent =
 
 // -- LIVE BAR ------------------------------------------
 // Reads: stats_cache → total_tips, total_won, total_lost, win_rate, total_pl, roi
+let cachedStats = {};
 async function loadLiveBar() {
   const { data } = await db.from('stats_cache').select('*').eq('id',1).single();
   if (!data) return;
+  cachedStats = data;
   const pl = parseFloat(data.total_pl||0), roi = parseFloat(data.roi||0);
   document.getElementById('lb-tips').textContent = data.total_tips||0;
   document.getElementById('lb-won').textContent  = data.total_won ||0;
@@ -628,28 +630,28 @@ function renderDashboard(period) {
     const e=document.getElementById(id); if(e){e.textContent=val;e.className='kpi-val '+cls;}
     const s=document.getElementById(id+'-sub'); if(s)s.textContent=sub||'';
   };
-  set('kpi-bets', total||'--', 'w', total>0?won+'W / '+lost+'L':'');
-  set('kpi-won',  won||'--',   'g', '');
-  set('kpi-lost', lost||'--',  'r', '');
-  set('kpi-rate', total>0?rate.toFixed(1)+'%':'--', 'g', total>0?total+' settled':'');
+  set('kpi-bets', total>0?total:0, 'w', total>0?won+'W / '+lost+'L':'no settled bets');
+  set('kpi-won',  won, 'g', '');
+  set('kpi-lost', lost, 'r', '');
+  set('kpi-rate', total>0?rate.toFixed(1)+'%':'0%', 'g', total>0?total+' settled':'awaiting results');
   const ple=document.getElementById('kpi-pl');
-  if(ple){ple.textContent=total>0?fmtU(pl):'--';ple.className='kpi-val '+(pl>=0?'g':'r');}
-  set('kpi-roi',  total>0?fmt(roi,1)+'%':'--', 'go', total>0?'on '+staked.toFixed(1)+'u staked':'');
+  if(ple){ple.textContent=total>0?fmtU(pl):'+0.00u';ple.className='kpi-val '+(pl>=0?'g':'r');}
+  set('kpi-roi',  total>0?fmt(roi,1)+'%':'+0.0%', 'go', total>0?'on '+staked.toFixed(1)+'u staked':'awaiting results');
 
   // Win rate card
   const wrp=document.getElementById('wr-pct');
-  if(wrp){wrp.textContent=total>0?rate.toFixed(1)+'%':'--';}
+  if(wrp){wrp.textContent=total>0?rate.toFixed(1)+'%':'0%';}
   const wrb=document.getElementById('wr-bar'); if(wrb)wrb.style.width=(total>0?rate:0)+'%';
   document.getElementById('wr-won-count').textContent  = won+' won';
   document.getElementById('wr-lost-count').textContent = lost+' lost';
-  document.getElementById('wr-pend-count').textContent = (parseInt(document.getElementById('lb-tips').textContent||0)-total)+' pending';
+  document.getElementById('wr-pend-count').textContent = (parseInt(cachedStats.total_pending||0))+' pending';
 
   // Streaks -- always from full history
   const {bw,bl,curN,curT} = calcStreaks(allHistory);
-  document.getElementById('streak-best-win').textContent = bw||'--';
+  document.getElementById('streak-best-win').textContent = bw||0;
   const curE=document.getElementById('streak-current'), curL=document.getElementById('streak-current-label');
   if(curN>0){curE.textContent=curN;curE.className='streak-num '+(curT?'g':'r');curL.textContent=curT?'win streak':'loss streak';}
-  else{curE.textContent='--';curL.textContent='no data yet';}
+  else{curE.textContent='0';curL.textContent='no results yet';}
 
   // Last 10 dots
   const last10=[...allHistory].sort((a,b)=>new Date(a.settled_at)-new Date(b.settled_at)).slice(-10);
@@ -659,12 +661,12 @@ function renderDashboard(period) {
 
   // Summary
   document.getElementById('sum-period-label').textContent = labels[period]+' Summary';
-  document.getElementById('sum-bets').textContent     = total||'--';
-  document.getElementById('sum-staked').textContent   = total>0?staked.toFixed(1)+'u':'--';
-  document.getElementById('sum-returned').textContent = total>0?(staked+pl).toFixed(2)+'u':'--';
+  document.getElementById('sum-bets').textContent     = total||0;
+  document.getElementById('sum-staked').textContent   = total>0?staked.toFixed(1)+'u':'0u';
+  document.getElementById('sum-returned').textContent = total>0?(staked+pl).toFixed(2)+'u':'0u';
   const sn=document.getElementById('sum-net');
-  sn.textContent=total>0?fmtU(pl):'--'; sn.style.color=pl>=0?'var(--green)':'var(--red)';
-  document.getElementById('sum-avgodds').textContent  = total>0?avgOdds.toFixed(2):'--';
+  sn.textContent=total>0?fmtU(pl):'+0.00u'; sn.style.color='var(--green)';
+  document.getElementById('sum-avgodds').textContent  = total>0?avgOdds.toFixed(2):'N/A';
 }
 
 function switchPeriod(p,btn) {
@@ -831,7 +833,8 @@ db.channel('live-updates')
   .subscribe();
 
 async function loadHistory(){
-  const {data}=await db.from('results_history').select('*').order('settled_at',{ascending:false}).limit(500);
+  const {data,error}=await db.from('results_history').select('*').order('settled_at',{ascending:false}).limit(500);
+  if(error){ console.error('Results load error:',error.message); return; }
   allHistory=data||[];
   renderDashboard(activePeriod);
   renderHistoryTable();
