@@ -305,31 +305,42 @@ async function loadSubscribers() {
   }).join('');
 }
 
+// ── JOB QUEUE ────────────────────────────────────────────
+// Admin writes a job to Supabase. Engine picks it up within 1 minute.
+// This avoids direct browser->engine calls which Render blocks.
+async function queueJob(job_type, payload = {}) {
+  const { error } = await db.from('admin_jobs').insert({
+    job_type,
+    payload: JSON.stringify(payload),
+    status: 'pending',
+    created_at: new Date().toISOString()
+  });
+  return !error;
+}
+
 // ── TEST EMAIL ────────────────────────────────────────────
 async function sendTest() {
-  const btn = document.getElementById('testBtn');
+  const btn   = document.getElementById('testBtn');
   const alert = document.getElementById('testAlert');
-  const to   = document.getElementById('testEmailTo').value;
-  const type = document.getElementById('testEmailType').value;
+  const to    = document.getElementById('testEmailTo').value.trim();
+  const type  = document.getElementById('testEmailType').value;
   if (!to) { showAlert(alert, 'Enter an email address.', 'error'); return; }
-  btn.disabled=true; btn.textContent='Sending...';
-  try {
-    const res = await fetch(`${ENGINE_URL}/admin/test-email?to=${encodeURIComponent(to)}&type=${type}&key=${encodeURIComponent(localStorage.getItem('tipster_admin_key')||'')}`);
-    const data = await res.json();
-    showAlert(alert, data.success ? 'Test email sent to ' + to : ('Error: ' + (data.error||'Failed')), data.success?'success':'error');
-  } catch(e) { showAlert(alert, 'Engine not reachable: ' + e.message, 'error'); }
-  btn.disabled=false; btn.textContent='Send Test Email';
+  btn.disabled = true; btn.textContent = 'Queuing...';
+  const ok = await queueJob('test_email', { to, type });
+  btn.disabled = false; btn.textContent = 'Send Test Email';
+  if (ok) {
+    showAlert(alert, 'Job queued. Email will arrive within 1 minute.', 'success');
+  } else {
+    showAlert(alert, 'Failed to queue job. Check Supabase connection.', 'error');
+  }
 }
 
 // ── TRIGGER SEND ──────────────────────────────────────────
 async function triggerSend(type) {
   const alert = document.getElementById('triggerAlert');
   if (!confirm('Send ' + type + ' email to all subscribers now?')) return;
-  try {
-    const res = await fetch(`${ENGINE_URL}/admin/send-${type}?key=${encodeURIComponent(localStorage.getItem('tipster_admin_key')||'')}`);
-    const data = await res.json();
-    showAlert(alert, data.started ? 'Dispatch started.' : 'Failed to trigger.', data.started?'success':'error');
-  } catch(e) { showAlert(alert, 'Engine not reachable.', 'error'); }
+  const ok = await queueJob('send_' + type);
+  showAlert(alert, ok ? 'Dispatch queued. Will send within 1 minute.' : 'Failed to queue.', ok ? 'success' : 'error');
 }
 
 // ── DAILY OVERRIDE ────────────────────────────────────────
