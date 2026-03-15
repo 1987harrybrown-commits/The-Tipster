@@ -1023,6 +1023,7 @@ document.getElementById('todayDate').textContent =
 // -- LIVE BAR ------------------------------------------
 // Reads: stats_cache → total_tips, total_won, total_lost, win_rate, total_pl, roi
 let cachedStats = {};
+let isProUser = false;  // Set to true when logged-in Pro user detected
 async function loadLiveBar() {
   const { data } = await db.from('stats_cache').select('*').eq('id',1).single();
   if (!data) return;
@@ -1242,7 +1243,7 @@ function renderTips() {
   }
   grid.innerHTML = '';
   sorted.forEach((tip, i) => {
-    const free   = i < 3;
+    const free   = isProUser || i < 3;
     const locked = !free;
     const conf   = tip.confidence || 0;
     const cls    = conf>=85?'':conf>=72?'med':'low';
@@ -1632,10 +1633,17 @@ async function updateNavAuth() {
   const rightEl = document.querySelector('.nav-right');
   if (!rightEl) return;
   if (session) {
+    // Check Pro status from users table
+    const { data: profile } = await db.from('users').select('subscription_status').eq('id', session.user.id).single();
+    isProUser = profile && profile.subscription_status === 'pro';
     rightEl.innerHTML =
-      '<a href="/account.html" class="btn btn-ghost" style="text-decoration:none;font-size:13px;padding:7px 16px;border-radius:4px;border:1px solid var(--border2);color:var(--text);">My Account</a>' +
+      '<a href="/account.html" class="btn btn-ghost" style="text-decoration:none;font-size:13px;padding:7px 16px;border-radius:4px;border:1px solid var(--border2);color:var(--text);">' +
+      (isProUser ? '<span style="color:var(--gold);margin-right:5px;">PRO</span>' : '') + 'My Account</a>' +
       '<button class="btn btn-ghost" onclick="handleLogout()">Log Out</button>';
+    // Re-render tips with pro access
+    if (allTips.length) renderTips();
   } else {
+    isProUser = false;
     rightEl.innerHTML =
       '<button class="btn btn-ghost" onclick="openModal(&quot;login&quot;)">Log In</button>' +
       '<button class="btn btn-green" onclick="openModal(&quot;signup&quot;)">Join Free</button>';
