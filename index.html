@@ -1684,6 +1684,23 @@ function showMAlert(el, msg, type) {
   el.className = 'alert ' + type + ' show';
 }
 
+// -- FAQ TOGGLE ─────────────────────────────────────────────
+function toggleFaq(btn) {
+  const expanded = btn.getAttribute('aria-expanded') === 'true';
+  // Close all open
+  document.querySelectorAll('.faq-q').forEach(b => {
+    b.setAttribute('aria-expanded', 'false');
+    const a = b.nextElementSibling;
+    if (a) a.classList.remove('open');
+  });
+  // Open clicked one if it was closed
+  if (!expanded) {
+    btn.setAttribute('aria-expanded', 'true');
+    const ans = btn.nextElementSibling;
+    if (ans) ans.classList.add('open');
+  }
+}
+
 // -- INIT ----------------------------------------------
 (async()=>{
   await updateNavAuth();
