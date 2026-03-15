@@ -862,7 +862,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-            <p itemprop="text">Pro is £9.99 per month. The first week is free — no card charges until day 8. Cancel any time with one click. Pro unlocks the full daily card (15+ tips), full value edge data on every selection, stake recommendations, the morning email digest and the Saturday accumulator. Free members always keep their 3 daily tips regardless.</p>
+            <p itemprop="text">Pro is £9.99 per month billed monthly, or £99.90 per year — the equivalent of 10 months, so you get 2 months completely free. Both plans include the full daily card at 07:00, value edge data on every selection, stake recommendations and the Saturday accumulator. Cancel any time, no contracts..</p>
           </div>
         </div>
 
@@ -876,7 +876,16 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
     <div class="wrap" style="text-align:center">
       <div class="sec-label">Membership</div>
       <h2 class="sec-title">STRAIGHTFORWARD PRICING</h2>
-      <p style="color:var(--muted);font-size:14px;margin-bottom:36px">Free to start. Pro to dominate.</p>
+      <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Free to start. Pro to dominate.</p>
+
+      <!-- Billing toggle -->
+      <div style="display:inline-flex;align-items:center;gap:12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 6px;margin-bottom:36px;">
+        <button id="toggle-monthly" onclick="setPricingToggle('monthly')" style="padding:7px 18px;border-radius:5px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;cursor:pointer;border:none;background:var(--text);color:var(--bg);transition:all 0.15s;">Monthly</button>
+        <button id="toggle-annual" onclick="setPricingToggle('annual')" style="padding:7px 18px;border-radius:5px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;cursor:pointer;border:none;background:none;color:var(--muted);transition:all 0.15s;">
+          Annual <span style="background:var(--green);color:#07090d;font-size:9px;padding:2px 7px;border-radius:10px;margin-left:4px;">2 MONTHS FREE</span>
+        </button>
+      </div>
+
       <div class="pricing-grid">
         <div class="prc-card">
           <div class="pname">Free</div>
@@ -895,11 +904,24 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
           </ul>
           <button class="btn-p free-p" onclick="openModal('signup')">Get Started Free</button>
         </div>
+
         <div class="prc-card featured">
-          <div class="popular">Most Popular</div>
+          <div class="popular" id="pricing-badge">Most Popular</div>
           <div class="pname" style="color:var(--gold)">Pro</div>
-          <div class="pprice" style="color:var(--gold)"><sup>£</sup>9<small>.99 / month</small></div>
-          <div class="pdesc">The complete intelligence platform. Every edge, every day.</div>
+
+          <!-- Monthly price -->
+          <div id="price-monthly">
+            <div class="pprice" style="color:var(--gold)"><sup>£</sup>9<small>.99 / month</small></div>
+            <div class="pdesc">The complete intelligence platform. Every edge, every day.</div>
+          </div>
+
+          <!-- Annual price (hidden by default) -->
+          <div id="price-annual" style="display:none;">
+            <div class="pprice" style="color:var(--gold)"><sup>£</sup>99<small>.90 / year</small></div>
+            <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--green);margin-bottom:6px;">£8.33/mo — 2 months free</div>
+            <div class="pdesc">Everything in monthly, billed annually. Best value.</div>
+          </div>
+
           <ul class="pfeatures">
             <li><span class="ck">✓</span> Full card (15+ tips) delivered at 07:00</li>
             <li><span class="ck">✓</span> 90 mins ahead of free members</li>
@@ -910,7 +932,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
             <li><span class="ck">✓</span> Full confidence breakdown</li>
             <li><span class="ck">✓</span> Priority support</li>
           </ul>
-          <button class="btn-p pro-p" onclick="openModal('signup')">Start Pro — First Week Free</button>
+          <button class="btn-p pro-p" id="pro-cta-btn" onclick="openModal('signup')">Start Pro — £9.99/mo</button>
+          <div style="font-size:11px;color:var(--muted);margin-top:10px;">Cancel any time. No contracts.</div>
         </div>
       </div>
     </div>
@@ -1842,6 +1865,29 @@ async function loadConversionBlock() {
       if (legsEl)   legsEl.textContent  = accaOverride.acca_selections.length + ' selections';
     }
   }
+}
+
+
+// -- PRICING TOGGLE ──────────────────────────────────────
+function setPricingToggle(plan) {
+  const isAnnual = plan === 'annual';
+  const monthlyBtn = document.getElementById('toggle-monthly');
+  const annualBtn  = document.getElementById('toggle-annual');
+  const priceM     = document.getElementById('price-monthly');
+  const priceA     = document.getElementById('price-annual');
+  const ctaBtn     = document.getElementById('pro-cta-btn');
+  const badge      = document.getElementById('pricing-badge');
+
+  if (monthlyBtn) {
+    monthlyBtn.style.background = isAnnual ? 'none'          : 'var(--text)';
+    monthlyBtn.style.color      = isAnnual ? 'var(--muted)'  : 'var(--bg)';
+    annualBtn.style.background  = isAnnual ? 'var(--green)'  : 'none';
+    annualBtn.style.color       = isAnnual ? '#07090d'       : 'var(--muted)';
+  }
+  if (priceM) priceM.style.display = isAnnual ? 'none'  : 'block';
+  if (priceA) priceA.style.display = isAnnual ? 'block' : 'none';
+  if (ctaBtn) ctaBtn.textContent   = isAnnual ? 'Start Annual — £99.90/yr' : 'Start Pro — £9.99/mo';
+  if (badge)  badge.textContent    = isAnnual ? 'Best Value' : 'Most Popular';
 }
 
 // -- INIT ----------------------------------------------
