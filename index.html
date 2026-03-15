@@ -616,7 +616,6 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
           <button class="ptab active" onclick="switchPeriod('yesterday',this)">Yesterday</button>
           <button class="ptab" onclick="switchPeriod('7d',this)">7 Days</button>
           <button class="ptab" onclick="switchPeriod('30d',this)">30 Days</button>
-          <button class="ptab" onclick="switchPeriod('all',this)">All Time</button>
         </div>
       </div>
 
@@ -750,7 +749,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-            <p itemprop="text">Yes. The top 3 highest-confidence tips every day are completely free — no account required. Free members see the selection, odds, confidence rating and value edge on every pick. Pro members unlock the full daily card across all sports, plus stake recommendations and morning email digests.</p>
+            <p itemprop="text">Yes — the top 3 highest-confidence tips every day are completely free, no account required. You get the full selection, odds, confidence rating and value edge on each pick. Free members also receive a daily email with the Bet of the Day at 08:30 and the Saturday accumulator. Pro members unlock the full daily card of 15+ tips across all sports.</p>
           </div>
         </div>
 
@@ -760,7 +759,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-            <p itemprop="text">Tips are refreshed every 15 minutes, pulling live odds from over 40 bookmakers. When odds move, the analysis updates automatically. You will always see the most current market data, not stale picks from the morning.</p>
+            <p itemprop="text">Every 15 minutes. The engine pulls live odds from over 40 bookmakers continuously and updates picks in real time. When lines move, the value edge recalculates automatically. You will never see stale morning prices — what you see is what the market is offering right now.</p>
           </div>
         </div>
 
@@ -770,7 +769,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-            <p itemprop="text">Every tip is logged the moment it is published. Results are recorded automatically when fixtures complete — nothing is deleted and nothing is excluded. The win rate, P&L and ROI you see on this page reflects every single settled bet in our database, good and bad.</p>
+            <p itemprop="text">Every tip is timestamped and logged the moment it is published. Results are recorded automatically when fixtures complete — nothing is removed, edited or excluded. The win rate, P&L and ROI you see reflects every single settled tip in the database. Losing bets count. There is no cherry picking.</p>
           </div>
         </div>
 
@@ -780,7 +779,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-            <p itemprop="text">Football is our primary sport — we cover Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League daily. We also cover NBA basketball, NFL American football, NHL ice hockey and MLB baseball. More sports are added as data coverage improves.</p>
+            <p itemprop="text">Football is our primary focus — Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League are covered daily. We also cover NBA basketball, NHL ice hockey, NFL and MLB. Each sport uses the same model logic: find markets where our probability estimate beats the bookmaker implied probability by a meaningful margin.</p>
           </div>
         </div>
 
@@ -790,7 +789,17 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-            <p itemprop="text">Value edge is the difference between our model's estimated probability of a result and the probability implied by the bookmaker's odds. A positive edge means we believe the selection is more likely to win than the market price suggests — this is the core of profitable betting over time.</p>
+            <p itemprop="text">Value edge is the gap between what our model thinks the true probability of a result is, and what the bookmaker's odds imply. For example: if our model gives a team a 65% chance of winning, but the bookmaker odds imply only 55%, that is a +10% edge. Consistently backing positive-edge selections is how you build a profitable record over time — not just picking winners.</p>
+          </div>
+        </div>
+
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question">
+          <button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false">
+            <span itemprop="name">Which bookmakers do you use?</span>
+            <span class="faq-icon">+</span>
+          </button>
+          <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
+            <p itemprop="text">The engine scans odds from over 40 UK-licensed bookmakers in real time — including Bet365, William Hill, Betfair, Paddy Power, Unibet, Sky Bet, Ladbrokes and more. Each tip shows which bookmaker had the best available price at the time the pick was generated. We recommend shopping the line — prices can differ by 5-10% between books on the same selection.</p>
           </div>
         </div>
 
@@ -800,7 +809,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
             <span class="faq-icon">+</span>
           </button>
           <div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer">
-            <p itemprop="text">Pro membership costs £9.99 per month with the first week free. You can cancel at any time. Pro gives you unlimited tips across all sports, stake recommendations, morning email digests and full value edge data on every selection.</p>
+            <p itemprop="text">Pro is £9.99 per month. The first week is free — no card charges until day 8. Cancel any time with one click. Pro unlocks the full daily card (15+ tips), full value edge data on every selection, stake recommendations, the morning email digest and the Saturday accumulator. Free members always keep their 3 daily tips regardless.</p>
           </div>
         </div>
 
@@ -934,6 +943,16 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         <div class="tm-meta-val" id="tm-stake"></div>
       </div>
     </div>
+    <div style="margin:0 20px 16px;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;">
+      <div>
+        <div style="font-family:Space Mono,monospace;font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:4px;">Best Available Odds From</div>
+        <div style="font-size:13px;font-weight:700;text-transform:capitalize;" id="tm-bookmaker">—</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:Space Mono,monospace;font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:4px;">Market</div>
+        <div style="font-size:12px;color:var(--muted);" id="tm-market">—</div>
+      </div>
+    </div>
     <div class="tm-disclaimer">Tips are for informational purposes only. Past performance does not guarantee future results. Please gamble responsibly. 18+ only.</div>
   </div>
 </div>
@@ -1043,7 +1062,7 @@ async function loadLiveBar() {
 // Fields: result, profit_loss, stake, odds, settled_at
 // Rolling period filter + streak calc happen in JS -- no new DB fields needed
 let allHistory = [];
-let activePeriod = 'all';
+let activePeriod = '30d';
 
 function filterByPeriod(rows, period) {
   const now = new Date();
@@ -1086,7 +1105,7 @@ function renderDashboard(period) {
   const roi   = staked>0?(pl/staked)*100:0;
   const avgOdds = total>0?rows.reduce((s,r)=>s+parseFloat(r.odds||0),0)/total:0;
 
-  const labels={yesterday:'Yesterday','7d':'Last 7 Days','30d':'Last 30 Days',all:'All Time'};
+  const labels={yesterday:'Yesterday','7d':'Last 7 Days','30d':'Last 30 Days'};
 
   // KPI cells
   const set = (id,val,cls,sub) => {
@@ -1123,7 +1142,7 @@ function renderDashboard(period) {
     : '<span style="font-size:11px;color:var(--muted)">No settled results yet</span>';
 
   // Summary
-  document.getElementById('sum-period-label').textContent = labels[period]+' Summary';
+  document.getElementById('sum-period-label').textContent = (labels[period] || 'Last 30 Days')+' Summary';
   document.getElementById('sum-bets').textContent     = total||0;
   document.getElementById('sum-staked').textContent   = total>0?staked.toFixed(1)+'u':'0u';
   document.getElementById('sum-returned').textContent = total>0?(staked+pl).toFixed(2)+'u':'0u';
@@ -1273,7 +1292,10 @@ function renderTips() {
         '<div class="tcard-league">' + (tip.league||'') + '</div>' +
         '<div class="tcard-pick-row">' +
           '<div class="tcard-pick-l"><div class="label">Selection</div><div class="value">' + (tip.selection||'') + '</div></div>' +
-          '<div class="tcard-odds">' + parseFloat(tip.odds||0).toFixed(2) + '</div>' +
+          '<div style="text-align:right">' +
+            '<div class="tcard-odds">' + parseFloat(tip.odds||0).toFixed(2) + '</div>' +
+            (tip.bookmaker ? '<div style="font-size:9px;color:var(--muted);font-family:Space Mono,monospace;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">' + tip.bookmaker.replace(/_/g,' ') + '</div>' : '') +
+          '</div>' +
         '</div>' +
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;">' +
           '<span style="font-family:Space Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--green)">Value Edge ' + eStr + '</span>' +
@@ -1399,7 +1421,7 @@ async function loadHistory(){
   const {data,error}=await db.from('results_history').select('*').order('settled_at',{ascending:false}).limit(500);
   if(error){ console.error('Results load error:',error.message); return; }
   allHistory=data||[];
-  renderDashboard(activePeriod);
+  renderDashboard('30d');
   renderHistoryTable();
 }
 
@@ -1529,6 +1551,12 @@ function openTipModal(tip) {
   document.getElementById('tm-analysis').textContent = writeTipAnalysis(tip);
   document.getElementById('tm-conf').textContent     = conf + '%';
   document.getElementById('tm-stake').textContent    = stakeStr;
+
+  // Bookmaker and market
+  const bkEl = document.getElementById('tm-bookmaker');
+  const mkEl = document.getElementById('tm-market');
+  if (bkEl) bkEl.textContent = tip.bookmaker ? tip.bookmaker.replace(/_/g,' ') : 'Best available';
+  if (mkEl) mkEl.textContent = tip.market || 'Match winner';
 
   const fill = document.getElementById('tm-conf-fill');
   fill.style.width      = conf + '%';
