@@ -14,7 +14,7 @@
 <meta name="keywords" content="free football tips, football predictions today, sports betting tips, value bets, betting tips today, premier league predictions, football tips today, best betting tips, free betting tips, sports predictions">
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
 <meta name="author" content="The Tipster">
-<link rel="canonical" href="https://the-tipster.vercel.app/">
+<link rel="canonical" href="https://www.thetipsteredge.com/">
 
 <!-- ═══════════════════════════════════════
      OPEN GRAPH — Social sharing & Google preview
@@ -22,7 +22,7 @@
 <meta property="og:type" content="website">
 <meta property="og:title" content="Free Football Tips & Sports Betting Predictions | The Tipster">
 <meta property="og:description" content="Data-driven betting tips updated every 15 minutes. Free football tips, value bets and predictions across all major sports. Verified P&L track record.">
-<meta property="og:url" content="https://the-tipster.vercel.app/">
+<meta property="og:url" content="https://www.thetipsteredge.com/">
 <meta property="og:site_name" content="The Tipster">
 <meta property="og:locale" content="en_GB">
 
@@ -45,24 +45,24 @@
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://the-tipster.vercel.app/#website",
-      "url": "https://the-tipster.vercel.app/",
+      "@id": "https://www.thetipsteredge.com/#website",
+      "url": "https://www.thetipsteredge.com/",
       "name": "The Tipster",
       "description": "Data-driven sports betting tips and football predictions updated every 15 minutes.",
       "publisher": {
-        "@id": "https://the-tipster.vercel.app/#organization"
+        "@id": "https://www.thetipsteredge.com/#organization"
       },
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://the-tipster.vercel.app/?s={search_term_string}",
+        "target": "https://www.thetipsteredge.com/?s={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     },
     {
       "@type": "Organization",
-      "@id": "https://the-tipster.vercel.app/#organization",
+      "@id": "https://www.thetipsteredge.com/#organization",
       "name": "The Tipster",
-      "url": "https://the-tipster.vercel.app/",
+      "url": "https://www.thetipsteredge.com/",
       "description": "Independent sports betting intelligence platform providing data-driven tips and predictions.",
       "foundingDate": "2026",
       "knowsAbout": ["Football Betting Tips", "Sports Predictions", "Value Betting", "Football Tips Today", "Premier League Predictions", "NBA Predictions"]
@@ -704,7 +704,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
           <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:4px;">Today so far</div>
           <div style="font-size:14px;font-weight:700;" id="missedWinsText">Pro members have already seen <span style="color:var(--gold)">—</span> more tips than you today.</div>
         </div>
-        <button onclick="openModal('signup')" class="btn btn-green" style="white-space:nowrap;padding:9px 20px;font-size:13px;">Unlock Pro</button>
+        <button onclick="handleProClick()" class="btn btn-green" style="white-space:nowrap;padding:9px 20px;font-size:13px;">Go Pro</button>
       </div>
 
       <!-- PRO VS FREE STATS -->
@@ -738,7 +738,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
           </div>
           <div style="text-align:right;">
             <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Selections hidden for free members</div>
-            <button onclick="openModal('signup')" class="btn btn-green" style="padding:9px 20px;font-size:13px;">Unlock for £9.99/mo</button>
+            <button onclick="handleProClick()" class="btn btn-green" style="padding:9px 20px;font-size:13px;">Unlock for £9.99/mo</button>
           </div>
         </div>
       </div>
@@ -932,7 +932,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
             <li><span class="ck">✓</span> Full confidence breakdown</li>
             <li><span class="ck">✓</span> Priority support</li>
           </ul>
-          <button class="btn-p pro-p" id="pro-cta-btn" onclick="openModal('signup')">Start Pro — £9.99/mo</button>
+          <button class="btn-p pro-p" id="pro-cta-btn" onclick="startCheckout(activePricingPlan)">Start Pro — £9.99/mo</button>
           <div style="font-size:11px;color:var(--muted);margin-top:10px;">Cancel any time. No contracts.</div>
         </div>
       </div>
@@ -1394,7 +1394,7 @@ function renderTips() {
           '<div class="lk-icon">🔒</div>' +
           '<div class="lk-title">Pro Members Only</div>' +
           '<div class="lk-sub">Unlock value edge data, signal analysis and stake recommendations on every tip.</div>' +
-          '<button class="btn-unlock" onclick="openModal(&quot;signup&quot;)">Unlock Pro -- £9.99/mo</button>' +
+          '<button class="btn-unlock" onclick="handleProClick()">Go Pro — £9.99/mo</button>' +
         '</div>' : '');
     grid.appendChild(d);
   });
@@ -1747,6 +1747,9 @@ async function updateNavAuth() {
       '<button class="btn btn-ghost" onclick="handleLogout()">Log Out</button>';
     // Re-render tips with pro access
     if (allTips.length) renderTips();
+    // Also hide conversion block for pro users
+    const convBlock = document.getElementById('proConversion');
+    if (convBlock) convBlock.style.display = 'none';
   } else {
     isProUser = false;
     rightEl.innerHTML =
@@ -1868,8 +1871,64 @@ async function loadConversionBlock() {
 }
 
 
+// -- PRO CLICK HANDLER ──────────────────────────────────────
+// Logged in users scroll to pricing, logged out users see signup
+async function handleProClick() {
+  const { data: { session } } = await db.auth.getSession();
+  if (session) {
+    // Already logged in — scroll to pricing
+    document.getElementById('pricing').scrollIntoView({ behavior: 'smooth' });
+  } else {
+    // Not logged in — show signup
+    openModal('signup');
+  }
+}
+
+
+// -- STRIPE CHECKOUT ─────────────────────────────────────────
+const ENGINE_URL = 'https://tipster-engine.onrender.com';
+
+async function startCheckout(plan) {
+  const { data: { session } } = await db.auth.getSession();
+
+  // Not logged in — show signup first
+  if (!session) {
+    openModal('signup');
+    return;
+  }
+
+  const btn = document.getElementById('pro-cta-btn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Loading...'; }
+
+  try {
+    const res = await fetch(ENGINE_URL + '/stripe/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        userId: session.user.id,
+        email:  session.user.email,
+        plan
+      })
+    });
+    const data = await res.json();
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      alert('Could not start checkout. Please try again.');
+      if (btn) { btn.disabled = false; btn.textContent = activePricingPlan === 'annual' ? 'Start Annual — £99.90/yr' : 'Start Pro — £9.99/mo'; }
+    }
+  } catch(e) {
+    console.error('Checkout error:', e.message);
+    alert('Could not connect to payment system. Please try again.');
+    if (btn) { btn.disabled = false; }
+  }
+}
+
+let activePricingPlan = 'monthly';
+
 // -- PRICING TOGGLE ──────────────────────────────────────
 function setPricingToggle(plan) {
+  activePricingPlan = plan;
   const isAnnual = plan === 'annual';
   const monthlyBtn = document.getElementById('toggle-monthly');
   const annualBtn  = document.getElementById('toggle-annual');
@@ -1900,6 +1959,18 @@ function setPricingToggle(plan) {
   // Check URL for auth redirect
   const params = new URLSearchParams(window.location.search);
   if (params.get('auth') === 'login') openModal('login');
+  if (params.get('upgraded') === '1') {
+    // Just returned from Stripe — show success
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#0f141c;border:1px solid var(--green);border-radius:8px;padding:16px 24px;z-index:999;text-align:center;animation:up 0.3s ease;';
+      el.innerHTML = '<div style="font-size:18px;margin-bottom:4px;">🎉</div><div style="font-family:Syne,sans-serif;font-weight:800;margin-bottom:4px;">Welcome to Pro!</div><div style="font-size:12px;color:var(--muted);">Your account has been upgraded. Full card arrives tomorrow at 07:00.</div>';
+      document.body.appendChild(el);
+      setTimeout(() => el.remove(), 6000);
+      // Clean URL
+      window.history.replaceState({}, '', '/');
+    }, 1000);
+  }
 })();
 </script>
 
