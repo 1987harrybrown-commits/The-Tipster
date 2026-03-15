@@ -694,6 +694,59 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
     </div>
   </div>
 
+  <!-- CONVERSION BLOCK — shows between tips and results -->
+  <div id="proConversion" style="padding:48px 0;background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);display:none;">
+    <div class="wrap">
+
+      <!-- MISSED WINS COUNTER -->
+      <div id="missedWinsBar" style="background:rgba(240,180,41,0.06);border:1px solid rgba(240,180,41,0.2);border-radius:8px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:4px;">Today so far</div>
+          <div style="font-size:14px;font-weight:700;" id="missedWinsText">Pro members have already seen <span style="color:var(--gold)">—</span> more tips than you today.</div>
+        </div>
+        <button onclick="openModal('signup')" class="btn btn-green" style="white-space:nowrap;padding:9px 20px;font-size:13px;">Unlock Pro</button>
+      </div>
+
+      <!-- PRO VS FREE STATS -->
+      <div style="margin-bottom:20px;">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--green);margin-bottom:14px;">Pro tips vs Free tips — last 30 days</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:8px;overflow:hidden;">
+          <div style="background:var(--card);padding:18px 20px;">
+            <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:10px;">Free Tips</div>
+            <div style="display:flex;gap:20px;flex-wrap:wrap;">
+              <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Win Rate</div><div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;" id="free-wr-display">—</div></div>
+              <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">P&L</div><div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;" id="free-pl-display">—</div></div>
+            </div>
+          </div>
+          <div style="background:var(--card2);padding:18px 20px;border-left:2px solid var(--gold);">
+            <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);margin-bottom:10px;">Pro Tips ⭐</div>
+            <div style="display:flex;gap:20px;flex-wrap:wrap;">
+              <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Win Rate</div><div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--green);" id="pro-wr-display">—</div></div>
+              <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">P&L</div><div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--green);" id="pro-pl-display">—</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SATURDAY ACCA TEASER -->
+      <div id="accaTeaser" style="display:none;background:var(--card);border:1px solid rgba(240,180,41,0.2);border-radius:8px;padding:18px 20px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:6px;">Saturday Accumulator</div>
+            <div style="font-size:14px;font-weight:700;margin-bottom:3px;">This week's acca is ready</div>
+            <div style="font-size:12px;color:var(--muted);">Combined odds: <span style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--gold);" id="accaTeaserOdds">—</span> &nbsp;·&nbsp; <span id="accaTeaserLegs">—</span> selections</div>
+          </div>
+          <div style="text-align:right;">
+            <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Selections hidden for free members</div>
+            <button onclick="openModal('signup')" class="btn btn-green" style="padding:9px 20px;font-size:13px;">Unlock for £9.99/mo</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
   <!-- RESULTS -->
   <div id="record" class="pl-section section">
     <div class="wrap">
@@ -833,11 +886,12 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
             <li><span class="ck">✓</span> Top 3 tips daily</li>
             <li><span class="ck">✓</span> All sports access</li>
             <li><span class="ck">✓</span> Confidence ratings</li>
-            <li><span class="ck">✓</span> Full track record</li>
-            <li class="dim"><span class="xx">✗</span> Full daily card (15+ tips)</li>
-            <li class="dim"><span class="xx">✗</span> Morning email digest</li>
+            <li><span class="ck">✓</span> Daily Bet of the Day email at 08:30</li>
+            <li><span class="ck">✓</span> Saturday accumulator email</li>
+            <li class="dim"><span class="xx">✗</span> Full card (15+ tips) at 07:00</li>
+            <li class="dim"><span class="xx">✗</span> Value edge % on every tip</li>
             <li class="dim"><span class="xx">✗</span> Stake recommendations</li>
-            <li class="dim"><span class="xx">✗</span> Value edge data</li>
+            <li class="dim"><span class="xx">✗</span> Full Saturday acca with selections</li>
           </ul>
           <button class="btn-p free-p" onclick="openModal('signup')">Get Started Free</button>
         </div>
@@ -847,13 +901,13 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
           <div class="pprice" style="color:var(--gold)"><sup>£</sup>9<small>.99 / month</small></div>
           <div class="pdesc">The complete intelligence platform. Every edge, every day.</div>
           <ul class="pfeatures">
-            <li><span class="ck">✓</span> Unlimited tips daily</li>
+            <li><span class="ck">✓</span> Full card (15+ tips) delivered at 07:00</li>
+            <li><span class="ck">✓</span> 90 mins ahead of free members</li>
+            <li><span class="ck">✓</span> Value edge % on every selection</li>
+            <li><span class="ck">✓</span> Stake recommendations (1–3u)</li>
+            <li><span class="ck">✓</span> Saturday acca with full selections</li>
             <li><span class="ck">✓</span> All sports + niche markets</li>
             <li><span class="ck">✓</span> Full confidence breakdown</li>
-            <li><span class="ck">✓</span> Morning email digest</li>
-            <li><span class="ck">✓</span> Stake recommendations (1–3u)</li>
-            <li><span class="ck">✓</span> Value edge analysis</li>
-            <li><span class="ck">✓</span> Premium accumulators</li>
             <li><span class="ck">✓</span> Priority support</li>
           </ul>
           <button class="btn-p pro-p" onclick="openModal('signup')">Start Pro — First Week Free</button>
@@ -1701,12 +1755,102 @@ function toggleFaq(btn) {
   }
 }
 
+
+// -- CONVERSION BLOCK ─────────────────────────────────────
+// Shows only to logged-out or free users
+// Loads Pro vs Free stats from results_history
+// Shows missed wins counter and Saturday acca teaser
+
+async function loadConversionBlock() {
+  // Only show to non-Pro users
+  if (isProUser) return;
+
+  const block = document.getElementById('proConversion');
+  if (block) block.style.display = 'block';
+
+  // Load 30d Pro vs Free stats
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const { data: history } = await db
+    .from('results_history')
+    .select('tier, result, profit_loss, stake')
+    .gte('settled_at', thirtyDaysAgo.toISOString());
+
+  if (history && history.length) {
+    const proRows  = history.filter(r => r.tier === 'pro');
+    const freeRows = history.filter(r => r.tier === 'free');
+
+    const calcStats = rows => {
+      const won   = rows.filter(r => r.result === 'WON').length;
+      const total = rows.filter(r => r.result !== 'pending').length;
+      const pl    = rows.reduce((s,r) => s + parseFloat(r.profit_loss||0), 0);
+      return {
+        wr:  total > 0 ? (won/total*100).toFixed(1) + '%' : '--',
+        pl:  total > 0 ? (pl >= 0 ? '+' : '') + pl.toFixed(2) + 'u' : '--',
+        pos: pl >= 0
+      };
+    };
+
+    const proStats  = calcStats(proRows);
+    const freeStats = calcStats(freeRows);
+
+    const proWr  = document.getElementById('pro-wr-display');
+    const proPl  = document.getElementById('pro-pl-display');
+    const freeWr = document.getElementById('free-wr-display');
+    const freePl = document.getElementById('free-pl-display');
+
+    if (proWr)  proWr.textContent  = proStats.wr;
+    if (proPl)  { proPl.textContent = proStats.pl; proPl.style.color = proStats.pos ? 'var(--green)' : 'var(--red)'; }
+    if (freeWr) freeWr.textContent = freeStats.wr;
+    if (freePl) { freePl.textContent = freeStats.pl; freePl.style.color = freeStats.pos ? 'var(--green)' : 'var(--red)'; }
+  }
+
+  // Missed wins counter — Pro tips won today that free users didn't see
+  const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+  const { data: todayResults } = await db
+    .from('results_history')
+    .select('tier, result')
+    .gte('settled_at', todayStart.toISOString());
+
+  if (todayResults) {
+    const proWins = todayResults.filter(r => r.tier === 'pro' && r.result === 'WON').length;
+    const el = document.getElementById('missedWinsText');
+    if (el && proWins > 0) {
+      el.innerHTML = 'Pro members have already banked <span style="color:var(--gold);font-weight:700;">' + proWins + ' winning tip' + (proWins !== 1 ? 's' : '') + '</span> today that you missed.';
+    } else if (el) {
+      el.innerHTML = 'Pro members received the full card at <span style="color:var(--gold);font-weight:700;">07:00</span> — 90 minutes before this email.';
+    }
+  }
+
+  // Saturday acca teaser — show on Fridays and Saturdays
+  const day = new Date().getDay();
+  if (day === 5 || day === 6) {
+    const { data: accaOverride } = await db
+      .from('email_overrides')
+      .select('acca_combined_odds, acca_selections')
+      .eq('type', 'saturday')
+      .gte('date', new Date().toISOString().split('T')[0])
+      .single();
+
+    if (accaOverride && accaOverride.acca_selections) {
+      const teaserEl = document.getElementById('accaTeaser');
+      const oddsEl   = document.getElementById('accaTeaserOdds');
+      const legsEl   = document.getElementById('accaTeaserLegs');
+      if (teaserEl) teaserEl.style.display = 'block';
+      if (oddsEl)   oddsEl.textContent  = parseFloat(accaOverride.acca_combined_odds||0).toFixed(2);
+      if (legsEl)   legsEl.textContent  = accaOverride.acca_selections.length + ' selections';
+    }
+  }
+}
+
 // -- INIT ----------------------------------------------
 (async()=>{
   await updateNavAuth();
   await loadLiveBar();
   await loadHistory();
   await loadTips();
+  await loadConversionBlock();
   // Check URL for auth redirect
   const params = new URLSearchParams(window.location.search);
   if (params.get('auth') === 'login') openModal('login');
