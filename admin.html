@@ -194,13 +194,39 @@ td{padding:9px 11px;}
 
   <!-- SUBSCRIBERS -->
   <div class="section-title">Subscribers</div>
+
+  <!-- Quick edit panel -->
+  <div class="card full" style="margin-bottom:14px;">
+    <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:12px;">Quick Account Edit</div>
+    <div class="grid">
+      <div class="fg">
+        <label>Email address</label>
+        <input type="email" id="editEmail" placeholder="user@email.com">
+      </div>
+      <div class="fg">
+        <label>Subscription status</label>
+        <select id="editPlan">
+          <option value="free">Free</option>
+          <option value="pro">Pro</option>
+          <option value="cancelled">Cancelled</option>
+          <option value="expired">Expired</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button class="btn btn-gold" onclick="updateUserPlan()" id="updatePlanBtn">Update Plan</button>
+      <button class="btn btn-ghost" onclick="toggleUserEmail()" id="toggleEmailBtn">Toggle Email Opt-in</button>
+    </div>
+    <div class="alert" id="editAlert"></div>
+  </div>
+
   <div class="card full">
     <div class="tbl-wrap">
       <table>
         <thead><tr>
-          <th>Email</th><th>Name</th><th>Plan</th><th>Joined</th><th>Opted in</th><th>Last login</th>
+          <th>Email</th><th>Name</th><th>Plan</th><th>Joined</th><th>Opted in</th><th>Last login</th><th>Edit</th>
         </tr></thead>
-        <tbody id="subTable"><tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr></tbody>
+        <tbody id="subTable"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -288,21 +314,61 @@ async function loadEmailLog() {
 }
 
 async function loadSubscribers() {
-  const { data } = await db.from('users').select('*').order('created_at',{ascending:false}).limit(50);
+  const { data } = await db.from('users').select('*').order('created_at',{ascending:false}).limit(100);
   const tbody = document.getElementById('subTable');
-  if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">No subscribers yet</td></tr>'; return; }
+  if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No subscribers yet</td></tr>'; return; }
   tbody.innerHTML = data.map(u => {
     const joined = new Date(u.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
     const last   = u.last_login ? new Date(u.last_login).toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '—';
+    const status = u.subscription_status || 'free';
     return `<tr>
       <td style="font-size:12px">${u.email||''}</td>
       <td style="font-size:12px">${u.first_name||'—'}</td>
-      <td><span class="pill ${u.subscription_status||'free'}">${u.subscription_status||'free'}</span></td>
+      <td><span class="pill ${status}">${status}</span></td>
       <td style="font-size:11px;color:var(--muted)">${joined}</td>
-      <td style="text-align:center">${u.email_opt_in ? '✓' : '—'}</td>
+      <td style="text-align:center;color:${u.email_opt_in?'var(--green)':'var(--muted)'}">${u.email_opt_in ? '✓' : '✗'}</td>
       <td style="font-size:11px;color:var(--muted)">${last}</td>
+      <td><button class="btn btn-ghost" style="font-size:11px;padding:4px 10px;" onclick="prefillEdit('${u.email}','${status}')">Edit</button></td>
     </tr>`;
   }).join('');
+}
+
+function prefillEdit(email, plan) {
+  document.getElementById('editEmail').value = email;
+  document.getElementById('editPlan').value  = plan;
+  document.getElementById('editEmail').scrollIntoView({ behavior: 'smooth' });
+  document.getElementById('editEmail').focus();
+}
+
+async function updateUserPlan() {
+  const btn   = document.getElementById('updatePlanBtn');
+  const alert = document.getElementById('editAlert');
+  const email = document.getElementById('editEmail').value.trim();
+  const plan  = document.getElementById('editPlan').value;
+  if (!email) { showAlert(alert, 'Enter an email address.', 'error'); return; }
+  btn.disabled = true; btn.textContent = 'Updating...';
+  const { error } = await db.from('users').update({ subscription_status: plan }).eq('email', email);
+  btn.disabled = false; btn.textContent = 'Update Plan';
+  if (error) { showAlert(alert, error.message, 'error'); return; }
+  showAlert(alert, email + ' updated to ' + plan.toUpperCase(), 'success');
+  loadSubscribers();
+}
+
+async function toggleUserEmail() {
+  const btn   = document.getElementById('toggleEmailBtn');
+  const alert = document.getElementById('editAlert');
+  const email = document.getElementById('editEmail').value.trim();
+  if (!email) { showAlert(alert, 'Enter an email address first.', 'error'); return; }
+  // Get current state
+  const { data } = await db.from('users').select('email_opt_in').eq('email', email).single();
+  if (!data) { showAlert(alert, 'User not found.', 'error'); return; }
+  const newState = !data.email_opt_in;
+  btn.disabled = true;
+  const { error } = await db.from('users').update({ email_opt_in: newState }).eq('email', email);
+  btn.disabled = false;
+  if (error) { showAlert(alert, error.message, 'error'); return; }
+  showAlert(alert, email + ' email opt-in set to ' + (newState ? 'ON' : 'OFF'), 'success');
+  loadSubscribers();
 }
 
 // ── JOB QUEUE ────────────────────────────────────────────
