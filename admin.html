@@ -102,6 +102,51 @@ td{padding:9px 11px;}
     <div class="stat-cell"><div class="stat-label">Emails Sent</div><div class="stat-val" id="st-emails">—</div></div>
   </div>
 
+  <!-- ALL TIME PERFORMANCE -->
+  <div class="section-title">All Time Performance</div>
+  <div class="grid" style="margin-bottom:24px;">
+    <div class="card">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <div class="stat-label" style="text-align:left;margin-bottom:6px;">Settled Bets</div>
+          <div class="stat-val" id="at-bets" style="font-size:28px;">—</div>
+        </div>
+        <div>
+          <div class="stat-label" style="text-align:left;margin-bottom:6px;">Win Rate</div>
+          <div class="stat-val" id="at-rate" style="font-size:28px;color:var(--green);">—</div>
+        </div>
+        <div>
+          <div class="stat-label" style="text-align:left;margin-bottom:6px;">Won</div>
+          <div class="stat-val" id="at-won" style="font-size:22px;color:var(--green);">—</div>
+        </div>
+        <div>
+          <div class="stat-label" style="text-align:left;margin-bottom:6px;">Lost</div>
+          <div class="stat-val" id="at-lost" style="font-size:22px;color:var(--red);">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+        <div>
+          <div class="stat-label" style="text-align:left;margin-bottom:6px;">Total P&amp;L</div>
+          <div class="stat-val" id="at-pl" style="font-size:28px;color:var(--green);">—</div>
+        </div>
+        <div>
+          <div class="stat-label" style="text-align:left;margin-bottom:6px;">ROI</div>
+          <div class="stat-val" id="at-roi" style="font-size:28px;color:var(--gold);">—</div>
+        </div>
+        <div>
+          <div class="stat-label" style="text-align:left;margin-bottom:6px;">Units Staked</div>
+          <div class="stat-val" id="at-staked" style="font-size:22px;">—</div>
+        </div>
+        <div>
+          <div class="stat-label" style="text-align:left;margin-bottom:6px;">Avg Odds</div>
+          <div class="stat-val" id="at-odds" style="font-size:22px;color:var(--gold);">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- TEST EMAIL -->
   <div class="section-title">Test Email</div>
   <div class="grid">
@@ -281,8 +326,38 @@ function showDash() {
 // ── LOAD ALL DATA ─────────────────────────────────────────
 async function loadAll() {
   loadStats();
+  loadAllTimeStats();
   loadEmailLog();
   loadSubscribers();
+}
+
+async function loadAllTimeStats() {
+  const { data, error } = await db
+    .from('results_history')
+    .select('result, profit_loss, stake, odds');
+  if (error || !data) return;
+
+  const won   = data.filter(r => r.result === 'WON').length;
+  const lost  = data.filter(r => r.result === 'LOST').length;
+  const total = won + lost;
+  const pl    = data.reduce((s,r) => s + parseFloat(r.profit_loss||0), 0);
+  const staked= data.reduce((s,r) => s + parseFloat(r.stake||1), 0);
+  const roi   = staked > 0 ? (pl/staked)*100 : 0;
+  const avgOdds = total > 0 ? data.reduce((s,r) => s + parseFloat(r.odds||0), 0) / total : 0;
+  const rate  = total > 0 ? (won/total)*100 : 0;
+
+  const fmt = (n,d=2) => (n>=0?'+':'')+n.toFixed(d);
+
+  document.getElementById('at-bets').textContent   = total || '—';
+  document.getElementById('at-won').textContent    = won   || '—';
+  document.getElementById('at-lost').textContent   = lost  || '—';
+  document.getElementById('at-rate').textContent   = total > 0 ? rate.toFixed(1)+'%' : '—';
+  const plEl = document.getElementById('at-pl');
+  plEl.textContent = total > 0 ? fmt(pl)+'u' : '—';
+  plEl.style.color = pl >= 0 ? 'var(--green)' : 'var(--red)';
+  document.getElementById('at-roi').textContent    = total > 0 ? fmt(roi,1)+'%' : '—';
+  document.getElementById('at-staked').textContent = total > 0 ? staked.toFixed(1)+'u' : '—';
+  document.getElementById('at-odds').textContent   = total > 0 ? avgOdds.toFixed(2) : '—';
 }
 
 async function loadStats() {
