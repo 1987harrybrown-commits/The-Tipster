@@ -196,7 +196,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:60px;display:flex;ali
 .ptab.active{background:var(--border2);color:var(--text);}
 
 /* KPI GRID */
-.kpi-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
 .kpi-cell{background:var(--card);padding:18px 16px;}
 .kpi-label{font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:8px;}
 .kpi-val{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;line-height:1;margin-bottom:4px;}
@@ -207,7 +207,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:60px;display:flex;ali
 .kpi-sub{font-size:11px;color:var(--muted);}
 
 /* BOTTOM ROW */
-.perf-bottom{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.perf-bottom{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .pcard-base{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px 22px;}
 .pcard-label{font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:12px;}
 
@@ -295,7 +295,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:60px;display:flex;ali
 
 /* P&L TABLE */
 .pl-section{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
-.pl-summary{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:24px;}
+.pl-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
 .pl-s-cell{background:var(--card);padding:16px;text-align:center;}
 .pl-s-label{font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:6px;}
 .pl-s-val{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;}
@@ -450,7 +450,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 
 /* RESPONSIVE */
 @media(max-width:900px){
-  .kpi-grid{grid-template-columns:repeat(3,1fr);}
+  .kpi-grid{grid-template-columns:repeat(3,1fr);} /* already 3 */
   .perf-bottom{grid-template-columns:1fr 1fr;}
 }
 @media(max-width:600px){
@@ -458,7 +458,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
   .nav-mid{display:none;}
   .live-bar{padding:0 14px;gap:12px;}
   .wrap{padding:0 14px;}
-  .kpi-grid{grid-template-columns:repeat(2,1fr);}
+  .kpi-grid{grid-template-columns:repeat(3,1fr);} /* keep 3 on small screens */
   .perf-bottom{grid-template-columns:1fr;}
   .pricing-grid{grid-template-columns:1fr;}
   .pl-summary{grid-template-columns:repeat(3,1fr);}
@@ -584,15 +584,16 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 </nav>
 
 <div class="live-bar">
-  <div class="lb-item"><div class="live-dot"></div><span class="lb-label">Live</span></div>
+  <div class="lb-item"><div class="live-dot"></div><span class="lb-label" style="display:none;">Live</span></div>
   <div class="lb-div"></div>
-  <div class="lb-item"><span class="lb-label">Tips&nbsp;</span><span class="lb-val w" id="lb-tips">—</span></div>
-  <div class="lb-item"><span class="lb-val g" id="lb-won">—</span><span class="lb-label">&nbsp;Won</span></div>
-  <div class="lb-item"><span class="lb-val r" id="lb-lost">—</span><span class="lb-label">&nbsp;Lost</span></div>
+  <div class="lb-item"><span class="lb-label">W&nbsp;</span><span class="lb-val g" id="lb-won">—</span></div>
+  <div class="lb-item"><span class="lb-label">L&nbsp;</span><span class="lb-val r" id="lb-lost">—</span></div>
   <div class="lb-div"></div>
-  <div class="lb-item"><span class="lb-label">Win Rate&nbsp;</span><span class="lb-val g" id="lb-rate">—</span></div>
+  <div class="lb-item"><span class="lb-val g" id="lb-rate">—</span><span class="lb-label">&nbsp;Win Rate</span></div>
+  <div class="lb-div"></div>
   <div class="lb-item"><span class="lb-label">P&amp;L&nbsp;</span><span class="lb-val g" id="lb-pl">—</span></div>
   <div class="lb-item"><span class="lb-label">ROI&nbsp;</span><span class="lb-val g" id="lb-roi">—</span></div>
+  <div id="lb-tips" style="display:none">—</div>
 </div>
 
 <main id="main-content" class="page" role="main">
@@ -631,17 +632,6 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <div class="perf-bottom">
 
         <div class="pcard-base">
-          <div class="pcard-label">Win Rate</div>
-          <div class="wr-pct" id="wr-pct">—</div>
-          <div class="wr-bar-wrap"><div class="wr-bar-fill" id="wr-bar" style="width:0%"></div></div>
-          <div class="wr-meta">
-            <div class="wr-meta-item"><div class="wr-dot" style="background:var(--green)"></div><span id="wr-won-count">—</span></div>
-            <div class="wr-meta-item"><div class="wr-dot" style="background:var(--red)"></div><span id="wr-lost-count">—</span></div>
-            <div class="wr-meta-item"><div class="wr-dot" style="background:var(--muted2)"></div><span id="wr-pend-count">—</span></div>
-          </div>
-        </div>
-
-        <div class="pcard-base">
           <div class="pcard-label">Streaks</div>
           <div class="streak-halves">
             <div class="streak-half">
@@ -669,6 +659,14 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         </div>
 
       </div>
+    </div>
+    <!-- Hidden elements referenced by JS -->
+    <div style="display:none">
+      <div id="wr-pct"></div>
+      <div id="wr-bar"></div>
+      <div id="wr-won-count"></div>
+      <div id="wr-lost-count"></div>
+      <div id="wr-pend-count"></div>
     </div>
   </section>
 
@@ -764,14 +762,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         <div class="pl-s-cell"><div class="pl-s-label">Win Rate</div><div class="pl-s-val" id="ps-rate" style="color:var(--green)">—</div></div>
         <div class="pl-s-cell"><div class="pl-s-label">Total P&amp;L</div><div class="pl-s-val" id="ps-pl">—</div></div>
       </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>Date</th><th>Sport</th><th>Event</th><th>Selection</th>
-            <th>Tier</th><th>Odds</th><th>Stake</th><th>Result</th><th>P&amp;L</th><th>Running P&amp;L</th>
-          </tr></thead>
-          <tbody id="plBody"><tr><td colspan="10" style="text-align:center;color:var(--muted);padding:36px">Loading results...</td></tr></tbody>
-        </table>
+      <div id="plBody" style="display:flex;flex-direction:column;gap:0;">
+        <div style="text-align:center;color:var(--muted);padding:36px;font-size:13px;">Loading results...</div>
       </div>
     </div>
   </div>
@@ -1449,30 +1441,40 @@ function switchPLTab(tab){
 }
 
 function renderHistoryTable(){
-  const tbody=document.getElementById('plBody');
-  let rows=allHistory;
-  if(activePLTab!=='all') rows=rows.filter(r=>(r.tier||'free')===activePLTab);
-  if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:32px">No settled results yet -- check back after today\'s events complete.</td></tr>';
+  const container = document.getElementById('plBody');
+  let rows = allHistory;
+  if (activePLTab !== 'all') rows = rows.filter(r => (r.tier||'free') === activePLTab);
+
+  if (!rows.length) {
+    container.innerHTML = '<div style="text-align:center;color:var(--muted);padding:36px;font-size:13px;">No settled results yet.</div>';
     updatePLSummary(rows); return;
   }
-  let running=0;
-  tbody.innerHTML=rows.map(r=>{
-    const pl=parseFloat(r.profit_loss||0); running=parseFloat((running+pl).toFixed(2));
-    const date=new Date(r.settled_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-    const rc=r.result==='WON'?'w':'l', tier=r.tier||'free';
-    return '<tr>'+
-      '<td style="color:var(--muted);font-family:Space Mono,monospace;font-size:10px">'+date+'</td>'+
-      '<td style="font-size:11px">'+(r.sport||'')+'</td>'+
-      '<td style="font-weight:600;font-size:11px">'+(r.event||'')+'</td>'+
-      '<td style="font-size:11px">'+(r.selection||'')+'</td>'+
-      '<td><span class="tcard-badge '+tier+'">'+tier.toUpperCase()+'</span></td>'+
-      '<td class="odds-td">'+parseFloat(r.odds||0).toFixed(2)+'</td>'+
-      '<td style="font-family:Space Mono,monospace;font-size:10px;color:var(--muted)">'+(r.stake||1)+'u</td>'+
-      '<td><span class="res-pill '+rc+'">'+r.result+'</span></td>'+
-      '<td class="'+(pl>=0?'pl-plus':'pl-minus')+'">'+fmtU(pl)+'</td>'+
-      '<td class="'+(running>=0?'pl-plus':'pl-minus')+'">'+fmtU(running)+'</td>'+
-    '</tr>';
+
+  let running = 0;
+  container.innerHTML = rows.map(r => {
+    const pl     = parseFloat(r.profit_loss||0);
+    running      = parseFloat((running + pl).toFixed(2));
+    const date   = new Date(r.settled_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    const won    = r.result === 'WON';
+    const tier   = r.tier || 'free';
+    const plCol  = pl >= 0 ? 'var(--green)' : 'var(--red)';
+    const rplCol = running >= 0 ? 'var(--green)' : 'var(--red)';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);gap:10px;">' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;">' +
+          '<span style="font-family:Space Mono,monospace;font-size:10px;color:var(--muted);">' + date + '</span>' +
+          '<span class="tcard-badge ' + tier + '" style="font-size:8px;padding:2px 5px;">' + tier.toUpperCase() + '</span>' +
+          '<span style="font-size:10px;color:var(--muted);">' + (r.sport||'') + '</span>' +
+        '</div>' +
+        '<div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">' + (r.event||'') + '</div>' +
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px;">' + (r.selection||'') + ' <span style="color:var(--gold);font-family:Space Mono,monospace;">@ ' + parseFloat(r.odds||0).toFixed(2) + '</span></div>' +
+      '</div>' +
+      '<div style="text-align:right;flex-shrink:0;">' +
+        '<span class="res-pill ' + (won?'w':'l') + '" style="display:inline-block;margin-bottom:5px;">' + r.result + '</span>' +
+        '<div style="font-family:Space Mono,monospace;font-size:12px;font-weight:700;color:' + plCol + ';">' + fmtU(pl) + '</div>' +
+        '<div style="font-family:Space Mono,monospace;font-size:10px;color:' + rplCol + ';">' + fmtU(running) + '</div>' +
+      '</div>' +
+    '</div>';
   }).join('');
   updatePLSummary(rows);
 }
