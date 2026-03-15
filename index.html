@@ -189,7 +189,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:60px;display:flex;ali
 .perf-section{padding:40px 0 52px;}
 .perf-header{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:28px;flex-wrap:wrap;}
 .perf-eyebrow{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:6px;}
-.perf-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;letter-spacing:-0.3px;}
+.perf-title{font-family:'Syne',sans-serif;font-size:clamp(18px,5vw,26px);font-weight:800;letter-spacing:-0.3px;}
 .period-tabs{display:flex;gap:3px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:3px;}
 .ptab{padding:8px 14px;border-radius:4px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;cursor:pointer;color:var(--muted);background:none;border:none;transition:all 0.15s;min-height:36px;}
 .ptab:hover{color:var(--text);}
@@ -242,7 +242,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:60px;display:flex;ali
 /* SECTIONS */
 .section{padding:60px 0;}
 .sec-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:8px;}
-.sec-title{font-family:'Syne',sans-serif;font-size:clamp(26px,4vw,40px);font-weight:800;letter-spacing:-0.5px;margin-bottom:24px;}
+.sec-title{font-family:'Syne',sans-serif;font-size:clamp(18px,5vw,40px);font-weight:800;letter-spacing:-0.5px;margin-bottom:24px;overflow-wrap:break-word;hyphens:auto;}
 
 /* TABS */
 .tabs{display:flex;gap:5px;flex-wrap:wrap;}
@@ -749,7 +749,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
   <div id="record" class="pl-section section">
     <div class="wrap">
       <div class="sec-label">Verified Track Record</div>
-      <h2 class="sec-title">EVERY TIP. EVERY RESULT.</h2>
+      <h2 class="sec-title" style="font-size:clamp(16px,5vw,40px);">EVERY TIP. EVERY RESULT.</h2>
       <div style="display:flex;gap:5px;margin-bottom:18px;">
         <button class="tab on" id="plTab-all"  onclick="switchPLTab('all')">All Tips</button>
         <button class="tab"    id="plTab-free" onclick="switchPLTab('free')">Free</button>
@@ -867,7 +867,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
   <div id="pricing" class="pricing-section section">
     <div class="wrap" style="text-align:center">
       <div class="sec-label">Membership</div>
-      <h2 class="sec-title">STRAIGHTFORWARD PRICING</h2>
+      <h2 class="sec-title" style="font-size:clamp(16px,4.5vw,40px);">STRAIGHTFORWARD PRICING</h2>
       <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Free to start. Pro to dominate.</p>
 
       <!-- Billing toggle -->
