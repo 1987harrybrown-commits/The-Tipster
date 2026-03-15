@@ -1007,7 +1007,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         <div class="tm-meta-val" id="tm-conf"></div>
         <div class="tm-conf-bar"><div class="tm-conf-fill" id="tm-conf-fill"></div></div>
       </div>
-      <div class="tm-meta-cell">
+      <div class="tm-meta-cell" id="tm-stake-cell">
         <div class="tm-meta-label">Recommended Stake</div>
         <div class="tm-meta-val" id="tm-stake"></div>
       </div>
@@ -1315,10 +1315,10 @@ function stakeClass(s) {
 
 function stakeLabel(s) {
   s = parseFloat(s||1);
-  if (s >= 3) return s + ' Units';
-  if (s >= 2) return s + ' Units';
-  if (s >= 1.5) return s + ' Units';
-  return s + ' Unit';
+  if (s >= 3) return s + 'u — High Confidence';
+  if (s >= 2) return s + 'u — Medium';
+  if (s >= 1.5) return s + 'u';
+  return s + 'u';
 }
 
 function renderTips() {
@@ -1610,9 +1610,9 @@ function openTipModal(tip) {
   const eCls    = edge >= 5 ? 'pos' : edge >= 0 ? 'neu' : 'neg';
   const eStr    = (edge >= 0 ? '+' : '') + edge.toFixed(1) + '%';
   const stake   = parseFloat(tip.stake || 1);
-  const stakeStr = stake >= 3 ? stake + ' Units -- High Confidence' :
-                   stake >= 2 ? stake + ' Units -- Medium' :
-                   stake + (stake === 1 ? ' Unit' : ' Units');
+  const stakeStr = stake >= 3 ? stake + 'u — High Confidence' :
+                   stake >= 2 ? stake + 'u — Medium' :
+                   stake + 'u';
   const confCls  = conf >= 85 ? 'var(--green)' : conf >= 72 ? 'var(--gold)' : 'var(--red)';
 
   document.getElementById('tm-sport').textContent      = (sportIcon(tip.sport)||'') + '  ' + (tip.sport||'');
@@ -1630,6 +1630,16 @@ function openTipModal(tip) {
   document.getElementById('tm-analysis').textContent = writeTipAnalysis(tip);
   document.getElementById('tm-conf').textContent     = conf + '%';
   document.getElementById('tm-stake').textContent    = stakeStr;
+
+  // Hide stake for free users — Pro only feature
+  const stakeCell = document.getElementById('tm-stake-cell');
+  if (stakeCell) {
+    if (isProUser) {
+      stakeCell.style.display = 'block';
+    } else {
+      stakeCell.innerHTML = '<div class="tm-meta-label">Recommended Stake</div><div style="font-size:11px;color:var(--gold);font-weight:700;">Pro Members Only 🔒</div>';
+    }
+  }
 
   // Bookmaker and market
   const bkEl = document.getElementById('tm-bookmaker');
