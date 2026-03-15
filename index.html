@@ -755,12 +755,12 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         <button class="tab"    id="plTab-free" onclick="switchPLTab('free')">Free</button>
         <button class="tab"    id="plTab-pro"  onclick="switchPLTab('pro')">Pro</button>
       </div>
-      <div class="pl-summary">
+      <div class="pl-summary" style="grid-template-columns:repeat(4,1fr);">
         <div class="pl-s-cell"><div class="pl-s-label">Settled</div><div class="pl-s-val" id="ps-settled" style="color:var(--text)">—</div></div>
         <div class="pl-s-cell"><div class="pl-s-label">Won</div><div class="pl-s-val" id="ps-won" style="color:var(--green)">—</div></div>
         <div class="pl-s-cell"><div class="pl-s-label">Lost</div><div class="pl-s-val" id="ps-lost" style="color:var(--red)">—</div></div>
-        <div class="pl-s-cell"><div class="pl-s-label">Win Rate</div><div class="pl-s-val" id="ps-rate" style="color:var(--green)">—</div></div>
         <div class="pl-s-cell"><div class="pl-s-label">Total P&amp;L</div><div class="pl-s-val" id="ps-pl">—</div></div>
+        <div id="ps-rate" style="display:none">—</div>
       </div>
       <div id="plBody" style="display:flex;flex-direction:column;gap:0;">
         <div style="text-align:center;color:var(--muted);padding:36px;font-size:13px;">Loading results...</div>
