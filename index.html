@@ -702,7 +702,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
           <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:4px;">Today so far</div>
           <div style="font-size:14px;font-weight:700;" id="missedWinsText">Pro members have already seen <span style="color:var(--gold)">—</span> more tips than you today.</div>
         </div>
-        <button onclick="openModal('signup')" class="btn btn-green" style="white-space:nowrap;padding:9px 20px;font-size:13px;">Join Free</button>
+        <button onclick="handleProClick()" class="btn btn-green" style="white-space:nowrap;padding:9px 20px;font-size:13px;">Go Pro</button>
       </div>
 
       <!-- PRO VS FREE STATS -->
@@ -736,7 +736,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
           </div>
           <div style="text-align:right;">
             <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Selections hidden for free members</div>
-            <button onclick="openModal('signup')" class="btn btn-green" style="padding:9px 20px;font-size:13px;">Join Free</button>
+            <button onclick="handleProClick()" class="btn btn-green" style="padding:9px 20px;font-size:13px;">Unlock Pro</button>
           </div>
         </div>
       </div>
@@ -898,7 +898,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         </div>
 
         <div class="prc-card featured">
-          <div class="popular" id="pricing-badge" style="background:var(--green);color:#07090d;">Coming Soon</div>
+          <div class="popular" id="pricing-badge" >Most Popular</div>
           <div class="pname" style="color:var(--gold)">Pro</div>
 
           <!-- Monthly price -->
@@ -924,8 +924,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
             <li><span class="ck">✓</span> Full confidence breakdown</li>
             <li><span class="ck">✓</span> Priority support</li>
           </ul>
-          <button class="btn-p pro-p" id="pro-cta-btn" onclick="openModal('signup')">Pro — Coming Soon</button>
-          <div style="font-size:11px;color:var(--green);margin-top:10px;font-family:Space Mono,monospace;">🔔 Sign up free — be first to know when Pro launches</div>
+          <button class="btn-p pro-p" id="pro-cta-btn" onclick="startCheckout(activePricingPlan)">Start Pro — £9.99/mo</button>
+          <div style="font-size:11px;color:var(--muted);margin-top:10px;">Cancel any time. No contracts.</div>
         </div>
       </div>
     </div>
@@ -1432,7 +1432,7 @@ function renderTips() {
           '<div class="lk-icon">🔒</div>' +
           '<div class="lk-title">Pro Members Only</div>' +
           '<div class="lk-sub">Unlock value edge data, signal analysis and stake recommendations on every tip.</div>' +
-          '<button class="btn-unlock" onclick="openModal(&quot;signup&quot;)">Join Free — Pro Coming Soon</button>' +
+          '<button class="btn-unlock" onclick="handleProClick()">Go Pro — £9.99/mo</button>' +
         '</div>' : '');
     grid.appendChild(d);
   });
@@ -1683,7 +1683,7 @@ function openTipModal(tip) {
     if (isProUser) {
       stakeCell.style.display = 'block';
     } else {
-      stakeCell.innerHTML = '<div class="tm-meta-label">Recommended Stake</div><div style="font-size:11px;color:var(--green);font-weight:700;">Available when Pro launches 🔔</div>';
+      stakeCell.innerHTML = '<div class="tm-meta-label">Recommended Stake</div><div style="font-size:11px;color:var(--gold);font-weight:700;">Pro Members Only 🔒</div>';
     }
   }
 
@@ -2004,7 +2004,7 @@ function setPricingToggle(plan) {
   if (priceM) priceM.style.display = isAnnual ? 'none'  : 'block';
   if (priceA) priceA.style.display = isAnnual ? 'block' : 'none';
   if (ctaBtn) ctaBtn.textContent   = isAnnual ? 'Start Annual — £99.90/yr' : 'Start Pro — £9.99/mo';
-  if (badge)  badge.textContent    = 'Coming Soon';
+  if (badge)  badge.textContent    = isAnnual ? 'Best Value' : 'Most Popular';
 }
 
 // -- INIT ----------------------------------------------
