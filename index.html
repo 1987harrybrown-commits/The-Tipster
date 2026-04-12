@@ -550,7 +550,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <div class="flinks"><h4>Legal</h4><ul><li><a href="#">Terms of Service</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Responsible Gambling</a></li><li><a href="#">Cookie Policy</a></li></ul></div>
     </div>
     <div style="max-width:1200px;margin:0 auto 0;padding:24px 0 0;border-top:1px solid var(--border);">
-      <p style="font-size:11px;color:var(--muted);line-height:1.8;max-width:900px;">The Tipster Edge provides free football tips, value bets and sports predictions across all major leagues. Questions? <a href="mailto:support@thetipsteredge.com" style="color:var(--muted);text-decoration:underline;">support@thetipsteredge.com</a> &bull; Bet responsibly. 18+ only.</p>
+      <p style="font-size:11px;color:var(--muted);line-height:1.8;max-width:900px;">The Tipster Edge provides free football tips, value bets and sports predictions across all major leagues. Questions? <a href="/cdn-cgi/l/email-protection#55262025253a272115213d30213c2526213027303132307b363a38" style="color:var(--muted);text-decoration:underline;"><span class="__cf_email__" data-cfemail="40333530302f32340034282534293033342532252427256e232f2d">[email&#160;protected]</span></a> &bull; Bet responsibly. 18+ only.</p>
     </div>
     <div class="footer-bot">
       <p>© 2026 The Tipster. All rights reserved.</p>
@@ -652,7 +652,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
   </div>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
 const { createClient } = supabase;
@@ -698,17 +698,23 @@ const fmtU = n => fmt(n,2)+'u';
 // Reads localStorage preference set in account.html.
 function decimalToFractional(decimal) {
   if (!decimal || decimal <= 1) return decimal.toFixed(2);
-  const frac = decimal - 1;
-  // Find nearest simple fraction using continued fractions
-  const tolerance = 1e-4;
-  let h1=1, h2=0, k1=0, k2=1, b=frac;
-  do {
-    const a = Math.floor(b);
-    let aux = h1; h1 = a*h1+h2; h2 = aux;
-    aux = k1; k1 = a*k1+k2; k2 = aux;
-    b = 1/(b-a);
-  } while (Math.abs(frac - h1/k1) > frac * tolerance && k1 < 1000);
-  return h1 + '/' + k1;
+  // Standard bookmaker fractional odds — the exact fractions used on
+  // Bet365, William Hill, Paddy Power, Sky Bet etc. Nearest match wins.
+  const BOOKIE_FRACTIONS = [
+    [1,10],[1,8],[1,7],[1,6],[1,5],[2,9],[1,4],[2,7],[3,10],[1,3],
+    [4,11],[2,5],[4,9],[1,2],[8,15],[4,7],[8,13],[4,6],[8,11],[4,5],
+    [5,6],[10,11],[1,1],[11,10],[6,5],[5,4],[11,8],[6,4],[13,8],[7,4],
+    [15,8],[2,1],[9,4],[5,2],[11,4],[3,1],[10,3],[7,2],[4,1],[9,2],
+    [5,1],[11,2],[6,1],[13,2],[7,1],[15,2],[8,1],[9,1],[10,1],[11,1],
+    [12,1],[14,1],[16,1],[20,1],[25,1],[33,1],[40,1],[50,1],[66,1],[100,1]
+  ];
+  const target = decimal - 1; // net odds (e.g. 3.50 decimal = 2.50 net = 5/2)
+  let best = BOOKIE_FRACTIONS[0], bestDiff = Infinity;
+  for (const [n, d] of BOOKIE_FRACTIONS) {
+    const diff = Math.abs((n / d) - target);
+    if (diff < bestDiff) { bestDiff = diff; best = [n, d]; }
+  }
+  return best[0] + '/' + best[1];
 }
 
 function fmtOdds(decimal) {
@@ -1169,13 +1175,4 @@ function setPricingToggle(plan){
     setTimeout(()=>{
       const el=document.createElement('div');
       el.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#0f141c;border:1px solid var(--green);border-radius:8px;padding:16px 24px;z-index:999;text-align:center;animation:up 0.3s ease;';
-      el.innerHTML='<div style="font-size:18px;margin-bottom:4px;">🎉</div><div style="font-family:Syne,sans-serif;font-weight:800;margin-bottom:4px;">Welcome to Pro!</div><div style="font-size:12px;color:var(--muted);">Your account has been upgraded. Full card arrives tomorrow at 07:00.</div>';
-      document.body.appendChild(el);
-      setTimeout(()=>el.remove(),6000);
-      window.history.replaceState({},'','/');
-    },1000);
-  }
-})();
-</script>
-</body>
-</html>
+      el.innerHTML='<div style="font-size:18px;margin-bottom:4px;">🎉</div><div style="font-family:Syne,sans-serif;font-weight:800;margin-bottom:4px;">Welcome to Pro!</div><div style="font-size:12px;color:var(--m
