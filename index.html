@@ -659,9 +659,8 @@ const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
 // ── ODDS FORMAT ───────────────────────────────────────────────
-// useFractional is read from localStorage — set from account.html
-// All calculations remain decimal internally. This is display-only.
-let useFractional = localStorage.getItem('oddsFormat') === 'fractional';
+// fmtOdds() reads localStorage on every call — no variable needed.
+// Set from account.html preferences toggle.
 
 const SPORT_ICONS = {'Football':'⚽','Basketball':'🏀','Tennis':'🎾','NFL':'🏈','Baseball':'⚾','Ice Hockey':'🏒','Horse Racing':'🏇','Boxing / MMA':'🥊','Golf':'🏌️','Rugby':'🏉','Cricket':'🏏','Snooker':'🎱'};
 const sportIcon = s => SPORT_ICONS[s] || '🏅';
@@ -817,8 +816,8 @@ function renderTips() {
     const stake  = parseFloat(tip.stake||1);
     const { edge } = deriveEdge(tip);
     const eStr   = (edge>=0?'+':'')+edge.toFixed(1)+'%';
-    // displayOdds respects the user's format preference — no calculation change
-    const oddsDisplay = displayOdds(tip.odds);
+    // fmtOdds respects the user's format preference — no calculation change
+    const oddsDisplay = fmtOdds(tip.odds);
 
     const d = document.createElement('div');
     d.className = 'tcard '+(locked?'pro-card':'');
@@ -862,7 +861,7 @@ function renderTicker(){
   const track=document.getElementById('tickerTrack');
   if(!allTips.length)return;
   const items=[...allTips.slice(0,10),...allTips.slice(0,10)];
-  track.innerHTML=items.map(t=>'<div class="tick"><span>'+sportIcon(t.sport)+'</span><span class="ev">'+(t.home_team||'')+' vs '+(t.away_team||'')+'</span><span>→</span><span class="pick">'+(t.selection||'')+'</span><span class="odds">@ '+displayOdds(t.odds)+'</span><span class="res p">PENDING</span></div>').join('');
+  track.innerHTML=items.map(t=>'<div class="tick"><span>'+sportIcon(t.sport)+'</span><span class="ev">'+(t.home_team||'')+' vs '+(t.away_team||'')+'</span><span>→</span><span class="pick">'+(t.selection||'')+'</span><span class="odds">@ '+fmtOdds(t.odds)+'</span><span class="res p">PENDING</span></div>').join('');
 }
 
 function renderSportsGrid(){
@@ -905,7 +904,7 @@ function renderHistoryTable(){
       '<div style="flex:1;min-width:0;">'+
         '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;"><span style="font-family:Space Mono,monospace;font-size:10px;color:var(--muted);">'+date+'</span><span class="tcard-badge '+tier+'" style="font-size:8px;padding:2px 5px;">'+tier.toUpperCase()+'</span><span style="font-size:10px;color:var(--muted);">'+(r.sport||'')+'</span></div>'+
         '<div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">'+(r.event||'')+'</div>'+
-        '<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+(r.selection||'')+' <span style="color:var(--gold);font-family:Space Mono,monospace;">@ '+displayOdds(r.odds)+'</span></div>'+
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+(r.selection||'')+' <span style="color:var(--gold);font-family:Space Mono,monospace;">@ '+fmtOdds(r.odds)+'</span></div>'+
       '</div>'+
       '<div style="text-align:right;flex-shrink:0;"><span class="res-pill '+(won?'w':'l')+'" style="display:inline-block;margin-bottom:5px;">'+r.result+'</span><div style="font-family:Space Mono,monospace;font-size:12px;font-weight:700;color:'+plCol+';">'+fmtU(pl)+'</div><div style="font-family:Space Mono,monospace;font-size:10px;color:'+rplCol+';">'+fmtU(running)+'</div></div>'+
     '</div>';
@@ -972,7 +971,7 @@ function openTipModal(tip) {
   document.getElementById('tm-league').textContent    = tip.league||'';
   document.getElementById('tm-selection').textContent = tip.selection||'';
   // Modal shows odds in user's chosen format — still display-only
-  document.getElementById('tm-odds').textContent      = displayOdds(odds);
+  document.getElementById('tm-odds').textContent      = fmtOdds(odds);
   document.getElementById('tm-model-prob').textContent  = conf.toFixed(0)+'%';
   document.getElementById('tm-implied-prob').textContent= implied.toFixed(0)+'%';
   const edgeEl=document.getElementById('tm-edge'); edgeEl.textContent=eStr; edgeEl.className='tm-edge-val '+eCls;
@@ -1143,8 +1142,6 @@ function setPricingToggle(plan){
   await loadHistory();
   await loadTips();
   await loadConversionBlock();
-  // Sync odds format from localStorage on load
-  useFractional = localStorage.getItem('oddsFormat') === 'fractional';
   const params=new URLSearchParams(window.location.search);
   if(params.get('auth')==='login')openModal('login');
   if(params.get('upgraded')==='1'){
