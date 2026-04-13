@@ -273,6 +273,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 .tcard-stake.s15{background:rgba(74,158,255,0.12);color:var(--blue);}
 .tcard-stake.s2{background:rgba(240,180,41,0.12);color:var(--gold);}
 .tcard-stake.s3{background:rgba(24,224,122,0.12);color:var(--green);}
+.best-bet-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(240,180,41,0.15);border:1px solid rgba(240,180,41,0.4);color:var(--gold);font-family:'Space Mono',monospace;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:1px;padding:3px 8px;border-radius:3px;}
 @media(max-width:600px){
   nav{padding:0 14px;}
   .nav-mid{display:none;}
@@ -315,6 +316,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
   <div class="lb-item"><span class="lb-label">P&amp;L&nbsp;</span><span class="lb-val g" id="lb-pl">—</span></div>
   <div class="lb-item"><span class="lb-label">ROI&nbsp;</span><span class="lb-val g" id="lb-roi">—</span></div>
   <div id="lb-tips" style="display:none">—</div>
+  <div class="lb-div"></div>
+  <div class="lb-item"><span class="lb-label">Best Bet Streak&nbsp;</span><span class="lb-val g" id="lb-streak">—</span></div>
 </div>
 
 <main id="main-content" class="page" role="main">
@@ -697,6 +700,45 @@ async function loadLiveBar() {
   const plEl = document.getElementById('lb-pl'), roiEl = document.getElementById('lb-roi');
   plEl.textContent  = fmtU(pl);  plEl.className  = 'lb-val '+(pl>=0?'g':'r');
   roiEl.textContent = fmt(roi,1)+'%'; roiEl.className = 'lb-val '+(roi>=0?'g':'r');
+  // Load best bet streak
+  loadBestBetStreak();
+}
+
+async function loadBestBetStreak() {
+  try {
+    const [{ data: history }, { data: tips }] = await Promise.all([
+      db.from('results_history').select('tip_ref, result, settled_at, event, odds').order('settled_at', { ascending: true }).limit(1000),
+      db.from('tips').select('tip_ref, confidence'),
+    ]);
+    if (!history || !tips) return;
+    const confMap = {};
+    for (const t of tips) confMap[t.tip_ref] = t.confidence || 0;
+    const rows = history.filter(r => r.result === 'WON' || r.result === 'LOST');
+    const byDay = {};
+    for (const r of rows) {
+      const day = new Date(r.settled_at).toISOString().split('T')[0];
+      if (!byDay[day]) byDay[day] = [];
+      r._conf = confMap[r.tip_ref] || 0;
+      byDay[day].push(r);
+    }
+    const dailyBest = Object.entries(byDay).sort().map(([day, tips]) => ({
+      day, tip: tips.sort((a,b) => b._conf - a._conf)[0]
+    }));
+    let streak = 0;
+    for (let i = dailyBest.length - 1; i >= 0; i--) {
+      if (dailyBest[i].tip.result === 'WON') streak++;
+      else break;
+    }
+    // Store for use in renderTips
+    window._bestBetStreak = streak;
+    window._bestBetDays = new Set(dailyBest.map(d => d.day));
+    // Today's best bet tip_ref
+    const today = new Date().toISOString().split('T')[0];
+    const todayBest = byDay[today]?.sort((a,b) => b._conf - a._conf)[0];
+    window._todayBestRef = todayBest?.tip_ref || null;
+    const el = document.getElementById('lb-streak');
+    if (el) { el.textContent = streak + ' days'; el.className = 'lb-val g'; }
+  } catch(e) { console.error('Streak error:', e.message); }
 }
 
 let allHistory = [], activePeriod = '30d';
@@ -785,6 +827,7 @@ function renderTips() {
   sorted.forEach((tip,i)=>{
     const free=isProUser||i<3, locked=!free;
     const conf=tip.confidence||0, cls=conf>=85?'':conf>=72?'med':'low';
+    const isBestBet = !locked && sorted.indexOf(tip) === 0 && (window._bestBetStreak||0) > 0;
     const ev=new Date(tip.event_time);
     const ts=ev.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' . '+ev.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     const stake=parseFloat(tip.stake||1);
@@ -818,6 +861,7 @@ function renderTips() {
             (isProUser?'<div class="tcard-stake '+stakeClass(stake)+'">'+stakeLabel(stake)+'</div>':'')+
           '</div>'+
         '</div>'+
+        (isBestBet?'<div style="padding:8px 18px;border-top:1px solid rgba(240,180,41,0.2);background:rgba(240,180,41,0.04);"><span class="best-bet-badge">🏆 Best Bet · '+(window._bestBetStreak||0)+' day streak</span></div>':'')+
       '</div>'+
       (locked?'<div class="lock-overlay"><div class="lk-icon">🔒</div><div class="lk-title">Pro Members Only</div><div class="lk-sub">Unlock value edge data, signal analysis and stake recommendations on every tip.</div><button class="btn-unlock" onclick="handleProClick()">Go Pro — £9.99/mo</button></div>':'');
     grid.appendChild(d);
@@ -1165,4 +1209,4 @@ function setPricingToggle(plan){
 })();
 </script>
 </body>
-</html>
+                                                                      </html>
