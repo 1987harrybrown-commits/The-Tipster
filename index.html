@@ -851,7 +851,7 @@ function renderTips() {
   sorted.forEach((tip,i)=>{
     const free=isProUser||i<3, locked=!free;
     const conf=tip.confidence||0, cls=conf>=85?'':conf>=72?'med':'low';
-    const isBestBet = !locked && sorted.indexOf(tip) === 0 && (window._bestBetStreak||0) > 0;
+    const isBestBet = sorted.indexOf(tip) === 0 && (window._bestBetStreak||0) > 0;
     const ev=new Date(tip.event_time);
     const ts=ev.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' . '+ev.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     const stake=parseFloat(tip.stake||1);
@@ -885,7 +885,7 @@ function renderTips() {
             (isProUser?'<div class="tcard-stake '+stakeClass(stake)+'">'+stakeLabel(stake)+'</div>':'')+
           '</div>'+
         '</div>'+
-        (isBestBet?'<div style="padding:8px 18px;border-top:1px solid rgba(240,180,41,0.2);background:rgba(240,180,41,0.04);"><span class="best-bet-badge">🏆 Best Bet · '+(window._bestBetStreak||0)+' day streak</span></div>':'')+
+        (isBestBet && isProUser?'<div style="padding:8px 18px;border-top:1px solid rgba(240,180,41,0.2);background:rgba(240,180,41,0.04);"><span class="best-bet-badge">🏆 Best Bet · '+(window._bestBetStreak||0)+' day streak</span></div>':isBestBet && !isProUser?'<div style="padding:8px 18px;border-top:1px solid rgba(240,180,41,0.2);background:rgba(240,180,41,0.04);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;"><span class="best-bet-badge">🏆 Best Bet · '+(window._bestBetStreak||0)+' day streak</span><span style="font-family:Space Mono,monospace;font-size:9px;color:var(--gold);cursor:pointer;" onclick="handleProClick()">Pro only — Unlock →</span></div>':'')+
       '</div>'+
       (locked?'<div class="lock-overlay"><div class="lk-icon">🔒</div><div class="lk-title">Pro Members Only</div><div class="lk-sub">Unlock value edge data, signal analysis and stake recommendations on every tip.</div><button class="btn-unlock" onclick="handleProClick()">Go Pro — £9.99/mo</button></div>':'');
     grid.appendChild(d);
