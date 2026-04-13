@@ -933,10 +933,10 @@ function writeTipAnalysis(tip){
     }
     // Value pick (1.81–2.20)
     if(odds<=2.20){
-      return 'At '+odds.toFixed(2)+', the market is underestimating '+teamName+' in this '+league+' clash. The implied probability of '+implied.toFixed(0)+'% sits well below our model's '+conf+'% assessment — a '+fmtEdge+' gap that is significant. '+opponent+' will present a challenge '+(isHome?'at home':'on the road')+', but the data points to '+teamName+' as the sharper side. This is the type of priced inefficiency the model targets.';
+      return 'At '+odds.toFixed(2)+', the market is underestimating '+teamName+' in this '+league+' clash. The implied probability of '+implied.toFixed(0)+'% sits well below our model\'s '+conf+'% assessment — a '+fmtEdge+' gap that is significant. '+opponent+' will present a challenge '+(isHome?'at home':'on the road')+', but the data points to '+teamName+' as the sharper side. This is the type of priced inefficiency the model targets.';
     }
     // Elite odds (2.21–2.50)
-    return teamName+' are available at '+odds.toFixed(2)+' in this '+league+' fixture — a price the model believes is too generous. With a '+conf+'% win probability against the market's '+implied.toFixed(0)+'%, the '+fmtEdge+' edge clears the elite threshold required for selection at this odds range. '+opponent+' are not without danger, but the value at this price is the primary reason this tip has been flagged.';
+    return teamName+' are available at '+odds.toFixed(2)+' in this '+league+' fixture — a price the model believes is too generous. With a '+conf+'% win probability against the market\'s '+implied.toFixed(0)+'%, the '+fmtEdge+' edge clears the elite threshold required for selection at this odds range. '+opponent+' are not without danger, but the value at this price is the primary reason this tip has been flagged.';
   }
 
   // ── BASKETBALL WIN ────────────────────────────────────────────
@@ -958,7 +958,7 @@ function writeTipAnalysis(tip){
     if(odds<=2.10){
       return 'Line matchup analysis and recent 5-on-5 form give '+teamName+' the edge in this '+league+' clash. The market prices them at '+implied.toFixed(0)+'% — our model sits '+edgeNum.toFixed(0)+'% higher at '+conf+'%. '+opponent+' are a capable side '+(isHome?'but surrender the home ice advantage here.':'and will have crowd support, but the underlying numbers support '+teamName+'.')+' At '+odds.toFixed(2)+' the '+fmtEdge+' edge is above the minimum required for selection.';
     }
-    return 'The '+league+' market has '+teamName+' as underdogs at '+odds.toFixed(2)+', but our model disagrees materially — '+conf+'% versus '+implied.toFixed(0)+'% implied. A '+fmtEdge+' edge in hockey at this odds range is significant. '+opponent+' have home support '+(isHome?'but this is '+teamName+''s building.':'but '+teamName+''s numbers on the road this season do not reflect the underdog tag the market has assigned.')+' The edge clears the elite threshold for this odds band.';
+    return 'The '+league+' market has '+teamName+' as underdogs at '+odds.toFixed(2)+', but our model disagrees materially — '+conf+'% versus '+implied.toFixed(0)+'% implied. A '+fmtEdge+' edge in hockey at this odds range is significant. '+opponent+' have home support '+(isHome?'but this is '+teamName+'\'s building.':'but '+teamName+'\'s numbers on the road this season do not reflect the underdog tag the market has assigned.')+' The edge clears the elite threshold for this odds band.';
   }
 
   // ── OVERS ─────────────────────────────────────────────────────
@@ -1165,4 +1165,4 @@ function setPricingToggle(plan){
 })();
 </script>
 </body>
-</html>
+          </html>
