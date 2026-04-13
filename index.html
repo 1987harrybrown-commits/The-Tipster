@@ -28,7 +28,7 @@
     {"@type":"FAQPage","mainEntity":[
       {"@type":"Question","name":"Are the football tips free?","acceptedAnswer":{"@type":"Answer","text":"Yes. The top 3 highest-confidence tips every day are completely free with no account required. Pro members get access to the full daily card across all sports."}},
       {"@type":"Question","name":"How often are tips updated?","acceptedAnswer":{"@type":"Answer","text":"Tips are refreshed every 15 minutes, pulling live odds from over 40 bookmakers to identify value across Premier League, La Liga, Bundesliga, NBA, NHL and more."}},
-      {"@type":"Question","name":"How is the win rate calculated?","acceptedAnswer":{"@type":"Answer","text":"Every tip is tracked from the moment it is published. Results are recorded automatically when fixtures complete and the win rate reflects every settled bet in the database — nothing is excluded."}},
+      {"@type":"Question","name":"How is the win rate calculated?","acceptedAnswer":{"@type":"Answer","text":"Every tip is tracked from the moment it is published. Results are recorded automatically when fixtures complete and the win rate reflects every settled bet in the database \u2014 nothing is excluded."}},
       {"@type":"Question","name":"What sports are covered?","acceptedAnswer":{"@type":"Answer","text":"Ice Hockey (NHL), Basketball (NBA) and Football (Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions League)."}}
     ]}
   ]
@@ -308,16 +308,16 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 <div class="live-bar">
   <div class="lb-item"><div class="live-dot"></div></div>
   <div class="lb-div"></div>
-  <div class="lb-item"><span class="lb-label">W&nbsp;</span><span class="lb-val g" id="lb-won">—</span></div>
-  <div class="lb-item"><span class="lb-label">L&nbsp;</span><span class="lb-val r" id="lb-lost">—</span></div>
+  <div class="lb-item"><span class="lb-label">W&nbsp;</span><span class="lb-val g" id="lb-won">\u2014</span></div>
+  <div class="lb-item"><span class="lb-label">L&nbsp;</span><span class="lb-val r" id="lb-lost">\u2014</span></div>
   <div class="lb-div"></div>
-  <div class="lb-item"><span class="lb-val g" id="lb-rate">—</span><span class="lb-label">&nbsp;Win Rate</span></div>
+  <div class="lb-item"><span class="lb-val g" id="lb-rate">\u2014</span><span class="lb-label">&nbsp;Win Rate</span></div>
   <div class="lb-div"></div>
-  <div class="lb-item"><span class="lb-label">P&amp;L&nbsp;</span><span class="lb-val g" id="lb-pl">—</span></div>
-  <div class="lb-item"><span class="lb-label">ROI&nbsp;</span><span class="lb-val g" id="lb-roi">—</span></div>
-  <div id="lb-tips" style="display:none">—</div>
+  <div class="lb-item"><span class="lb-label">P&amp;L&nbsp;</span><span class="lb-val g" id="lb-pl">\u2014</span></div>
+  <div class="lb-item"><span class="lb-label">ROI&nbsp;</span><span class="lb-val g" id="lb-roi">\u2014</span></div>
+  <div id="lb-tips" style="display:none">\u2014</div>
   <div class="lb-div"></div>
-  <div class="lb-item"><span class="lb-label">Best Bet Streak&nbsp;</span><span class="lb-val g" id="lb-streak">—</span></div>
+  <div class="lb-item"><span class="lb-label">Best Bet Streak&nbsp;</span><span class="lb-val g" id="lb-streak">\u2014</span></div>
 </div>
 
 <main id="main-content" class="page" role="main">
@@ -338,35 +338,35 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         </div>
       </div>
       <div class="kpi-grid">
-        <div class="kpi-cell"><div class="kpi-label">Bets</div><div class="kpi-val w" id="kpi-bets">—</div><div class="kpi-sub" id="kpi-bets-sub"></div></div>
-        <div class="kpi-cell"><div class="kpi-label">Won</div><div class="kpi-val g" id="kpi-won">—</div><div class="kpi-sub" id="kpi-won-sub"></div></div>
-        <div class="kpi-cell"><div class="kpi-label">Lost</div><div class="kpi-val r" id="kpi-lost">—</div><div class="kpi-sub" id="kpi-lost-sub"></div></div>
-        <div class="kpi-cell"><div class="kpi-label">Win Rate</div><div class="kpi-val g" id="kpi-rate">—</div><div class="kpi-sub" id="kpi-rate-sub"></div></div>
-        <div class="kpi-cell"><div class="kpi-label">Profit / Loss</div><div class="kpi-val g" id="kpi-pl">—</div><div class="kpi-sub" id="kpi-pl-sub"></div></div>
-        <div class="kpi-cell"><div class="kpi-label">ROI</div><div class="kpi-val go" id="kpi-roi">—</div><div class="kpi-sub" id="kpi-roi-sub"></div></div>
+        <div class="kpi-cell"><div class="kpi-label">Bets</div><div class="kpi-val w" id="kpi-bets">\u2014</div><div class="kpi-sub" id="kpi-bets-sub"></div></div>
+        <div class="kpi-cell"><div class="kpi-label">Won</div><div class="kpi-val g" id="kpi-won">\u2014</div><div class="kpi-sub" id="kpi-won-sub"></div></div>
+        <div class="kpi-cell"><div class="kpi-label">Lost</div><div class="kpi-val r" id="kpi-lost">\u2014</div><div class="kpi-sub" id="kpi-lost-sub"></div></div>
+        <div class="kpi-cell"><div class="kpi-label">Win Rate</div><div class="kpi-val g" id="kpi-rate">\u2014</div><div class="kpi-sub" id="kpi-rate-sub"></div></div>
+        <div class="kpi-cell"><div class="kpi-label">Profit / Loss</div><div class="kpi-val g" id="kpi-pl">\u2014</div><div class="kpi-sub" id="kpi-pl-sub"></div></div>
+        <div class="kpi-cell"><div class="kpi-label">ROI</div><div class="kpi-val go" id="kpi-roi">\u2014</div><div class="kpi-sub" id="kpi-roi-sub"></div></div>
       </div>
 
       <!-- BEST BET STREAK BANNER -->
       <div style="background:rgba(240,180,41,0.06);border:1px solid rgba(240,180,41,0.25);border-radius:8px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;">
         <div>
-          <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:4px;">Best Bet · Daily Top Pick</div>
-          <div style="font-size:15px;font-weight:700;">🏆 <span id="streak-days" style="color:var(--gold);font-family:'Space Mono',monospace;font-size:22px;">—</span> consecutive winning days</div>
-          <div style="font-size:11px;color:var(--muted);margin-top:3px;font-family:'Space Mono',monospace;"><span id="streak-rate">—</span> win rate on highest confidence pick</div>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:4px;">Best Bet \u00b7 Daily Top Pick</div>
+          <div style="font-size:15px;font-weight:700;">\ud83c\udfc6 <span id="streak-days" style="color:var(--gold);font-family:'Space Mono',monospace;font-size:22px;">\u2014</span> consecutive winning days</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;font-family:'Space Mono',monospace;"><span id="streak-rate">\u2014</span> win rate on highest confidence pick</div>
         </div>
         <div style="text-align:right;">
           <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:4px;">Best Ever</div>
-          <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--text);" id="streak-best">—</div>
+          <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--text);" id="streak-best">\u2014</div>
           <div style="font-size:10px;color:var(--muted);">day run</div>
         </div>
       </div>
       <div class="perf-bottom" style="grid-template-columns:1fr;">
         <div class="pcard-base">
           <div class="pcard-label" id="sum-period-label">All Time Summary</div>
-          <div class="sum-row"><span class="sum-key">Bets placed</span><span class="sum-val w" id="sum-bets">—</span></div>
-          <div class="sum-row"><span class="sum-key">Staked</span><span class="sum-val w" id="sum-staked">—</span></div>
-          <div class="sum-row"><span class="sum-key">Returned</span><span class="sum-val g" id="sum-returned">—</span></div>
-          <div class="sum-row"><span class="sum-key">Net profit</span><span class="sum-val" id="sum-net">—</span></div>
-          <div class="sum-row"><span class="sum-key">Avg odds</span><span class="sum-val go" id="sum-avgodds">—</span></div>
+          <div class="sum-row"><span class="sum-key">Bets placed</span><span class="sum-val w" id="sum-bets">\u2014</span></div>
+          <div class="sum-row"><span class="sum-key">Staked</span><span class="sum-val w" id="sum-staked">\u2014</span></div>
+          <div class="sum-row"><span class="sum-key">Returned</span><span class="sum-val g" id="sum-returned">\u2014</span></div>
+          <div class="sum-row"><span class="sum-key">Net profit</span><span class="sum-val" id="sum-net">\u2014</span></div>
+          <div class="sum-row"><span class="sum-key">Avg odds</span><span class="sum-val go" id="sum-avgodds">\u2014</span></div>
         </div>
       </div>
     </div>
@@ -376,14 +376,13 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
     <div class="wrap">
       <div class="sec-label">Today's Selections</div>
       <div class="tips-toolbar">
-        <h2 class="sec-title" style="margin-bottom:0">TIPS — <span style="color:var(--green)" id="todayDate"></span></h2>
+        <h2 class="sec-title" style="margin-bottom:0">TIPS \u2014 <span style="color:var(--green)" id="todayDate"></span></h2>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
           <div class="tabs" id="sportTabs">
             <button class="tab on" onclick="filterTips('all',this)">All</button>
-            <button class="tab" onclick="filterTips('Football',this)">⚽ Football</button>
-            <button class="tab" onclick="filterTips('Basketball',this)">🏀 Basketball</button>
-
-            <button class="tab" onclick="filterTips('Ice Hockey',this)">🏒 Hockey</button>
+            <button class="tab" onclick="filterTips('Football',this)">\u26bd Football</button>
+            <button class="tab" onclick="filterTips('Basketball',this)">\ud83c\udfc0 Basketball</button>
+            <button class="tab" onclick="filterTips('Ice Hockey',this)">\ud83c\udfd2 Hockey</button>
           </div>
           <div class="update-tag"><div class="live-dot"></div>Updates every 15 mins</div>
         </div>
@@ -397,25 +396,25 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <div id="missedWinsBar" style="background:rgba(240,180,41,0.06);border:1px solid rgba(240,180,41,0.2);border-radius:8px;padding:16px 20px;margin-bottom:20px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;">
         <div>
           <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:4px;">Today so far</div>
-          <div style="font-size:14px;font-weight:700;" id="missedWinsText">Pro members have already seen <span style="color:var(--gold)">—</span> more tips than you today.</div>
+          <div style="font-size:14px;font-weight:700;" id="missedWinsText">Pro members have already seen <span style="color:var(--gold)">\u2014</span> more tips than you today.</div>
         </div>
         <button onclick="handleProClick()" class="btn btn-green" style="white-space:nowrap;padding:9px 20px;font-size:13px;">Go Pro</button>
       </div>
       <div style="margin-bottom:20px;">
-        <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--green);margin-bottom:14px;">Pro tips vs Free tips — last 30 days</div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--green);margin-bottom:14px;">Pro tips vs Free tips \u2014 last 30 days</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:8px;overflow:hidden;">
           <div style="background:var(--card);padding:18px 20px;">
             <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:10px;">Free Tips</div>
             <div style="display:flex;gap:20px;flex-wrap:wrap;">
-              <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Win Rate</div><div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;" id="free-wr-display">—</div></div>
-              <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">P&L</div><div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;" id="free-pl-display">—</div></div>
+              <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Win Rate</div><div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;" id="free-wr-display">\u2014</div></div>
+              <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">P&L</div><div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;" id="free-pl-display">\u2014</div></div>
             </div>
           </div>
           <div style="background:var(--card2);padding:18px 20px;border-left:2px solid var(--gold);">
-            <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);margin-bottom:10px;">Pro Tips ⭐</div>
+            <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);margin-bottom:10px;">Pro Tips \u2b50</div>
             <div style="display:flex;gap:20px;flex-wrap:wrap;">
-              <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Win Rate</div><div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--green);" id="pro-wr-display">—</div></div>
-              <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">P&L</div><div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--green);" id="pro-pl-display">—</div></div>
+              <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Win Rate</div><div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--green);" id="pro-wr-display">\u2014</div></div>
+              <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">P&L</div><div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--green);" id="pro-pl-display">\u2014</div></div>
             </div>
           </div>
         </div>
@@ -425,7 +424,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
           <div>
             <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:6px;">Saturday Accumulator</div>
             <div style="font-size:14px;font-weight:700;margin-bottom:3px;">This week's acca is ready</div>
-            <div style="font-size:12px;color:var(--muted);">Combined odds: <span style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--gold);" id="accaTeaserOdds">—</span> &nbsp;·&nbsp; <span id="accaTeaserLegs">—</span> selections</div>
+            <div style="font-size:12px;color:var(--muted);">Combined odds: <span style="font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--gold);" id="accaTeaserOdds">\u2014</span> &nbsp;\u00b7&nbsp; <span id="accaTeaserLegs">\u2014</span> selections</div>
           </div>
           <div style="text-align:right;">
             <div style="font-size:11px;color:var(--muted);margin-bottom:8px;">Selections hidden for free members</div>
@@ -446,11 +445,11 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         <button class="tab"    id="plTab-pro"  onclick="switchPLTab('pro')">Pro</button>
       </div>
       <div class="pl-summary" style="grid-template-columns:repeat(4,1fr);">
-        <div class="pl-s-cell"><div class="pl-s-label">Settled</div><div class="pl-s-val" id="ps-settled" style="color:var(--text)">—</div></div>
-        <div class="pl-s-cell"><div class="pl-s-label">Won</div><div class="pl-s-val" id="ps-won" style="color:var(--green)">—</div></div>
-        <div class="pl-s-cell"><div class="pl-s-label">Lost</div><div class="pl-s-val" id="ps-lost" style="color:var(--red)">—</div></div>
-        <div class="pl-s-cell"><div class="pl-s-label">Total P&amp;L</div><div class="pl-s-val" id="ps-pl">—</div></div>
-        <div id="ps-rate" style="display:none">—</div>
+        <div class="pl-s-cell"><div class="pl-s-label">Settled</div><div class="pl-s-val" id="ps-settled" style="color:var(--text)">\u2014</div></div>
+        <div class="pl-s-cell"><div class="pl-s-label">Won</div><div class="pl-s-val" id="ps-won" style="color:var(--green)">\u2014</div></div>
+        <div class="pl-s-cell"><div class="pl-s-label">Lost</div><div class="pl-s-val" id="ps-lost" style="color:var(--red)">\u2014</div></div>
+        <div class="pl-s-cell"><div class="pl-s-label">Total P&amp;L</div><div class="pl-s-val" id="ps-pl">\u2014</div></div>
+        <div id="ps-rate" style="display:none">\u2014</div>
       </div>
       <div id="plBody" style="display:flex;flex-direction:column;gap:0;">
         <div style="text-align:center;color:var(--muted);padding:36px;font-size:13px;">Loading results...</div>
@@ -471,13 +470,13 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <div class="sec-label">FAQ</div>
       <h2 class="sec-title">COMMON QUESTIONS</h2>
       <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;" itemscope itemtype="https://schema.org/FAQPage">
-        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">Are the football tips free?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Yes — the top 3 highest-confidence tips every day are completely free, no account required. You get the full selection, odds, confidence rating and value edge on each pick. Free members also receive a daily email with the Bet of the Day at 08:30 and the Saturday accumulator. Pro members unlock the full daily card of 15+ tips across all sports.</p></div></div>
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">Are the football tips free?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Yes \u2014 the top 3 highest-confidence tips every day are completely free, no account required. You get the full selection, odds, confidence rating and value edge on each pick. Free members also receive a daily email with the Bet of the Day at 08:30 and the Saturday accumulator. Pro members unlock the full daily card of 15+ tips across all sports.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How often are the tips updated?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Every 15 minutes. The engine pulls live odds from over 40 bookmakers continuously and updates picks in real time. When lines move, the value edge recalculates automatically.</p></div></div>
-        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How is the win rate calculated?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Every tip is timestamped and logged the moment it is published. Results are recorded automatically when fixtures complete — nothing is removed, edited or excluded. The win rate, P&L and ROI you see reflects every single settled tip in the database.</p></div></div>
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How is the win rate calculated?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Every tip is timestamped and logged the moment it is published. Results are recorded automatically when fixtures complete \u2014 nothing is removed, edited or excluded. The win rate, P&L and ROI you see reflects every single settled tip in the database.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">What sports are covered?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Ice Hockey (NHL) and Basketball (NBA) are our primary focus, with Football as a secondary market covering Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">What does value edge mean?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Value edge is the gap between what our model thinks the true probability of a result is, and what the bookmaker's odds imply. Consistently backing positive-edge selections is how you build a profitable record over time.</p></div></div>
-        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">Which bookmakers do you use?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">The engine scans odds from over 40 UK-licensed bookmakers in real time — including Bet365, William Hill, Betfair, Paddy Power, Unibet, Sky Bet, Ladbrokes and more.</p></div></div>
-        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How much does Pro cost?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Pro is £9.99 per month billed monthly, or £99.90 per year — 2 months free. Cancel any time, no contracts.</p></div></div>
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">Which bookmakers do you use?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">The engine scans odds from over 40 UK-licensed bookmakers in real time \u2014 including Bet365, William Hill, Betfair, Paddy Power, Unibet, Sky Bet, Ladbrokes and more.</p></div></div>
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How much does Pro cost?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Pro is \u00a39.99 per month billed monthly, or \u00a399.90 per year \u2014 2 months free. Cancel any time, no contracts.</p></div></div>
       </div>
     </div>
   </section>
@@ -494,37 +493,37 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <div class="pricing-grid">
         <div class="prc-card">
           <div class="pname">Free</div>
-          <div class="pprice"><sup>£</sup>0<small> / month</small></div>
+          <div class="pprice"><sup>\u00a3</sup>0<small> / month</small></div>
           <div class="pdesc">Daily previews. See the quality before committing.</div>
           <ul class="pfeatures">
-            <li><span class="ck">✓</span> Top 3 tips daily</li>
-            <li><span class="ck">✓</span> All sports access</li>
-            <li><span class="ck">✓</span> Saturday accumulator email</li>
-            <li class="dim"><span class="xx">✗</span> Confidence ratings</li>
-            <li class="dim"><span class="xx">✗</span> Value edge % on every tip</li>
-            <li class="dim"><span class="xx">✗</span> Daily Bet of the Day email at 08:30</li>
-            <li class="dim"><span class="xx">✗</span> Full card (15+ tips) at 07:00</li>
-            <li class="dim"><span class="xx">✗</span> Stake recommendations</li>
-            <li class="dim"><span class="xx">✗</span> Full Saturday acca with selections</li>
+            <li><span class="ck">\u2713</span> Top 3 tips daily</li>
+            <li><span class="ck">\u2713</span> All sports access</li>
+            <li><span class="ck">\u2713</span> Saturday accumulator email</li>
+            <li class="dim"><span class="xx">\u2717</span> Confidence ratings</li>
+            <li class="dim"><span class="xx">\u2717</span> Value edge % on every tip</li>
+            <li class="dim"><span class="xx">\u2717</span> Daily Bet of the Day email at 08:30</li>
+            <li class="dim"><span class="xx">\u2717</span> Full card (15+ tips) at 07:00</li>
+            <li class="dim"><span class="xx">\u2717</span> Stake recommendations</li>
+            <li class="dim"><span class="xx">\u2717</span> Full Saturday acca with selections</li>
           </ul>
           <button class="btn-p free-p" onclick="openModal('signup')">Get Started Free</button>
         </div>
         <div class="prc-card featured">
           <div class="popular" id="pricing-badge">Most Popular</div>
           <div class="pname" style="color:var(--gold)">Pro</div>
-          <div id="price-monthly"><div class="pprice" style="color:var(--gold)"><sup>£</sup>9<small>.99 / month</small></div><div class="pdesc">The complete intelligence platform. Every edge, every day.</div></div>
-          <div id="price-annual" style="display:none;"><div class="pprice" style="color:var(--gold)"><sup>£</sup>99<small>.90 / year</small></div><div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--green);margin-bottom:6px;">£8.33/mo — 2 months free</div><div class="pdesc">Everything in monthly, billed annually. Best value.</div></div>
+          <div id="price-monthly"><div class="pprice" style="color:var(--gold)"><sup>\u00a3</sup>9<small>.99 / month</small></div><div class="pdesc">The complete intelligence platform. Every edge, every day.</div></div>
+          <div id="price-annual" style="display:none;"><div class="pprice" style="color:var(--gold)"><sup>\u00a3</sup>99<small>.90 / year</small></div><div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--green);margin-bottom:6px;">\u00a38.33/mo \u2014 2 months free</div><div class="pdesc">Everything in monthly, billed annually. Best value.</div></div>
           <ul class="pfeatures">
-            <li><span class="ck">✓</span> Full card (15+ tips) delivered at 07:00</li>
-            <li><span class="ck">✓</span> Daily Bet of the Day email at 08:30</li>
-            <li><span class="ck">✓</span> Confidence ratings on every tip</li>
-            <li><span class="ck">✓</span> Value edge % on every selection</li>
-            <li><span class="ck">✓</span> Stake recommendations (1–3u)</li>
-            <li><span class="ck">✓</span> Saturday acca with full selections</li>
-            <li><span class="ck">✓</span> All sports + niche markets</li>
-            <li><span class="ck">✓</span> Priority support</li>
+            <li><span class="ck">\u2713</span> Full card (15+ tips) delivered at 07:00</li>
+            <li><span class="ck">\u2713</span> Daily Bet of the Day email at 08:30</li>
+            <li><span class="ck">\u2713</span> Confidence ratings on every tip</li>
+            <li><span class="ck">\u2713</span> Value edge % on every selection</li>
+            <li><span class="ck">\u2713</span> Stake recommendations (1\u20133u)</li>
+            <li><span class="ck">\u2713</span> Saturday acca with full selections</li>
+            <li><span class="ck">\u2713</span> All sports + niche markets</li>
+            <li><span class="ck">\u2713</span> Priority support</li>
           </ul>
-          <button class="btn-p pro-p" id="pro-cta-btn" onclick="startCheckout(activePricingPlan)">Start Pro — £9.99/mo</button>
+          <button class="btn-p pro-p" id="pro-cta-btn" onclick="startCheckout(activePricingPlan)">Start Pro \u2014 \u00a39.99/mo</button>
           <div style="font-size:11px;color:var(--muted);margin-top:10px;">Cancel any time. No contracts.</div>
         </div>
       </div>
@@ -533,13 +532,13 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 
   <section style="background:var(--bg2);border-top:1px solid var(--border);padding:48px 0;">
     <div class="wrap"><div style="max-width:780px;">
-      <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:16px;">Free Football Tips Today — Value Betting Predictions</h2>
-      <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px;">The Tipster Edge provides free football tips updated every 15 minutes using live odds data from over 40 UK bookmakers. Every tip includes a value edge percentage — the difference between our model's probability and the bookmaker's implied odds.</p>
-      <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px;">Our primary focus is NHL Ice Hockey and NBA Basketball — the two most inefficient major markets for finding genuine value. Football is covered as a secondary market across Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League. Every tip is logged the moment it's published and results are recorded automatically — giving you a fully verified track record with no cherry-picking and no deleted tips.</p>
+      <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:16px;">Free Football Tips Today \u2014 Value Betting Predictions</h2>
+      <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px;">The Tipster Edge provides free football tips updated every 15 minutes using live odds data from over 40 UK bookmakers. Every tip includes a value edge percentage \u2014 the difference between our model's probability and the bookmaker's implied odds.</p>
+      <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px;">Our primary focus is NHL Ice Hockey and NBA Basketball \u2014 the two most inefficient major markets for finding genuine value. Football is covered as a secondary market across Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League. Every tip is logged the moment it's published and results are recorded automatically \u2014 giving you a fully verified track record with no cherry-picking and no deleted tips.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px;margin-top:24px;">
         <div><h3 style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--green);">Football Tips Today</h3><p style="font-size:12px;color:var(--muted);line-height:1.7;">Free Premier League tips, La Liga predictions and Champions League value bets refreshed every 15 minutes.</p></div>
         <div><h3 style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--green);">Value Betting Tips</h3><p style="font-size:12px;color:var(--muted);line-height:1.7;">Data-driven value bets that show the edge over bookmaker odds. Only tips with positive value are published.</p></div>
-        <div><h3 style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--green);">Verified Track Record</h3><p style="font-size:12px;color:var(--muted);line-height:1.7;">Every result logged and published. Win rate, P&L and ROI are calculated from every settled tip — nothing hidden.</p></div>
+        <div><h3 style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--green);">Verified Track Record</h3><p style="font-size:12px;color:var(--muted);line-height:1.7;">Every result logged and published. Win rate, P&L and ROI are calculated from every settled tip \u2014 nothing hidden.</p></div>
         <div><h3 style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--green);">Saturday Accumulator</h3><p style="font-size:12px;color:var(--muted);line-height:1.7;">Free Saturday accumulator tips each week. Combined odds from top-confidence Premier League and European selections.</p></div>
       </div>
     </div></div>
@@ -559,8 +558,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <p style="font-size:11px;color:var(--muted);line-height:1.8;max-width:900px;">The Tipster Edge provides free football tips, value bets and sports predictions across all major leagues. Questions? <a href="/cdn-cgi/l/email-protection#3c4f494c4c534e487c48545948554c4f48594e59585b59125f5351" style="color:var(--muted);text-decoration:underline;"><span class="__cf_email__" data-cfemail="265553565649545266524e43524f5655524354434241430845494b">[email&#160;protected]</span></a> &bull; Bet responsibly. 18+ only.</p>
     </div>
     <div class="footer-bot">
-      <p>© 2026 The Tipster. All rights reserved.</p>
-      <p style="max-width:540px">⚠️ <strong>18+ only.</strong> Tips are for informational and entertainment purposes only. Past performance does not guarantee future results. Please gamble responsibly. <strong>BeGambleAware.org</strong></p>
+      <p>\u00a9 2026 The Tipster. All rights reserved.</p>
+      <p style="max-width:540px">\u26a0\ufe0f <strong>18+ only.</strong> Tips are for informational and entertainment purposes only. Past performance does not guarantee future results. Please gamble responsibly. <strong>BeGambleAware.org</strong></p>
     </div>
   </footer>
 
@@ -592,9 +591,9 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
     <div style="margin:0 20px 16px;display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;">
       <div>
         <div style="font-family:Space Mono,monospace;font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:4px;">Best Available Odds From</div>
-        <div style="font-size:13px;font-weight:700;text-transform:capitalize;color:#4a9eff;" id="tm-bookmaker">—</div>
+        <div style="font-size:13px;font-weight:700;text-transform:capitalize;color:#4a9eff;" id="tm-bookmaker">\u2014</div>
       </div>
-      <div style="text-align:right;"><div style="font-family:Space Mono,monospace;font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:4px;">Market</div><div style="font-size:12px;color:var(--muted);" id="tm-market">—</div></div>
+      <div style="text-align:right;"><div style="font-family:Space Mono,monospace;font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:4px;">Market</div><div style="font-size:12px;color:var(--muted);" id="tm-market">\u2014</div></div>
     </div>
     <div class="tm-disclaimer">Tips are for informational purposes only. Past performance does not guarantee future results. Please gamble responsibly. 18+ only.</div>
   </div>
@@ -663,15 +662,11 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-const SPORT_ICONS = {'Football':'⚽','Basketball':'🏀','Tennis':'🎾','NFL':'🏈','Baseball':'⚾','Ice Hockey':'🏒','Horse Racing':'🏇','Boxing / MMA':'🥊','Golf':'🏌️','Rugby':'🏉','Cricket':'🏏','Snooker':'🎱'};
-const sportIcon = s => SPORT_ICONS[s] || '🏅';
+const SPORT_ICONS = {'Football':'\u26bd','Basketball':'\ud83c\udfc0','Tennis':'\ud83c\udfbe','NFL':'\ud83c\udfc8','Baseball':'\u26be','Ice Hockey':'\ud83c\udfd2','Horse Racing':'\ud83c\udfc7','Boxing / MMA':'\ud83e\udd4a','Golf':'\ud83c\udfcc\ufe0f','Rugby':'\ud83c\udfc9','Cricket':'\ud83c\udfcf','Snooker':'\ud83c\udfb1'};
+const sportIcon = s => SPORT_ICONS[s] || '\ud83c\udfc5';
 const fmt  = (n,d=2) => (n>=0?'+':'')+parseFloat(n).toFixed(d);
 const fmtU = n => fmt(n,2)+'u';
 
-// ── FRACTIONAL ODDS ───────────────────────────────────────
-// Display-only. All model calculations stay decimal.
-// Preference stored in localStorage, set from account.html toggle.
-// Uses the exact fraction list bookmakers (Bet365, Sky Bet etc) display.
 function decimalToFractional(decimal) {
   const FRACS = [
     [1,10],[1,8],[1,7],[1,6],[1,5],[2,9],[1,4],[2,7],[3,10],[1,3],
@@ -714,7 +709,6 @@ async function loadLiveBar() {
   const plEl = document.getElementById('lb-pl'), roiEl = document.getElementById('lb-roi');
   plEl.textContent  = fmtU(pl);  plEl.className  = 'lb-val '+(pl>=0?'g':'r');
   roiEl.textContent = fmt(roi,1)+'%'; roiEl.className = 'lb-val '+(roi>=0?'g':'r');
-  // Load best bet streak
   loadBestBetStreak();
 }
 
@@ -743,17 +737,14 @@ async function loadBestBetStreak() {
       if (dailyBest[i].tip.result === 'WON') streak++;
       else break;
     }
-    // Store for use in renderTips
     window._bestBetStreak = streak;
     window._bestBetDays = new Set(dailyBest.map(d => d.day));
-    // Today's best bet tip_ref
     const today = new Date().toISOString().split('T')[0];
     const todayBest = byDay[today]?.sort((a,b) => b._conf - a._conf)[0];
     window._todayBestRef = todayBest?.tip_ref || null;
     const el = document.getElementById('lb-streak');
     if (el) { el.textContent = streak + ' days'; el.className = 'lb-val g'; }
-    // Populate streak banner
-    const winRate = dailyBest.length > 0 ? ((dailyBest.filter(d=>d.tip.result==='WON').length / dailyBest.length)*100).toFixed(1)+'%' : '—';
+    const winRate = dailyBest.length > 0 ? ((dailyBest.filter(d=>d.tip.result==='WON').length / dailyBest.length)*100).toFixed(1)+'%' : '\u2014';
     let bestEver = 0, tmp = 0;
     for (const {tip} of dailyBest) { if(tip.result==='WON'){tmp++;bestEver=Math.max(bestEver,tmp);}else tmp=0; }
     const daysEl = document.getElementById('streak-days');
@@ -828,7 +819,7 @@ async function loadTips() {
   const {data,error}=await db.from('tips').select('*')
     .gte('event_time',today.toISOString()).lte('event_time',tom.toISOString())
     .order('confidence',{ascending:false}).limit(50);
-  if(error){grid.innerHTML='<div class="empty-state"><div class="ei">⚠️</div><h3>Could not load tips</h3><p>'+error.message+'</p></div>';return;}
+  if(error){grid.innerHTML='<div class="empty-state"><div class="ei">\u26a0\ufe0f</div><h3>Could not load tips</h3><p>'+error.message+'</p></div>';return;}
   allTips=data||[];
   renderTips(); renderTicker(); renderSportsGrid();
 }
@@ -840,13 +831,13 @@ function deriveEdge(tip) {
 }
 
 function stakeClass(s) { s=parseFloat(s||1); return s>=3?'s3':s>=2?'s2':s>=1.5?'s15':'s1'; }
-function stakeLabel(s) { s=parseFloat(s||1); if(s>=3)return s+'u — High Confidence'; if(s>=2)return s+'u — Medium'; if(s>=1.5)return s+'u'; return s+'u'; }
+function stakeLabel(s) { s=parseFloat(s||1); if(s>=3)return s+'u \u2014 High Confidence'; if(s>=2)return s+'u \u2014 Medium'; if(s>=1.5)return s+'u'; return s+'u'; }
 
 function renderTips() {
   const grid=document.getElementById('tipsGrid');
   const list=activeFilter==='all'?allTips:allTips.filter(t=>t.sport===activeFilter);
   const sorted=[...list].sort((a,b)=>b.confidence-a.confidence);
-  if(!sorted.length){grid.innerHTML='<div class="empty-state"><div class="ei">🔍</div><h3>No tips yet</h3><p>The engine is fetching the latest odds.</p></div>';return;}
+  if(!sorted.length){grid.innerHTML='<div class="empty-state"><div class="ei">\ud83d\udd0d</div><h3>No tips yet</h3><p>The engine is fetching the latest odds.</p></div>';return;}
   grid.innerHTML='';
   sorted.forEach((tip,i)=>{
     const free=isProUser||i<3, locked=!free;
@@ -875,19 +866,20 @@ function renderTips() {
           '</div>'+
         '</div>'+
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;">'+
-          (isProUser?'<span style="font-family:Space Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--green)">Value Edge '+eStr+'</span>':'<span style="font-family:Space Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)">Value Edge · Pro only 🔒</span>')+
+          (isProUser?'<span style="font-family:Space Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--green)">Value Edge '+eStr+'</span>':'<span style="font-family:Space Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)">Value Edge \u00b7 Pro only \ud83d\udd12</span>')+
           '<span style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted)">'+(isProUser?'Tap for analysis':'')+'</span>'+
         '</div>'+
         '<div class="tcard-footer">'+
-          (isProUser||locked?'<div class="conf-wrap"><div class="conf-row"><span>Confidence</span><span>'+conf+'%</span></div><div class="conf-bar"><div class="conf-fill '+cls+'" style="width:'+conf+'%"></div></div></div>':'<div class="conf-wrap"><div style="font-size:11px;color:var(--muted);font-family:Space Mono,monospace;">Confidence · <span style="color:var(--gold);">Pro only 🔒</span></div></div>')+
+          (isProUser||locked?'<div class="conf-wrap"><div class="conf-row"><span>Confidence</span><span>'+conf+'%</span></div><div class="conf-bar"><div class="conf-fill '+cls+'" style="width:'+conf+'%"></div></div></div>':'<div class="conf-wrap"><div style="font-size:11px;color:var(--muted);font-family:Space Mono,monospace;">Confidence \u00b7 <span style="color:var(--gold);">Pro only \ud83d\udd12</span></div></div>')+
           '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">'+
             '<div class="tcard-time">'+ts+'</div>'+
             (isProUser?'<div class="tcard-stake '+stakeClass(stake)+'">'+stakeLabel(stake)+'</div>':'')+
           '</div>'+
         '</div>'+
-        (isBestBet && isProUser?'<div style="padding:8px 18px;border-top:1px solid rgba(240,180,41,0.2);background:rgba(240,180,41,0.04);"><span class="best-bet-badge">🏆 Best Bet · '+(window._bestBetStreak||0)+' day streak</span></div>':isBestBet && !isProUser?'<div style="padding:8px 18px;border-top:1px solid rgba(240,180,41,0.2);background:rgba(240,180,41,0.04);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;"><span class="best-bet-badge">🏆 Best Bet · '+(window._bestBetStreak||0)+' day streak</span><span style="font-family:Space Mono,monospace;font-size:9px;color:var(--gold);cursor:pointer;" onclick="handleProClick()">Pro only — Unlock →</span></div>':'')+
+        // Best Bet badge: Pro users only
+        (isBestBet && isProUser ? '<div style="padding:8px 18px;border-top:1px solid rgba(240,180,41,0.2);background:rgba(240,180,41,0.04);"><span class="best-bet-badge">\ud83c\udfc6 Best Bet \u00b7 '+(window._bestBetStreak||0)+' day streak</span></div>' : '')+
       '</div>'+
-      (locked?'<div class="lock-overlay"><div class="lk-icon">🔒</div><div class="lk-title">Pro Members Only</div><div class="lk-sub">Unlock value edge data, signal analysis and stake recommendations on every tip.</div><button class="btn-unlock" onclick="handleProClick()">Go Pro — £9.99/mo</button></div>':'');
+      (locked?'<div class="lock-overlay"><div class="lk-icon">\ud83d\udd12</div><div class="lk-title">Pro Members Only</div><div class="lk-sub">Unlock value edge data, signal analysis and stake recommendations on every tip.</div><button class="btn-unlock" onclick="handleProClick()">Go Pro \u2014 \u00a39.99/mo</button></div>':'');
     grid.appendChild(d);
   });
 }
@@ -901,7 +893,7 @@ function renderTicker(){
   const track=document.getElementById('tickerTrack');
   if(!allTips.length)return;
   const items=[...allTips.slice(0,10),...allTips.slice(0,10)];
-  track.innerHTML=items.map(t=>'<div class="tick"><span>'+sportIcon(t.sport)+'</span><span class="ev">'+(t.home_team||'')+' vs '+(t.away_team||'')+'</span><span>→</span><span class="pick">'+(t.selection||'')+'</span><span class="odds">@ '+fmtOdds(t.odds)+'</span><span class="res p">PENDING</span></div>').join('');
+  track.innerHTML=items.map(t=>'<div class="tick"><span>'+sportIcon(t.sport)+'</span><span class="ev">'+(t.home_team||'')+' vs '+(t.away_team||'')+'</span><span>\u2192</span><span class="pick">'+(t.selection||'')+'</span><span class="odds">@ '+fmtOdds(t.odds)+'</span><span class="res p">PENDING</span></div>').join('');
 }
 
 function renderSportsGrid(){
@@ -945,292 +937,4 @@ function renderHistoryTable(){
         '<div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">'+(r.event||'')+'</div>'+
         '<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+(r.selection||'')+' <span style="color:var(--gold);font-family:Space Mono,monospace;">@ '+fmtOdds(r.odds)+'</span></div>'+
       '</div>'+
-      '<div style="text-align:right;flex-shrink:0;"><span class="res-pill '+(won?'w':'l')+'" style="display:inline-block;margin-bottom:5px;">'+r.result+'</span><div style="font-family:Space Mono,monospace;font-size:12px;font-weight:700;color:'+plCol+';">'+fmtU(pl)+'</div><div style="font-family:Space Mono,monospace;font-size:10px;color:'+rplCol+';">'+fmtU(running)+'</div></div>'+
-    '</div>';
-  }).join('');
-  updatePLSummary(rows);
-}
-
-function updatePLSummary(data){
-  const won=data.filter(r=>r.result==='WON').length,lost=data.filter(r=>r.result==='LOST').length;
-  const total=won+lost,pl=data.reduce((s,r)=>s+parseFloat(r.profit_loss||0),0);
-  document.getElementById('ps-settled').textContent=total;
-  document.getElementById('ps-won').textContent=won;
-  document.getElementById('ps-lost').textContent=lost;
-  document.getElementById('ps-rate').textContent=total>0?((won/total)*100).toFixed(1)+'%':'0%';
-  const p=document.getElementById('ps-pl');p.textContent=fmtU(pl);p.style.color=pl>=0?'var(--green)':'var(--red)';
-}
-
-db.channel('live-updates')
-  .on('postgres_changes',{event:'*',schema:'public',table:'tips'},          ()=>{loadTips();loadLiveBar();})
-  .on('postgres_changes',{event:'*',schema:'public',table:'results_history'},()=>{loadHistory();loadLiveBar();})
-  .on('postgres_changes',{event:'*',schema:'public',table:'stats_cache'},   ()=>{loadLiveBar();})
-  .subscribe();
-
-async function loadHistory(){
-  const {data,error}=await db.from('results_history').select('*').order('settled_at',{ascending:false}).limit(500);
-  if(error){console.error('Results load error:',error.message);return;}
-  allHistory=data||[];
-  renderDashboard('yesterday');
-  renderHistoryTable();
-}
-
-function writeTipAnalysis(tip){
-  const home=tip.home_team||'Home', away=tip.away_team||'Away';
-  const odds=parseFloat(tip.odds||0), conf=parseFloat(tip.confidence||0);
-  const sel=(tip.selection||'').toLowerCase(), league=tip.league||'', sport=tip.sport||'';
-  const implied=odds>0?(1/odds)*100:0;
-  const edge=conf-implied, edgeNum=parseFloat(edge.toFixed(1));
-  const teamName=(tip.selection||'').replace(/ win$/i,'').trim();
-  const opponent = teamName.toLowerCase()===home.toLowerCase() ? away : home;
-  const isHome   = teamName.toLowerCase()===home.toLowerCase();
-  const fmtEdge  = (edgeNum>=0?'+':'')+edgeNum.toFixed(1)+'%';
-
-  // ── FOOTBALL WIN ──────────────────────────────────────────────
-  if(sel.includes('win') && sport==='Football'){
-    // Heavy favourite (odds < 1.55)
-    if(odds<1.55){
-      const gap=edgeNum.toFixed(0);
-      return teamName+' enter this '+league+' fixture as clear market leaders, priced at '+odds.toFixed(2)+' by the books. That implies a '+implied.toFixed(0)+'% chance — our model has it '+gap+'% higher at '+conf+'%. '+opponent+' arrive '+(isHome?'at this ground':'here')+' without the firepower to trouble a side of this quality over 90 minutes. The favourite tag is deserved and the price holds value.';
-    }
-    // Solid favourite (1.55–1.80)
-    if(odds<=1.80){
-      const mktGap=(conf-implied).toFixed(0);
-      const venue=isHome?'in front of their own crowd':'away from home';
-      return 'The market has '+teamName+' at '+implied.toFixed(0)+'% — our model puts them '+mktGap+'% clear of that at '+conf+'%. Playing '+venue+' in '+league+', the structural edge here is not reflected in the current price. '+opponent+' have the capacity to make it uncomfortable, but the model consistently identifies this type of mis-pricing as a long-term positive-expectation position.';
-    }
-    // Value pick (1.81–2.20)
-    if(odds<=2.20){
-      return 'At '+odds.toFixed(2)+', the market is underestimating '+teamName+' in this '+league+' clash. The implied probability of '+implied.toFixed(0)+'% sits well below our model\'s '+conf+'% assessment — a '+fmtEdge+' gap that is significant. '+opponent+' will present a challenge '+(isHome?'at home':'on the road')+', but the data points to '+teamName+' as the sharper side. This is the type of priced inefficiency the model targets.';
-    }
-    // Elite odds (2.21–2.50)
-    return teamName+' are available at '+odds.toFixed(2)+' in this '+league+' fixture — a price the model believes is too generous. With a '+conf+'% win probability against the market\'s '+implied.toFixed(0)+'%, the '+fmtEdge+' edge clears the elite threshold required for selection at this odds range. '+opponent+' are not without danger, but the value at this price is the primary reason this tip has been flagged.';
-  }
-
-  // ── BASKETBALL WIN ────────────────────────────────────────────
-  if(sel.includes('win') && sport==='Basketball'){
-    if(odds<1.60){
-      return teamName+' are heavy favourites in this '+league+' contest at '+odds.toFixed(2)+'. The model assigns them a '+conf+'% win probability — '+edgeNum.toFixed(0)+'% above what the market implies. '+(isHome?'Home court gives them a structural advantage that is baked into the model.':'Even on the road, the talent gap between these rosters is meaningful.')+' '+opponent+' will compete, but the efficiency metrics favour '+teamName+' clearly.';
-    }
-    if(odds<=2.00){
-      return 'Pace, efficiency and recent roster form all point in the same direction in this '+league+' matchup. '+teamName+' are priced at '+odds.toFixed(2)+' — implying '+implied.toFixed(0)+'% — while our model has them at '+conf+'%. The '+fmtEdge+' edge reflects a genuine mismatch '+(isHome?'that home advantage amplifies.':'that travel and fatigue factors do not offset.')+' '+opponent+' are competitive but the numbers do not support fading '+teamName+' at this price.';
-    }
-    return 'This is a higher-variance pick at '+odds.toFixed(2)+', but the model edge of '+fmtEdge+' clears the threshold for selection. '+teamName+' at '+conf+'% versus a market-implied '+implied.toFixed(0)+'% in this '+league+' game. The value is in the mis-pricing, not the comfort of the selection. '+(isHome?'Home court is an added factor.':'The road assignment makes this stronger value, not weaker — the market has overcorrected.')+' Stake is sized for the odds range.';
-  }
-
-  // ── ICE HOCKEY WIN ────────────────────────────────────────────
-  if(sel.includes('win') && sport==='Ice Hockey'){
-    if(odds<1.70){
-      return teamName+' are expected to control this '+league+' matchup and the model agrees. At '+odds.toFixed(2)+', the implied probability is '+implied.toFixed(0)+'% — our Poisson goals model has them at '+conf+'%, reflecting '+(isHome?'home ice advantage and superior line depth.':'strong road form and a meaningful talent edge over '+opponent+'.')+' The price is fair but the model edge is sufficient for selection.';
-    }
-    if(odds<=2.10){
-      return 'Line matchup analysis and recent 5-on-5 form give '+teamName+' the edge in this '+league+' clash. The market prices them at '+implied.toFixed(0)+'% — our model sits '+edgeNum.toFixed(0)+'% higher at '+conf+'%. '+opponent+' are a capable side '+(isHome?'but surrender the home ice advantage here.':'and will have crowd support, but the underlying numbers support '+teamName+'.')+' At '+odds.toFixed(2)+' the '+fmtEdge+' edge is above the minimum required for selection.';
-    }
-    return 'The '+league+' market has '+teamName+' as underdogs at '+odds.toFixed(2)+', but our model disagrees materially — '+conf+'% versus '+implied.toFixed(0)+'% implied. A '+fmtEdge+' edge in hockey at this odds range is significant. '+opponent+' have home support '+(isHome?'but this is '+teamName+'\'s building.':'but '+teamName+'\'s numbers on the road this season do not reflect the underdog tag the market has assigned.')+' The edge clears the elite threshold for this odds band.';
-  }
-
-  // ── OVERS ─────────────────────────────────────────────────────
-  if(sel.startsWith('over')){
-    const line=sel.replace(/over /i,'').trim();
-    if(sport==='Basketball'){
-      return 'The total is set at '+line+' in this '+league+' game between '+home+' and '+away+'. Both rosters have been running at a pace that makes the over a logical position — the model assigns '+conf+'% probability to clearing this line against a market-implied '+implied.toFixed(0)+'%. The '+fmtEdge+' edge reflects genuine over-expectation in scoring output, not a marginal lean. Defensive intensity is the key risk, but the pace data supports this selection.';
-    }
-    if(sport==='Ice Hockey'){
-      return home+' vs '+away+' in '+league+'. The over '+line+' at '+odds.toFixed(2)+' is flagged by the model at '+conf+'% — '+edgeNum.toFixed(0)+'% above implied. Both teams have shown a tendency toward open play in recent outings, and the goaltending matchup does not strongly favour a low-scoring game. The Poisson model expects goals at a rate that makes this line beatable.';
-    }
-    return home+' and '+away+' meet in '+league+' with the model backing over '+line+' goals at '+conf+'% confidence. The market implies '+implied.toFixed(0)+'% — the '+fmtEdge+' gap is the reason for selection. Neither side has been defensively solid enough to make the under a credible position at current odds.';
-  }
-
-  // ── FALLBACK ──────────────────────────────────────────────────
-  return home+' vs '+away+' — '+league+'. Model probability: '+conf+'%. Market implied: '+implied.toFixed(0)+'%. Edge: '+fmtEdge+'. The signal clears the required threshold for selection at '+odds.toFixed(2)+'.';
-}
-
-function openTipModal(tip){
-  const odds=parseFloat(tip.odds||0),conf=parseFloat(tip.confidence||0);
-  const implied=odds>0?(1/odds)*100:0,edge=conf-implied;
-  const eCls=edge>=5?'pos':edge>=0?'neu':'neg',eStr=(edge>=0?'+':'')+edge.toFixed(1)+'%';
-  const stake=parseFloat(tip.stake||1),confCls=conf>=85?'var(--green)':conf>=72?'var(--gold)':'var(--red)';
-  document.getElementById('tm-sport').textContent    =(sportIcon(tip.sport)||'')+' '+(tip.sport||'');
-  document.getElementById('tm-match').textContent    =(tip.home_team||'')+' vs '+(tip.away_team||'');
-  document.getElementById('tm-league').textContent   =tip.league||'';
-  document.getElementById('tm-selection').textContent=tip.selection||'';
-  document.getElementById('tm-odds').textContent     =fmtOdds(odds);
-  document.getElementById('tm-model-prob').textContent =conf.toFixed(0)+'%';
-  document.getElementById('tm-implied-prob').textContent=implied.toFixed(0)+'%';
-  const edgeEl=document.getElementById('tm-edge');edgeEl.textContent=eStr;edgeEl.className='tm-edge-val '+eCls;
-  document.getElementById('tm-analysis').textContent=writeTipAnalysis(tip);
-  document.getElementById('tm-conf').textContent    = isProUser ? conf+'%' : 'Pro only 🔒';
-  document.getElementById('tm-stake').textContent   =stake>=3?stake+'u — High Confidence':stake>=2?stake+'u — Medium':stake+'u';
-  const stakeCell=document.getElementById('tm-stake-cell');
-  if(stakeCell){if(isProUser){stakeCell.style.display='block';}else{stakeCell.innerHTML='<div class="tm-meta-label">Recommended Stake</div><div style="font-size:11px;color:var(--gold);font-weight:700;">Pro Members Only 🔒</div>';}}
-  const bkEl=document.getElementById('tm-bookmaker'),mkEl=document.getElementById('tm-market');
-  if(bkEl)bkEl.textContent=tip.bookmaker?tip.bookmaker.replace(/_/g,' '):'Best available';
-  if(mkEl)mkEl.textContent=tip.market||'Match winner';
-  const fill=document.getElementById('tm-conf-fill');fill.style.width=conf+'%';fill.style.background=confCls;
-  document.getElementById('tipOverlay').classList.add('open');
-  document.body.style.overflow='hidden';
-}
-
-function closeTipModal(){document.getElementById('tipOverlay').classList.remove('open');document.body.style.overflow='';}
-function closeTipOuter(e){if(e.target===document.getElementById('tipOverlay'))closeTipModal();}
-
-function showPanel(name){['mSignup','mLogin','mForgot','mSuccess'].forEach(p=>{const el=document.getElementById(p);if(el)el.style.display=p===name?'block':'none';});}
-function openModal(type){document.getElementById('overlay').classList.add('open');document.body.style.overflow='hidden';if(type==='login')showPanel('mLogin');else if(type==='forgot')showPanel('mForgot');else showPanel('mSignup');}
-function closeModal(){document.getElementById('overlay').classList.remove('open');document.body.style.overflow='';['signupAlert','loginAlert','forgotAlert'].forEach(id=>{const el=document.getElementById(id);if(el)el.className='alert';});}
-function closeOuter(e){if(e.target===document.getElementById('overlay'))closeModal();}
-
-async function doSignup(){
-  const btn=document.getElementById('suBtn'),alert=document.getElementById('signupAlert');
-  const name=document.getElementById('su-name').value.trim();
-  const email=document.getElementById('su-email').value.trim();
-  const pw=document.getElementById('su-pw').value;
-  if(!name){document.getElementById('su-name').classList.add('error');showMAlert(alert,'Please enter your first name.','error');return;}
-  document.getElementById('su-name').classList.remove('error');
-  if(!email){showMAlert(alert,'Please enter your email.','error');return;}
-  if(pw.length<8){showMAlert(alert,'Password must be at least 8 characters.','error');return;}
-  btn.disabled=true;btn.textContent='Creating account...';
-  const {data,error}=await db.auth.signUp({email,password:pw,options:{data:{first_name:name}}});
-  btn.disabled=false;btn.textContent='Create Free Account \u2192';
-  if(error){showMAlert(alert,error.message,'error');return;}
-  document.getElementById('successEmail').textContent=email;
-  showPanel('mSuccess');updateNavAuth();
-}
-
-async function doLogin(){
-  const btn=document.getElementById('liBtn'),alert=document.getElementById('loginAlert');
-  const email=document.getElementById('li-email').value.trim(),pw=document.getElementById('li-pw').value;
-  if(!email||!pw){showMAlert(alert,'Enter your email and password.','error');return;}
-  btn.disabled=true;btn.textContent='Logging in...';
-  const {error}=await db.auth.signInWithPassword({email,password:pw});
-  btn.disabled=false;btn.textContent='Log In \u2192';
-  if(error){showMAlert(alert,error.message,'error');return;}
-  closeModal();updateNavAuth();
-}
-
-async function doForgot(){
-  const btn=document.getElementById('foBtn'),alert=document.getElementById('forgotAlert');
-  const email=document.getElementById('fo-email').value.trim();
-  if(!email){showMAlert(alert,'Enter your email address.','error');return;}
-  btn.disabled=true;btn.textContent='Sending...';
-  const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/account.html'});
-  btn.disabled=false;btn.textContent='Send Reset Link \u2192';
-  if(error){showMAlert(alert,error.message,'error');return;}
-  showMAlert(alert,'Reset link sent. Check your inbox.','success');
-}
-
-async function handleLogout(){await db.auth.signOut();updateNavAuth();}
-
-async function updateNavAuth(){
-  const {data:{session}}=await db.auth.getSession();
-  const rightEl=document.querySelector('.nav-right');
-  if(!rightEl)return;
-  if(session){
-    const {data:profile}=await db.from('users').select('subscription_status').eq('id',session.user.id).single();
-    isProUser=profile&&profile.subscription_status==='pro';
-    rightEl.innerHTML='<a href="/account.html" class="btn btn-ghost" style="text-decoration:none;font-size:13px;padding:7px 16px;border-radius:4px;border:1px solid var(--border2);color:var(--text);">'+(isProUser?'<span style="color:var(--gold);margin-right:5px;">PRO</span>':'')+'My Account</a><button class="btn btn-ghost" onclick="handleLogout()">Log Out</button>';
-    if(allTips.length)renderTips();
-    const convBlock=document.getElementById('proConversion');
-    if(convBlock)convBlock.style.display='none';
-  }else{
-    isProUser=false;
-    rightEl.innerHTML='<button class="btn btn-ghost" onclick="openModal(&quot;login&quot;)">Log In</button><button class="btn btn-green" onclick="openModal(&quot;signup&quot;)">Join Free</button>';
-  }
-}
-
-function showMAlert(el,msg,type){if(!el)return;el.textContent=msg;el.className='alert '+type+' show';}
-
-function toggleFaq(btn){
-  const expanded=btn.getAttribute('aria-expanded')==='true';
-  document.querySelectorAll('.faq-q').forEach(b=>{b.setAttribute('aria-expanded','false');const a=b.nextElementSibling;if(a)a.classList.remove('open');});
-  if(!expanded){btn.setAttribute('aria-expanded','true');const ans=btn.nextElementSibling;if(ans)ans.classList.add('open');}
-}
-
-async function loadConversionBlock(){
-  if(isProUser)return;
-  const block=document.getElementById('proConversion');if(block)block.style.display='block';
-  const thirtyDaysAgo=new Date();thirtyDaysAgo.setDate(thirtyDaysAgo.getDate()-30);
-  const {data:history}=await db.from('results_history').select('tier,result,profit_loss,stake').gte('settled_at',thirtyDaysAgo.toISOString());
-  if(history&&history.length){
-    const proRows=history.filter(r=>r.tier==='pro'),freeRows=history.filter(r=>r.tier==='free');
-    const calcStats=rows=>{const won=rows.filter(r=>r.result==='WON').length,total=rows.filter(r=>r.result!=='pending').length,pl=rows.reduce((s,r)=>s+parseFloat(r.profit_loss||0),0);return{wr:total>0?(won/total*100).toFixed(1)+'%':'--',pl:total>0?(pl>=0?'+':'')+pl.toFixed(2)+'u':'--',pos:pl>=0};};
-    const proStats=calcStats(proRows),freeStats=calcStats(freeRows);
-    const proWr=document.getElementById('pro-wr-display'),proPl=document.getElementById('pro-pl-display'),freeWr=document.getElementById('free-wr-display'),freePl=document.getElementById('free-pl-display');
-    if(proWr)proWr.textContent=proStats.wr;if(proPl){proPl.textContent=proStats.pl;proPl.style.color=proStats.pos?'var(--green)':'var(--red)';}
-    if(freeWr)freeWr.textContent=freeStats.wr;if(freePl){freePl.textContent=freeStats.pl;freePl.style.color=freeStats.pos?'var(--green)':'var(--red)';}
-  }
-  const todayStart=new Date();todayStart.setHours(0,0,0,0);
-  const {data:todayResults}=await db.from('results_history').select('tier,result').gte('settled_at',todayStart.toISOString());
-  if(todayResults){
-    const proWins=todayResults.filter(r=>r.tier==='pro'&&r.result==='WON').length;
-    const el=document.getElementById('missedWinsText');
-    if(el&&proWins>0)el.innerHTML='Pro members have already banked <span style="color:var(--gold);font-weight:700;">'+proWins+' winning tip'+(proWins!==1?'s':'')+'</span> today that you missed.';
-    else if(el)el.innerHTML='Pro members received the full card at <span style="color:var(--gold);font-weight:700;">07:00</span> — 90 minutes before free members.';
-  }
-  const day=new Date().getDay();
-  if(day===5||day===6){
-    const {data:accaOverride}=await db.from('email_overrides').select('acca_combined_odds,acca_selections').eq('type','saturday').gte('date',new Date().toISOString().split('T')[0]).single();
-    if(accaOverride&&accaOverride.acca_selections){
-      const teaserEl=document.getElementById('accaTeaser'),oddsEl=document.getElementById('accaTeaserOdds'),legsEl=document.getElementById('accaTeaserLegs');
-      if(teaserEl)teaserEl.style.display='block';if(oddsEl)oddsEl.textContent=parseFloat(accaOverride.acca_combined_odds||0).toFixed(2);if(legsEl)legsEl.textContent=accaOverride.acca_selections.length+' selections';
-    }
-  }
-}
-
-async function handleProClick(){
-  const {data:{session}}=await db.auth.getSession();
-  if(session)document.getElementById('pricing').scrollIntoView({behavior:'smooth'});
-  else openModal('signup');
-}
-
-const ENGINE_URL='https://tipster-engine-1.onrender.com';
-
-async function startCheckout(plan){
-  const {data:{session}}=await db.auth.getSession();
-  if(!session){openModal('signup');return;}
-  const btn=document.getElementById('pro-cta-btn');
-  if(btn){btn.disabled=true;btn.textContent='Loading...';}
-  try{
-    const res=await fetch(ENGINE_URL+'/stripe/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:session.user.id,email:session.user.email,plan})});
-    const data=await res.json();
-    if(data.url)window.location.href=data.url;
-    else{alert('Could not start checkout. Please try again.');if(btn){btn.disabled=false;btn.textContent=activePricingPlan==='annual'?'Start Annual — £99.90/yr':'Start Pro — £9.99/mo';}}
-  }catch(e){console.error('Checkout error:',e.message);alert('Could not connect to payment system. Please try again.');if(btn)btn.disabled=false;}
-}
-
-let activePricingPlan='monthly';
-
-function setPricingToggle(plan){
-  activePricingPlan=plan;
-  const isAnnual=plan==='annual';
-  const monthlyBtn=document.getElementById('toggle-monthly'),annualBtn=document.getElementById('toggle-annual');
-  const priceM=document.getElementById('price-monthly'),priceA=document.getElementById('price-annual');
-  const ctaBtn=document.getElementById('pro-cta-btn'),badge=document.getElementById('pricing-badge');
-  if(monthlyBtn){monthlyBtn.style.background=isAnnual?'none':'var(--text)';monthlyBtn.style.color=isAnnual?'var(--muted)':'var(--bg)';annualBtn.style.background=isAnnual?'var(--green)':'none';annualBtn.style.color=isAnnual?'#07090d':'var(--muted)';}
-  if(priceM)priceM.style.display=isAnnual?'none':'block';
-  if(priceA)priceA.style.display=isAnnual?'block':'none';
-  if(ctaBtn)ctaBtn.textContent=isAnnual?'Start Annual — £99.90/yr':'Start Pro — £9.99/mo';
-  if(badge)badge.textContent=isAnnual?'Best Value':'Most Popular';
-}
-
-(async()=>{
-  await updateNavAuth();
-  await loadLiveBar();
-  await loadHistory();
-  await loadTips();
-  await loadConversionBlock();
-  const params=new URLSearchParams(window.location.search);
-  if(params.get('auth')==='login')openModal('login');
-  if(params.get('upgraded')==='1'){
-    setTimeout(()=>{
-      const el=document.createElement('div');
-      el.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#0f141c;border:1px solid var(--green);border-radius:8px;padding:16px 24px;z-index:999;text-align:center;animation:up 0.3s ease;';
-      el.innerHTML='<div style="font-size:18px;margin-bottom:4px;">🎉</div><div style="font-family:Syne,sans-serif;font-weight:800;margin-bottom:4px;">Welcome to Pro!</div><div style="font-size:12px;color:var(--muted);">Your account has been upgraded. Full card arrives tomorrow at 07:00.</div>';
-      document.body.appendChild(el);
-      setTimeout(()=>el.remove(),6000);
-      window.history.replaceState({},'','/');
-    },1000);
-  }
-})();
-</script>
-</body>
-        </html>
+      '<div style="text-align:right;flex-shrink:0;
