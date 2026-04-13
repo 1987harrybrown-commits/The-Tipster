@@ -903,7 +903,7 @@ async function loadHistory(){
   const {data,error}=await db.from('results_history').select('*').order('settled_at',{ascending:false}).limit(500);
   if(error){console.error('Results load error:',error.message);return;}
   allHistory=data||[];
-  renderDashboard('30d');
+  renderDashboard('yesterday');
   renderHistoryTable();
 }
 
@@ -1165,4 +1165,4 @@ function setPricingToggle(plan){
 })();
 </script>
 </body>
-          </html>
+</html>
