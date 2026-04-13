@@ -427,47 +427,7 @@ async function resendVerification() {
 
 // ── LOGOUT ────────────────────────────────────────────────
 async function manageSubscription() {
-  const ENGINE_URL = 'https://tipster-engine-1.onrender.com';
-  // Show loading state on button
-  const btn = document.querySelector('[onclick="manageSubscription()"]');
-  if (btn) { btn.disabled = true; btn.textContent = 'Loading...'; }
-
-  try {
-    // Fetch stripe_customer_id from users table
-    const { data: profile, error: profileError } = await db
-      .from('users')
-      .select('stripe_customer_id')
-      .eq('id', currentUser.id)
-      .single();
-
-    if (profileError) throw new Error('Could not fetch billing details: ' + profileError.message);
-
-    if (!profile?.stripe_customer_id) {
-      alert('No billing account found. If you subscribed recently, please wait a few minutes and try again, or contact support@thetipsteredge.com');
-      if (btn) { btn.disabled = false; btn.textContent = 'Manage Billing'; }
-      return;
-    }
-
-    // POST to engine to create Stripe portal session
-    const res = await fetch(ENGINE_URL + '/stripe/portal', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ customerId: profile.stripe_customer_id })
-    });
-
-    if (!res.ok) throw new Error('Portal request failed: ' + res.status);
-
-    const data = await res.json();
-    if (data.url) {
-      window.location.href = data.url;
-    } else {
-      throw new Error(data.error || 'No portal URL returned');
-    }
-  } catch (e) {
-    console.error('Billing portal error:', e.message);
-    alert('Could not open billing portal. Please try again or contact support@thetipsteredge.com');
-    if (btn) { btn.disabled = false; btn.textContent = 'Manage Billing'; }
-  }
+  window.location.href = 'https://billing.stripe.com/p/login/aFaeVdbdwfNMaKQ3LM2oE00';
 }
 
 async function handleLogout() {
