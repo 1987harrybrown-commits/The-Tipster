@@ -1111,4 +1111,13 @@ function setPricingToggle(plan){
     setTimeout(()=>{
       const el=document.createElement('div');
       el.style.cssText='position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#0f141c;border:1px solid var(--green);border-radius:8px;padding:16px 24px;z-index:999;text-align:center;animation:up 0.3s ease;';
-      el.innerHTML='<div style="font-size:18px;margin-bottom:4px;">🎉</div><div style="font-family:Syne,sans-serif;font-weight:800;margin-bottom:4px;">Welcome to Pro!</div><div style="font-size:12px;color:var(--m
+      el.innerHTML='<div style="font-size:18px;margin-bottom:4px;">🎉</div><div style="font-family:Syne,sans-serif;font-weight:800;margin-bottom:4px;">Welcome to Pro!</div><div style="font-size:12px;color:var(--muted);">Your account has been upgraded. Full card arrives tomorrow at 07:00.</div>';
+      document.body.appendChild(el);
+      setTimeout(()=>el.remove(),6000);
+      window.history.replaceState({},'','/');
+    },1000);
+  }
+})();
+</script>
+</body>
+</html>
