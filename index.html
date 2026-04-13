@@ -345,6 +345,20 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         <div class="kpi-cell"><div class="kpi-label">Profit / Loss</div><div class="kpi-val g" id="kpi-pl">—</div><div class="kpi-sub" id="kpi-pl-sub"></div></div>
         <div class="kpi-cell"><div class="kpi-label">ROI</div><div class="kpi-val go" id="kpi-roi">—</div><div class="kpi-sub" id="kpi-roi-sub"></div></div>
       </div>
+
+      <!-- BEST BET STREAK BANNER -->
+      <div style="background:rgba(240,180,41,0.06);border:1px solid rgba(240,180,41,0.25);border-radius:8px;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px;">
+        <div>
+          <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:4px;">Best Bet · Daily Top Pick</div>
+          <div style="font-size:15px;font-weight:700;">🏆 <span id="streak-days" style="color:var(--gold);font-family:'Space Mono',monospace;font-size:22px;">—</span> consecutive winning days</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;font-family:'Space Mono',monospace;"><span id="streak-rate">—</span> win rate on highest confidence pick</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:4px;">Best Ever</div>
+          <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--text);" id="streak-best">—</div>
+          <div style="font-size:10px;color:var(--muted);">day run</div>
+        </div>
+      </div>
       <div class="perf-bottom" style="grid-template-columns:1fr;">
         <div class="pcard-base">
           <div class="pcard-label" id="sum-period-label">All Time Summary</div>
@@ -738,6 +752,16 @@ async function loadBestBetStreak() {
     window._todayBestRef = todayBest?.tip_ref || null;
     const el = document.getElementById('lb-streak');
     if (el) { el.textContent = streak + ' days'; el.className = 'lb-val g'; }
+    // Populate streak banner
+    const winRate = dailyBest.length > 0 ? ((dailyBest.filter(d=>d.tip.result==='WON').length / dailyBest.length)*100).toFixed(1)+'%' : '—';
+    let bestEver = 0, tmp = 0;
+    for (const {tip} of dailyBest) { if(tip.result==='WON'){tmp++;bestEver=Math.max(bestEver,tmp);}else tmp=0; }
+    const daysEl = document.getElementById('streak-days');
+    const rateEl = document.getElementById('streak-rate');
+    const bestEl = document.getElementById('streak-best');
+    if (daysEl) daysEl.textContent = streak;
+    if (rateEl) rateEl.textContent = winRate;
+    if (bestEl) bestEl.textContent = bestEver;
   } catch(e) { console.error('Streak error:', e.message); }
 }
 
@@ -1209,4 +1233,4 @@ function setPricingToggle(plan){
 })();
 </script>
 </body>
-                                                                      </html>
+</html>
