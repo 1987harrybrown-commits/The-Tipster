@@ -277,6 +277,35 @@ td{padding:9px 11px;}
     </div>
   </div>
 
+  <!-- DAILY ACCA HISTORY -->
+  <div class="section-title" style="margin-top:32px;">Daily Accumulator — Admin Only</div>
+  <div class="card full" style="margin-bottom:14px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+      <div>
+        <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px;">Performance Summary</div>
+        <div style="display:flex;gap:24px;flex-wrap:wrap;">
+          <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Total Accas</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;" id="acca-total">—</div></div>
+          <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Won</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--green);" id="acca-won">—</div></div>
+          <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Lost</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--red);" id="acca-lost">—</div></div>
+          <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Win Rate</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--green);" id="acca-rate">—</div></div>
+          <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">Total P&amp;L</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;" id="acca-pl">—</div></div>
+          <div><div style="font-size:10px;color:var(--muted);margin-bottom:3px;">ROI</div><div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--gold);" id="acca-roi">—</div></div>
+        </div>
+      </div>
+      <button class="btn btn-gold" onclick="triggerAccaGenerate()" id="accaGenBtn">Generate Today's Acca</button>
+    </div>
+  </div>
+  <div class="card full" style="margin-bottom:24px;">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Date</th><th>Sport</th><th>Legs</th><th>Selections</th><th>Combined Odds</th><th>Stake</th><th>Result</th><th>P&amp;L</th><th>Running P&amp;L</th>
+        </tr></thead>
+        <tbody id="accaHistory"><tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
 </div>
 </div>
 
@@ -330,6 +359,87 @@ async function loadAll() {
   loadAllTimeStats();
   loadEmailLog();
   loadSubscribers();
+  loadAccaHistory();
+}
+
+async function loadAccaHistory() {
+  const { data, error } = await db.from('daily_accas').select('*').order('date', { ascending: false });
+  const tbody = document.getElementById('accaHistory');
+  if (error || !data || !data.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">No accas generated yet.</td></tr>';
+    updateAccaSummary([]);
+    return;
+  }
+  updateAccaSummary(data);
+  let runningPL = 0;
+  // Reverse to calc running PL oldest first, then reverse back for display
+  const sorted = [...data].reverse();
+  const rows = sorted.map(a => {
+    const pl = a.profit_loss !== null ? parseFloat(a.profit_loss) : null;
+    if (pl !== null) runningPL = parseFloat((runningPL + pl).toFixed(2));
+    const plStr   = pl !== null ? (pl >= 0 ? '+' : '') + pl.toFixed(2) + 'u' : '—';
+    const rplStr  = pl !== null ? (runningPL >= 0 ? '+' : '') + runningPL.toFixed(2) + 'u' : '—';
+    const plCol   = pl !== null ? (pl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--muted)';
+    const rplCol  = runningPL >= 0 ? 'var(--green)' : 'var(--red)';
+    const resCol  = a.result === 'WON' ? 'var(--green)' : a.result === 'LOST' ? 'var(--red)' : 'var(--muted)';
+    const sels = (a.selections || []).map(s =>
+      `<div style="font-size:11px;margin-bottom:2px;"><span style="color:var(--text)">${s.match}</span> — <span style="color:var(--gold)">${s.selection}</span> <span style="color:var(--muted);font-family:Space Mono,monospace">@ ${parseFloat(s.odds).toFixed(2)}</span> <span style="color:var(--muted);font-size:10px">(${s.confidence}%)</span></div>`
+    ).join('');
+    return `<tr>
+      <td style="font-family:Space Mono,monospace;font-size:11px;color:var(--muted)">${a.date}</td>
+      <td style="font-size:12px">${a.sport}</td>
+      <td style="font-family:Space Mono,monospace;font-weight:700">${a.legs}</td>
+      <td style="min-width:280px">${sels}</td>
+      <td style="font-family:Space Mono,monospace;color:var(--gold);font-weight:700">${parseFloat(a.combined_odds).toFixed(2)}</td>
+      <td style="font-family:Space Mono,monospace">${a.stake}u</td>
+      <td style="font-family:Space Mono,monospace;font-weight:700;color:${resCol}">${a.result}</td>
+      <td style="font-family:Space Mono,monospace;font-weight:700;color:${plCol}">${plStr}</td>
+      <td style="font-family:Space Mono,monospace;font-size:11px;color:${rplCol}">${rplStr}</td>
+    </tr>`;
+  }).reverse().join('');
+  tbody.innerHTML = rows;
+}
+
+function updateAccaSummary(data) {
+  const settled = data.filter(a => a.result === 'WON' || a.result === 'LOST');
+  const won     = settled.filter(a => a.result === 'WON').length;
+  const lost    = settled.filter(a => a.result === 'LOST').length;
+  const total   = won + lost;
+  const pl      = settled.reduce((s,a) => s + parseFloat(a.profit_loss||0), 0);
+  const staked  = settled.reduce((s,a) => s + parseFloat(a.stake||1), 0);
+  const roi     = staked > 0 ? (pl/staked)*100 : 0;
+  const rate    = total > 0 ? (won/total)*100 : 0;
+  const fmt     = (n,d=2) => (n>=0?'+':'')+n.toFixed(d);
+
+  document.getElementById('acca-total').textContent = data.length || '—';
+  document.getElementById('acca-won').textContent   = won || '0';
+  document.getElementById('acca-lost').textContent  = lost || '0';
+  document.getElementById('acca-rate').textContent  = total > 0 ? rate.toFixed(1)+'%' : '—';
+  const plEl = document.getElementById('acca-pl');
+  plEl.textContent = total > 0 ? fmt(pl)+'u' : '—';
+  plEl.style.color = pl >= 0 ? 'var(--green)' : 'var(--red)';
+  const roiEl = document.getElementById('acca-roi');
+  roiEl.textContent = total > 0 ? fmt(roi,1)+'%' : '—';
+  roiEl.style.color = roi >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+async function triggerAccaGenerate() {
+  const btn = document.getElementById('accaGenBtn');
+  btn.disabled = true; btn.textContent = 'Generating...';
+  try {
+    const ADMIN_KEY = localStorage.getItem('tipster_admin_key') || '';
+    const res = await fetch(`${ENGINE_URL}/admin/generate-acca?key=${ADMIN_KEY}`);
+    const data = await res.json();
+    if (data.started) {
+      btn.textContent = 'Triggered!';
+      setTimeout(() => { btn.disabled=false; btn.textContent='Generate Today\'s Acca'; loadAccaHistory(); }, 3000);
+    } else {
+      btn.disabled=false; btn.textContent='Generate Today\'s Acca';
+    }
+  } catch(e) {
+    console.error(e);
+    btn.disabled=false; btn.textContent='Generate Today\'s Acca';
+  }
 }
 
 async function loadAllTimeStats() {
