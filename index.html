@@ -842,7 +842,7 @@ function renderTips() {
   sorted.forEach((tip,i)=>{
     const free=isProUser||i<3, locked=!free;
     const conf=tip.confidence||0, cls=conf>=85?'':conf>=72?'med':'low';
-    const isBestBet = sorted.indexOf(tip) === 0 && (window._bestBetStreak||0) > 0;
+    const isBestBet = isProUser && (window._bestBetStreak||0) > 0 && window._todayBestRef && tip.tip_ref === window._todayBestRef;
     const ev=new Date(tip.event_time);
     const ts=ev.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' . '+ev.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     const stake=parseFloat(tip.stake||1);
