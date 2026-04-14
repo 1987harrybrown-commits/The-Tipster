@@ -1,0 +1,170 @@
+const { createClient } = require('@supabase/supabase-js');
+
+const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
+const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
+const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+function fmtDate(d){return new Date(d).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
+function fmtTime(d){return new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/London'});}
+
+module.exports = async (req, res) => {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const tom   = new Date(today); tom.setDate(tom.getDate()+2);
+  const todayStr = fmtDate(new Date());
+
+  const [{ data: tips }, { data: history }] = await Promise.all([
+    db.from('tips').select('*')
+      .eq('sport','Football').eq('status','pending')
+      .gte('event_time', today.toISOString())
+      .lte('event_time', tom.toISOString())
+      .order('confidence',{ascending:false}).limit(10),
+    db.from('results_history').select('result,profit_loss,stake')
+      .eq('sport','Football')
+  ]);
+
+  const h = history||[];
+  const won = h.filter(r=>r.result==='WON').length;
+  const total = h.filter(r=>r.result==='WON'||r.result==='LOST').length;
+  const winRate = total>0?((won/total)*100).toFixed(1):0;
+  const pl = h.reduce((s,r)=>s+parseFloat(r.profit_loss||0),0);
+
+  const freeTips = (tips||[]).slice(0,3);
+  const leagues = [...new Set((tips||[]).map(t=>t.league))];
+
+  const tipCards = freeTips.map(t=>`
+    <article class="tip-card">
+      <div class="tip-league">${t.league}</div>
+      <h3>${t.home_team} vs ${t.away_team}</h3>
+      <div class="tip-row">
+        <span>📌 ${t.selection}</span>
+        <span style="color:#f0b429;font-family:monospace;font-weight:700">${parseFloat(t.odds).toFixed(2)}</span>
+      </div>
+      <div class="tip-row">
+        <span style="color:#4a5a70">🕐 ${fmtTime(t.event_time)} UK</span>
+        <span style="color:#4a5a70">Conf: ${t.confidence}%</span>
+      </div>
+    </article>`).join('');
+
+  const html = `<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free Football Tips Today — ${todayStr} | The Tipster</title>
+<meta name="description" content="Free football tips for ${todayStr}. Premier League, La Liga, Bundesliga, Champions League predictions. ${winRate}% win rate on football tips. Updated every 15 minutes.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.thetipsteredge.com/football-tips-today">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<script type="application/ld+json">${JSON.stringify({
+  "@context":"https://schema.org",
+  "@type":"ItemList",
+  "name":`Free Football Tips — ${todayStr}`,
+  "description":"Data-driven football predictions across Premier League, La Liga, Bundesliga, Champions League",
+  "url":"https://www.thetipsteredge.com/football-tips-today",
+  "itemListElement": freeTips.map((t,i)=>({
+    "@type":"ListItem","position":i+1,
+    "name":`${t.home_team} vs ${t.away_team} — ${t.selection}`,
+    "description":`${t.league} tip at ${parseFloat(t.odds).toFixed(2)} odds`
+  }))
+})}</script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#07090d;color:#dde6f0;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;}
+nav{background:#0c0f15;border-bottom:1px solid #1c2535;padding:14px 24px;display:flex;justify-content:space-between;align-items:center;}
+.logo{font-size:20px;font-weight:800;color:#dde6f0;text-decoration:none;} .logo em{color:#18e07a;font-style:normal;}
+.nav-cta{background:#18e07a;color:#07090d;padding:8px 18px;border-radius:5px;text-decoration:none;font-weight:700;font-size:13px;}
+.wrap{max-width:900px;margin:0 auto;padding:48px 24px 80px;}
+.label{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#18e07a;margin-bottom:10px;}
+h1{font-size:clamp(22px,5vw,38px);font-weight:800;margin-bottom:8px;}
+.sub{font-size:15px;color:#4a5a70;margin-bottom:32px;}
+.stats{display:flex;gap:20px;flex-wrap:wrap;background:#0f141c;border:1px solid #1c2535;border-radius:8px;padding:16px 20px;margin-bottom:32px;}
+.stat .sl{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#4a5a70;} .stat .sv{font-size:22px;font-weight:800;font-family:monospace;}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:32px;}
+.tip-card{background:#0f141c;border:1px solid #1c2535;border-radius:8px;padding:16px;border-top:3px solid #18e07a;}
+.tip-league{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#4a5a70;margin-bottom:6px;}
+.tip-card h3{font-size:14px;font-weight:800;margin-bottom:10px;}
+.tip-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;}
+.locked{background:#0f141c;border:1px solid rgba(240,180,41,0.2);border-radius:8px;padding:20px;text-align:center;border-top:3px solid #f0b429;}
+.locked p{font-size:13px;color:#4a5a70;margin-bottom:12px;}
+.locked a{display:inline-block;background:#f0b429;color:#07090d;padding:8px 20px;border-radius:5px;text-decoration:none;font-weight:700;font-size:13px;}
+.block{background:#0f141c;border:1px solid #1c2535;border-radius:8px;padding:24px;margin-bottom:16px;}
+.block h2{font-size:18px;font-weight:800;margin-bottom:12px;}
+.block p{font-size:14px;color:#4a5a70;line-height:1.8;margin-bottom:10px;}
+.block p:last-child{margin-bottom:0;}
+.leagues{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px;}
+.league-pill{background:#0f141c;border:1px solid #1c2535;border-radius:20px;padding:6px 14px;font-size:12px;color:#4a5a70;}
+.breadcrumb{font-size:12px;color:#4a5a70;margin-bottom:24px;}
+.breadcrumb a{color:#4a5a70;text-decoration:none;}
+h2{font-size:20px;font-weight:800;margin:32px 0 16px;}
+footer{background:#0c0f15;border-top:1px solid #1c2535;padding:24px;text-align:center;font-size:12px;color:#4a5a70;}
+footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="/">The <em>Tipster</em></a>
+  <a class="nav-cta" href="/">View All Tips →</a>
+</nav>
+<div class="wrap">
+  <nav class="breadcrumb"><a href="/">Home</a> › <a href="/tips">Betting Tips</a> › Football Tips Today</nav>
+  <div class="label">Updated Every 15 Minutes</div>
+  <h1>Free Football Tips Today — ${todayStr}</h1>
+  <p class="sub">Data-driven football predictions across Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League.</p>
+
+  <div class="stats">
+    <div class="stat"><div class="sl">Football Win Rate</div><div class="sv" style="color:#18e07a">${winRate}%</div></div>
+    <div class="stat"><div class="sl">Tips Won</div><div class="sv" style="color:#18e07a">${won}</div></div>
+    <div class="stat"><div class="sl">Total Tips</div><div class="sv" style="color:#dde6f0">${total}</div></div>
+    <div class="stat"><div class="sl">Net P&L</div><div class="sv" style="color:${pl>=0?'#18e07a':'#ff3d5a'};font-family:monospace">${pl>=0?'+':''}${pl.toFixed(1)}u</div></div>
+  </div>
+
+  ${leagues.length?`<div class="leagues">${leagues.map(l=>`<span class="league-pill">⚽ ${l}</span>`).join('')}</div>`:''}
+
+  <div class="label">Today's Picks</div>
+  <h2>Free Football Tips — ${todayStr}</h2>
+  <div class="tips-grid">
+    ${tipCards||'<p style="color:#4a5a70;grid-column:1/-1">No football tips available right now — check back shortly.</p>'}
+    <div class="locked">
+      <p>🔒 Pro members get the full football card — all leagues, all confidence levels, with value edge % on every tip</p>
+      <a href="/">Unlock Pro Tips →</a>
+    </div>
+  </div>
+
+  <div class="block">
+    <h2>Premier League Tips Today</h2>
+    <p>Our Dixon-Coles Poisson model is optimised for Premier League fixtures, using team season statistics, home/away attack and defence strength ratings, head-to-head records and live odds data from Bet365, Betfair, William Hill, Paddy Power and 37 other UK-licensed bookmakers.</p>
+    <p>Premier League tips are published when our model identifies a value edge of 8% or more above the bookmaker's implied probability. Only selections that pass our strict confidence threshold appear on the platform.</p>
+  </div>
+
+  <div class="block">
+    <h2>Champions League Tips</h2>
+    <p>Champions League football presents some of the best value betting opportunities due to the complexity of cross-league matchups. Our model incorporates group stage form, knockout round history, home and away European records, and squad depth to produce reliable win probabilities for every Champions League fixture.</p>
+  </div>
+
+  <div class="block">
+    <h2>La Liga, Bundesliga & European Football Tips</h2>
+    <p>Beyond the Premier League, we cover La Liga (Spain), Bundesliga (Germany), Serie A (Italy), Ligue 1 (France) and Champions League. Each league has its own calibrated attack/defence strength model built from full season statistics.</p>
+    <p>Tips are available for every match in these competitions throughout the season, with odds from the best available UK-licensed bookmaker at time of publication.</p>
+  </div>
+
+  <div class="block">
+    <h2>How to Use Our Football Tips</h2>
+    <p>Each football tip comes with an odds figure (the best available price from 40+ bookmakers), a confidence percentage (our model's estimated probability of the selection winning), and a value edge percentage (the gap between our probability and what the odds imply).</p>
+    <p>We recommend using stake recommendations — available to Pro members — to size each bet appropriately based on confidence. Never bet more than you can afford to lose, and treat all tips as analysis rather than guaranteed outcomes.</p>
+  </div>
+</div>
+<footer>
+  <p style="margin-bottom:10px">© 2026 The Tipster · Free football tips updated every 15 minutes · 18+ only · Please gamble responsibly</p>
+  <div>
+    <a href="/">Home</a><a href="/tips">All Tips</a><a href="/results">Track Record</a>
+    <a href="/nhl-tips.html">NHL Tips</a><a href="/nba-tips.html">NBA Tips</a>
+    <a href="/responsible-gambling.html">Responsible Gambling</a>
+  </div>
+</footer>
+</body>
+</html>`;
+
+  res.setHeader('Content-Type','text/html; charset=utf-8');
+  res.setHeader('Cache-Control','s-maxage=900, stale-while-revalidate=1800');
+  res.status(200).send(html);
+};
