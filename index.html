@@ -762,10 +762,11 @@ function filterByPeriod(rows, period) {
   const now = new Date();
   if (period === 'all') return rows;
   if (period === 'yesterday') {
-    const s = new Date(now); s.setDate(s.getDate()-1); s.setHours(0,0,0,0);
-    const e = new Date(s); e.setHours(23,59,59,999);
+    if (period === 'yesterday') {
+    const s = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()-1, 0, 0, 0, 0));
+    const e = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()-1, 23, 59, 59, 999));
     return rows.filter(r => { const d=new Date(r.settled_at); return d>=s&&d<=e; });
-  }
+    }
   if (period === '7d')  { const s=new Date(now); s.setDate(s.getDate()-7);  return rows.filter(r=>new Date(r.settled_at)>=s); }
   if (period === '30d') { const s=new Date(now); s.setDate(s.getDate()-30); return rows.filter(r=>new Date(r.settled_at)>=s); }
   return rows;
