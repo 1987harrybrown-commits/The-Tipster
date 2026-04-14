@@ -19,6 +19,17 @@
 <meta name="twitter:title" content="Free Football Tips & Sports Betting Predictions | The Tipster">
 <meta name="twitter:description" content="Data-driven betting tips updated every 15 minutes. Verified track record. Free to start.">
 <meta name="twitter:site" content="@TheTipsterApp">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#07090d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="The Tipster">
+<meta property="og:image" content="https://www.thetipsteredge.com/og-image.svg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.svg">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -552,7 +563,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       </div>
       <div class="flinks"><h4>Sports</h4><ul><li><a href="#">Ice Hockey</a></li><li><a href="#">Basketball</a></li><li><a href="#">Football</a></li></ul></div>
       <div class="flinks"><h4>Account</h4><ul><li><a href="#" onclick="openModal('signup')">Sign Up Free</a></li><li><a href="#" onclick="openModal('login')">Log In</a></li><li><a href="#pricing">Go Pro</a></li><li><a href="#record">Track Record</a></li></ul></div>
-      <div class="flinks"><h4>Legal</h4><ul><li><a href="#">Terms of Service</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Responsible Gambling</a></li><li><a href="#">Cookie Policy</a></li></ul></div>
+      <div class="flinks"><h4>Legal</h4><ul><li><a href="/terms.html">Terms of Service</a></li><li><a href="/privacy.html">Privacy Policy</a></li><li><a href="/responsible-gambling.html">Responsible Gambling</a></li><li><a href="/cookies.html">Cookie Policy</a></li></ul></div>
     </div>
     <div style="max-width:1200px;margin:0 auto 0;padding:24px 0 0;border-top:1px solid var(--border);">
       <p style="font-size:11px;color:var(--muted);line-height:1.8;max-width:900px;">The Tipster Edge provides free football tips, value bets and sports predictions across all major leagues. Questions? <a href="/cdn-cgi/l/email-protection#3c4f494c4c534e487c48545948554c4f48594e59585b59125f5351" style="color:var(--muted);text-decoration:underline;"><span class="__cf_email__" data-cfemail="265553565649545266524e43524f5655524354434241430845494b">[email&#160;protected]</span></a> &bull; Bet responsibly. 18+ only.</p>
@@ -820,7 +831,7 @@ async function loadTips() {
   const {data,error}=await db.from('tips').select('*')
     .gte('event_time',today.toISOString()).lte('event_time',tom.toISOString())
     .order('confidence',{ascending:false}).limit(50);
-  if(error){grid.innerHTML='<div class="empty-state"><div class="ei">⚠️</div><h3>Could not load tips</h3><p>'+error.message+'</p></div>';return;}
+  if(error){grid.innerHTML='<div class="empty-state"><div class="ei">⚡</div><h3>Tips temporarily unavailable</h3><p>We\'re having trouble connecting. Tips refresh every 15 minutes — please check back shortly.</p></div>';return;}
   allTips=data||[];
   // Set today's best bet ref immediately from loaded tips
   if (allTips.length) {
@@ -966,7 +977,9 @@ db.channel('live-updates')
 
 async function loadHistory(){
   const {data,error}=await db.from('results_history').select('*').order('settled_at',{ascending:false}).limit(500);
-  if(error){console.error('Results load error:',error.message);return;}
+  if(error){console.error('Results load error:',error.message);
+  document.getElementById('plBody').innerHTML='<div style="text-align:center;color:var(--muted);padding:36px;font-size:13px;">Results temporarily unavailable. Please check back shortly.</div>';
+  return;}
   allHistory=data||[];
   renderDashboard('yesterday');
   renderHistoryTable();
