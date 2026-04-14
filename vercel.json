@@ -20,6 +20,8 @@
     { "source": "/football-tips-today", "destination": "/api/football-tips" },
     { "source": "/nhl-tips-today", "destination": "/api/nhl-tips" },
     { "source": "/nba-tips-today", "destination": "/api/nba-tips" },
-    { "source": "/betting-stats", "destination": "/api/stats" }
+    { "source": "/betting-stats", "destination": "/api/stats" },
+    { "source": "/admin", "destination": "/admin.html" },
+    { "source": "/account", "destination": "/account.html" }
   ]
 }
