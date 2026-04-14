@@ -5,14 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Admin | The Tipster</title>
 <meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#07090d">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="The Tipster">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -313,6 +305,29 @@ td{padding:9px 11px;}
       </table>
     </div>
   </div>
+  <!-- COMPOUNDING BANKROLL CALCULATOR -->
+  <div class="section-title" style="margin-top:32px;">£100 Compounding Bankroll Simulator</div>
+  <div class="card full" style="margin-bottom:14px;">
+    <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:16px;">How it works: Start with £100. Each day, divide your bankroll by the number of tips that day to get 1u. Bet every tip using the engine's stake recommendation. Your return becomes the next day's bankroll.</div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;" id="bankrollSummary">
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Starting Bankroll</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--text);">£100.00</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Current Bankroll</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--green);" id="br-current">—</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Total Return</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;" id="br-return">—</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Days Tracked</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--text);" id="br-days">—</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Best Day</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--green);" id="br-best">—</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Worst Day</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--red);" id="br-worst">—</div></div>
+    </div>
+  </div>
+  <div class="card full" style="margin-bottom:24px;">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Date</th><th>Tips</th><th>1u Value</th><th>Total Staked</th><th>Return</th><th>Day P&L</th><th>Bankroll</th><th>Growth</th>
+        </tr></thead>
+        <tbody id="bankrollTable"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
 
 </div>
 </div>
@@ -368,6 +383,7 @@ async function loadAll() {
   loadEmailLog();
   loadSubscribers();
   loadAccaHistory();
+  loadBankrollSimulator();
 }
 
 async function loadAccaHistory() {
@@ -380,16 +396,15 @@ async function loadAccaHistory() {
   }
   updateAccaSummary(data);
   let runningPL = 0;
-  // Reverse to calc running PL oldest first, then reverse back for display
   const sorted = [...data].reverse();
   const rows = sorted.map(a => {
     const pl = a.profit_loss !== null ? parseFloat(a.profit_loss) : null;
     if (pl !== null) runningPL = parseFloat((runningPL + pl).toFixed(2));
-    const plStr   = pl !== null ? (pl >= 0 ? '+' : '') + pl.toFixed(2) + 'u' : '—';
-    const rplStr  = pl !== null ? (runningPL >= 0 ? '+' : '') + runningPL.toFixed(2) + 'u' : '—';
-    const plCol   = pl !== null ? (pl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--muted)';
-    const rplCol  = runningPL >= 0 ? 'var(--green)' : 'var(--red)';
-    const resCol  = a.result === 'WON' ? 'var(--green)' : a.result === 'LOST' ? 'var(--red)' : 'var(--muted)';
+    const plStr  = pl !== null ? (pl >= 0 ? '+' : '') + pl.toFixed(2) + 'u' : '—';
+    const rplStr = pl !== null ? (runningPL >= 0 ? '+' : '') + runningPL.toFixed(2) + 'u' : '—';
+    const plCol  = pl !== null ? (pl >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--muted)';
+    const rplCol = runningPL >= 0 ? 'var(--green)' : 'var(--red)';
+    const resCol = a.result === 'WON' ? 'var(--green)' : a.result === 'LOST' ? 'var(--red)' : 'var(--muted)';
     const sels = (a.selections || []).map(s =>
       `<div style="font-size:11px;margin-bottom:2px;"><span style="color:var(--text)">${s.match}</span> — <span style="color:var(--gold)">${s.selection}</span> <span style="color:var(--muted);font-family:Space Mono,monospace">@ ${parseFloat(s.odds).toFixed(2)}</span> <span style="color:var(--muted);font-size:10px">(${s.confidence}%)</span></div>`
     ).join('');
@@ -410,15 +425,14 @@ async function loadAccaHistory() {
 
 function updateAccaSummary(data) {
   const settled = data.filter(a => a.result === 'WON' || a.result === 'LOST');
-  const won     = settled.filter(a => a.result === 'WON').length;
-  const lost    = settled.filter(a => a.result === 'LOST').length;
-  const total   = won + lost;
-  const pl      = settled.reduce((s,a) => s + parseFloat(a.profit_loss||0), 0);
-  const staked  = settled.reduce((s,a) => s + parseFloat(a.stake||1), 0);
-  const roi     = staked > 0 ? (pl/staked)*100 : 0;
-  const rate    = total > 0 ? (won/total)*100 : 0;
-  const fmt     = (n,d=2) => (n>=0?'+':'')+n.toFixed(d);
-
+  const won = settled.filter(a => a.result === 'WON').length;
+  const lost = settled.filter(a => a.result === 'LOST').length;
+  const total = won + lost;
+  const pl = settled.reduce((s,a) => s + parseFloat(a.profit_loss||0), 0);
+  const staked = settled.reduce((s,a) => s + parseFloat(a.stake||1), 0);
+  const roi = staked > 0 ? (pl/staked)*100 : 0;
+  const rate = total > 0 ? (won/total)*100 : 0;
+  const fmt = (n,d=2) => (n>=0?'+':'')+n.toFixed(d);
   document.getElementById('acca-total').textContent = data.length || '—';
   document.getElementById('acca-won').textContent   = won || '0';
   document.getElementById('acca-lost').textContent  = lost || '0';
@@ -440,14 +454,89 @@ async function triggerAccaGenerate() {
     const data = await res.json();
     if (data.started) {
       btn.textContent = 'Triggered!';
-      setTimeout(() => { btn.disabled=false; btn.textContent='Generate Today\'s Acca'; loadAccaHistory(); }, 3000);
-    } else {
-      btn.disabled=false; btn.textContent='Generate Today\'s Acca';
-    }
-  } catch(e) {
-    console.error(e);
-    btn.disabled=false; btn.textContent='Generate Today\'s Acca';
+      setTimeout(() => { btn.disabled=false; btn.textContent="Generate Today's Acca"; loadAccaHistory(); }, 3000);
+    } else { btn.disabled=false; btn.textContent="Generate Today's Acca"; }
+  } catch(e) { console.error(e); btn.disabled=false; btn.textContent="Generate Today's Acca"; }
+}
+
+async function loadBankrollSimulator() {
+  const { data: history } = await db
+    .from('results_history')
+    .select('settled_at, stake, odds, result, event, sport')
+    .in('result', ['WON', 'LOST'])
+    .order('settled_at', { ascending: true });
+
+  if (!history || !history.length) {
+    document.getElementById('bankrollTable').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No settled results yet.</td></tr>';
+    return;
   }
+
+  // Group by day
+  const byDay = {};
+  for (const r of history) {
+    const day = r.settled_at?.slice(0, 10) || new Date(r.settled_at).toISOString().slice(0, 10);
+    if (!byDay[day]) byDay[day] = [];
+    byDay[day].push(r);
+  }
+
+  const days = Object.keys(byDay).sort();
+  let bankroll = 100;
+  const STARTING = 100;
+  let bestDayPL = -Infinity, worstDayPL = Infinity;
+
+  const rows = days.map(day => {
+    const tips = byDay[day];
+    const tipCount = tips.length;
+    const unitValue = bankroll / tipCount; // 1u = bankroll ÷ tips that day
+
+    let totalStaked = 0;
+    let totalReturn = 0;
+
+    for (const tip of tips) {
+      const stake     = parseFloat(tip.stake || 1);
+      const odds      = parseFloat(tip.odds  || 1);
+      const betAmount = unitValue * stake;
+      totalStaked += betAmount;
+      if (tip.result === 'WON') totalReturn += betAmount * odds;
+    }
+
+    const dayPL      = totalReturn - totalStaked;
+    const prevBR     = bankroll;
+    bankroll         = bankroll - totalStaked + totalReturn;
+    const growth     = ((bankroll - prevBR) / prevBR * 100);
+
+    if (dayPL > bestDayPL)  bestDayPL  = dayPL;
+    if (dayPL < worstDayPL) worstDayPL = dayPL;
+
+    const plCol   = dayPL   >= 0 ? 'var(--green)' : 'var(--red)';
+    const brCol   = bankroll >= STARTING ? 'var(--green)' : 'var(--red)';
+    const grCol   = growth  >= 0 ? 'var(--green)' : 'var(--red)';
+    const fmtDate = new Date(day + 'T12:00:00Z').toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+
+    return `<tr>
+      <td style="font-family:Space Mono,monospace;font-size:11px;color:var(--muted)">${fmtDate}</td>
+      <td style="font-family:Space Mono,monospace">${tipCount}</td>
+      <td style="font-family:Space Mono,monospace;color:var(--gold)">£${(prevBR/tipCount).toFixed(2)}</td>
+      <td style="font-family:Space Mono,monospace">£${totalStaked.toFixed(2)}</td>
+      <td style="font-family:Space Mono,monospace">£${totalReturn.toFixed(2)}</td>
+      <td style="font-family:Space Mono,monospace;font-weight:700;color:${plCol}">${dayPL>=0?'+':''}£${dayPL.toFixed(2)}</td>
+      <td style="font-family:Space Mono,monospace;font-weight:700;color:${brCol}">£${bankroll.toFixed(2)}</td>
+      <td style="font-family:Space Mono,monospace;font-size:11px;color:${grCol}">${growth>=0?'+':''}${growth.toFixed(1)}%</td>
+    </tr>`;
+  });
+
+  document.getElementById('bankrollTable').innerHTML = rows.reverse().join('');
+
+  const totalPct = ((bankroll - STARTING) / STARTING * 100);
+  const retCol   = bankroll >= STARTING ? 'var(--green)' : 'var(--red)';
+  document.getElementById('br-current').textContent  = `£${bankroll.toFixed(2)}`;
+  document.getElementById('br-current').style.color  = retCol;
+  document.getElementById('br-return').textContent   = `${totalPct>=0?'+':''}${totalPct.toFixed(1)}%`;
+  document.getElementById('br-return').style.color   = retCol;
+  document.getElementById('br-days').textContent     = days.length;
+  document.getElementById('br-best').textContent     = bestDayPL > -Infinity ? `+£${bestDayPL.toFixed(2)}` : '—';
+  document.getElementById('br-worst').textContent    = worstDayPL < Infinity ? `${worstDayPL>=0?'+':''}£${worstDayPL.toFixed(2)}` : '—';
+  document.getElementById('br-worst').style.color    = 'var(--red)';
 }
 
 async function loadAllTimeStats() {
