@@ -1,4 +1,6 @@
 {
+  "framework": null,
+  "outputDirectory": ".",
   "headers": [
     {
       "source": "/api/(.*)",
