@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cookie Policy | The Tipster</title>
+<meta name="description" content="Cookie Policy for The Tipster — what cookies we use and why.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.thetipsteredge.com/cookies.html">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07090d;--bg2:#0c0f15;--border:#1c2535;--green:#18e07a;--text:#dde6f0;--muted:#4a5a70;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;line-height:1.7;}
+nav{position:sticky;top:0;z-index:100;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(7,9,13,0.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+.logo{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;color:var(--text);text-decoration:none;}
+.logo em{color:var(--green);font-style:normal;}
+.nav-back{font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:5px 12px;border-radius:4px;transition:color 0.2s,border-color 0.2s;}
+.nav-back:hover{color:var(--green);border-color:var(--green);}
+.wrap{max-width:760px;margin:0 auto;padding:60px 24px 100px;}
+.page-label{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:10px;}
+h1{font-family:'Syne',sans-serif;font-size:clamp(24px,5vw,40px);font-weight:800;margin-bottom:8px;line-height:1.15;}
+.meta{font-size:12px;color:var(--muted);margin-bottom:48px;}
+h2{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin:40px 0 12px;color:var(--text);}
+p{font-size:14px;color:#8a9bb0;margin-bottom:14px;}
+ul{padding-left:20px;margin-bottom:14px;}
+li{font-size:14px;color:#8a9bb0;margin-bottom:6px;}
+strong{color:var(--text);}
+table{width:100%;border-collapse:collapse;margin:16px 0 24px;font-size:13px;}
+th{text-align:left;padding:10px 12px;background:var(--bg2);color:var(--text);border:1px solid var(--border);font-weight:700;}
+td{padding:10px 12px;color:#8a9bb0;border:1px solid var(--border);vertical-align:top;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:1px;}
+.badge.essential{background:rgba(24,224,122,0.1);color:var(--green);}
+.badge.functional{background:rgba(74,158,255,0.1);color:#4a9eff;}
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px;text-align:center;font-size:11px;color:var(--muted);}
+footer a{color:var(--muted);text-decoration:none;margin:0 10px;}
+footer a:hover{color:var(--text);}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="/">The <em>Tipster</em></a>
+  <a class="nav-back" href="/">← Back to site</a>
+</nav>
+
+<div class="wrap">
+  <div class="page-label">Legal</div>
+  <h1>Cookie Policy</h1>
+  <p class="meta">Last updated: April 2026</p>
+
+  <h2>What Are Cookies?</h2>
+  <p>Cookies are small text files stored on your device when you visit a website. They are widely used to make websites work correctly and to provide information to site owners.</p>
+
+  <h2>How We Use Cookies</h2>
+  <p>The Tipster uses only <strong>essential and functional cookies</strong>. We do not use advertising cookies, tracking cookies, or sell data to advertisers. We do not use Google Analytics or any third-party analytics platform.</p>
+
+  <h2>Cookies We Use</h2>
+  <table>
+    <thead>
+      <tr><th>Cookie</th><th>Type</th><th>Purpose</th><th>Duration</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>sb-access-token</strong></td>
+        <td><span class="badge essential">Essential</span></td>
+        <td>Authentication session token from Supabase. Keeps you logged in.</td>
+        <td>1 hour (refreshed automatically)</td>
+      </tr>
+      <tr>
+        <td><strong>sb-refresh-token</strong></td>
+        <td><span class="badge essential">Essential</span></td>
+        <td>Used to refresh your session without requiring you to log in again.</td>
+        <td>60 days</td>
+      </tr>
+      <tr>
+        <td><strong>tipster_admin_key</strong></td>
+        <td><span class="badge functional">Functional</span></td>
+        <td>Stores admin API key in localStorage for admin users only. Not set for regular users.</td>
+        <td>Persistent (localStorage)</td>
+      </tr>
+      <tr>
+        <td><strong>oddsFormat</strong></td>
+        <td><span class="badge functional">Functional</span></td>
+        <td>Remembers your preferred odds format (decimal or fractional).</td>
+        <td>Persistent (localStorage)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Essential Cookies</h2>
+  <p>Essential cookies are strictly necessary for the website to function. They enable core features like authentication and security. You cannot opt out of essential cookies while using the service — without them, you would not be able to log in or access your account.</p>
+
+  <h2>Functional Cookies</h2>
+  <p>Functional cookies remember your preferences to improve your experience. These are not required for the site to work but make it more convenient. They are stored in localStorage rather than traditional cookies.</p>
+
+  <h2>Third-Party Cookies</h2>
+  <p>Our payment provider <strong>Stripe</strong> may set cookies when you complete a purchase. These are governed by <a href="https://stripe.com/privacy" target="_blank" rel="noopener" style="color:var(--green)">Stripe's Privacy Policy</a>. We have no control over Stripe's cookies.</p>
+  <p>We do not use any other third-party cookies. We do not use Facebook Pixel, Google Ads, or any other advertising or tracking cookies.</p>
+
+  <h2>Managing Cookies</h2>
+  <p>You can control cookies through your browser settings. Note that blocking essential cookies will prevent you from logging in. Here's how to manage cookies in common browsers:</p>
+  <ul>
+    <li><strong>Chrome:</strong> Settings → Privacy and security → Cookies and other site data</li>
+    <li><strong>Firefox:</strong> Settings → Privacy & Security → Cookies and Site Data</li>
+    <li><strong>Safari:</strong> Preferences → Privacy → Manage Website Data</li>
+    <li><strong>Edge:</strong> Settings → Cookies and site permissions</li>
+  </ul>
+
+  <h2>Changes to This Policy</h2>
+  <p>We may update this Cookie Policy from time to time. Any changes will be posted on this page with an updated date.</p>
+
+  <h2>Contact</h2>
+  <p>Questions about our use of cookies? Email <a href="mailto:support@thetipsteredge.com" style="color:var(--green)">support@thetipsteredge.com</a>.</p>
+</div>
+
+<footer>
+  <p style="margin-bottom:10px">© 2026 The Tipster. All rights reserved.</p>
+  <div>
+    <a href="/terms.html">Terms</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/responsible-gambling.html">Responsible Gambling</a>
+    <a href="/cookies.html">Cookies</a>
+  </div>
+</footer>
+</body>
+</html>
