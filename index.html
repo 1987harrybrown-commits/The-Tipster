@@ -741,6 +741,11 @@ async function loadBestBetStreak() {
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
     const todayBest = byDay[today]?.sort((a,b) => b._conf - a._conf)[0];
     window._todayBestRef = todayBest?.tip_ref || null;
+    // Override with live tips if available (today's tips are pending, not in results_history)
+    if (allTips && allTips.length) {
+      const liveBest = [...allTips].sort((a,b) => (b.confidence||0) - (a.confidence||0))[0];
+      if (liveBest) window._todayBestRef = liveBest.tip_ref;
+    }
     const el = document.getElementById('lb-streak');
     if (el) { el.textContent = streak + ' days'; el.className = 'lb-val g'; }
     const winRate = dailyBest.length > 0 ? ((dailyBest.filter(d=>d.tip.result==='WON').length / dailyBest.length)*100).toFixed(1)+'%' : '--';
@@ -1196,9 +1201,9 @@ function setPricingToggle(plan){
 
 (async()=>{
   await updateNavAuth();
-  await loadLiveBar();
   await loadHistory();
   await loadTips();
+  await loadLiveBar();
   await loadConversionBlock();
   const params=new URLSearchParams(window.location.search);
   if(params.get('auth')==='login')openModal('login');
