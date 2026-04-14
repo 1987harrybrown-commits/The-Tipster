@@ -740,7 +740,7 @@ async function loadBestBetStreak() {
     window._bestBetDays = new Set(dailyBest.map(d => d.day));
     const today = new Date().toISOString().split('T')[0];
     const todayBest = byDay[today]?.sort((a,b) => b._conf - a._conf)[0];
-    window._todayBestRef = todayBest?.tip_ref || null;
+    if (!window._todayBestRef) window._todayBestRef = todayBest?.tip_ref || null;
     const el = document.getElementById('lb-streak');
     if (el) { el.textContent = streak + ' days'; el.className = 'lb-val g'; }
     const winRate = dailyBest.length > 0 ? ((dailyBest.filter(d=>d.tip.result==='WON').length / dailyBest.length)*100).toFixed(1)+'%' : '--';
@@ -822,6 +822,11 @@ async function loadTips() {
     .order('confidence',{ascending:false}).limit(50);
   if(error){grid.innerHTML='<div class="empty-state"><div class="ei">⚠️</div><h3>Could not load tips</h3><p>'+error.message+'</p></div>';return;}
   allTips=data||[];
+  // Set today's best bet ref immediately from loaded tips
+  if (allTips.length) {
+    const best = [...allTips].sort((a,b) => (b.confidence||0) - (a.confidence||0))[0];
+    window._todayBestRef = best?.tip_ref || null;
+  }
   renderTips(); renderTicker(); renderSportsGrid();
 }
 
