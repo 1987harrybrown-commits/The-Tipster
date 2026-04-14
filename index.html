@@ -723,7 +723,7 @@ async function loadBestBetStreak() {
     const rows = history.filter(r => r.result === 'WON' || r.result === 'LOST');
     const byDay = {};
     for (const r of rows) {
-      const day = r.settled_at ? r.settled_at.slice(0,10) : new Date(r.settled_at).toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
+      const day = new Date(r.settled_at).toISOString().split('T')[0];
       if (!byDay[day]) byDay[day] = [];
       r._conf = parseFloat(r.confidence || 0);
       byDay[day].push(r);
@@ -738,14 +738,9 @@ async function loadBestBetStreak() {
     }
     window._bestBetStreak = streak;
     window._bestBetDays = new Set(dailyBest.map(d => d.day));
-    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
+    const today = new Date().toISOString().split('T')[0];
     const todayBest = byDay[today]?.sort((a,b) => b._conf - a._conf)[0];
     window._todayBestRef = todayBest?.tip_ref || null;
-    // Override with live tips if available (today's tips are pending, not in results_history)
-    if (allTips && allTips.length) {
-      const liveBest = [...allTips].sort((a,b) => (b.confidence||0) - (a.confidence||0))[0];
-      if (liveBest) window._todayBestRef = liveBest.tip_ref;
-    }
     const el = document.getElementById('lb-streak');
     if (el) { el.textContent = streak + ' days'; el.className = 'lb-val g'; }
     const winRate = dailyBest.length > 0 ? ((dailyBest.filter(d=>d.tip.result==='WON').length / dailyBest.length)*100).toFixed(1)+'%' : '--';
@@ -757,6 +752,8 @@ async function loadBestBetStreak() {
     if (daysEl) daysEl.textContent = streak;
     if (rateEl) rateEl.textContent = winRate;
     if (bestEl) bestEl.textContent = bestEver;
+    // Re-render tips now that _todayBestRef is set
+    if (allTips && allTips.length) renderTips();
   } catch(e) { console.error('Streak error:', e.message); }
 }
 
@@ -766,10 +763,9 @@ function filterByPeriod(rows, period) {
   const now = new Date();
   if (period === 'all') return rows;
   if (period === 'yesterday') {
-    const ukYesterday = new Date(now.toLocaleDateString('en-CA', { timeZone: 'Europe/London' }));
-    ukYesterday.setDate(ukYesterday.getDate() - 1);
-    const yStr = ukYesterday.toISOString().split('T')[0];
-    return rows.filter(r => r.settled_at && r.settled_at.slice(0,10) === yStr);
+    const s = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()-1, 0, 0, 0, 0));
+    const e = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()-1, 23, 59, 59, 999));
+    return rows.filter(r => { const d=new Date(r.settled_at); return d>=s&&d<=e; });
   }
   if (period === '7d')  { const s=new Date(now); s.setDate(s.getDate()-7);  return rows.filter(r=>new Date(r.settled_at)>=s); }
   if (period === '30d') { const s=new Date(now); s.setDate(s.getDate()-30); return rows.filter(r=>new Date(r.settled_at)>=s); }
@@ -1201,9 +1197,9 @@ function setPricingToggle(plan){
 
 (async()=>{
   await updateNavAuth();
+  await loadLiveBar();
   await loadHistory();
   await loadTips();
-  await loadLiveBar();
   await loadConversionBlock();
   const params=new URLSearchParams(window.location.search);
   if(params.get('auth')==='login')openModal('login');
