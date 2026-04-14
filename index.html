@@ -762,9 +762,10 @@ function filterByPeriod(rows, period) {
   const now = new Date();
   if (period === 'all') return rows;
   if (period === 'yesterday') {
-    const s = new Date(now); s.setDate(s.getDate()-1); s.setHours(0,0,0,0);
-    const e = new Date(s); e.setHours(23,59,59,999);
+    const s = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()-1, 0, 0, 0, 0));
+    const e = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()-1, 23, 59, 59, 999));
     return rows.filter(r => { const d=new Date(r.settled_at); return d>=s&&d<=e; });
+  }
   if (period === '7d')  { const s=new Date(now); s.setDate(s.getDate()-7);  return rows.filter(r=>new Date(r.settled_at)>=s); }
   if (period === '30d') { const s=new Date(now); s.setDate(s.getDate()-30); return rows.filter(r=>new Date(r.settled_at)>=s); }
   return rows;
@@ -839,7 +840,7 @@ function renderTips() {
   if(!sorted.length){grid.innerHTML='<div class="empty-state"><div class="ei">🔍</div><h3>No tips yet</h3><p>The engine is fetching the latest odds.</p></div>';return;}
   grid.innerHTML='';
   sorted.forEach((tip,i)=>{
-    const free=isProUser||i<3, locked=!free;
+    const free=isProUser||(i>0&&i<4), locked=!free;
     const conf=tip.confidence||0, cls=conf>=85?'':conf>=72?'med':'low';
     const isBestBet = isProUser && (window._bestBetStreak||0) > 0 && window._todayBestRef && tip.tip_ref === window._todayBestRef;
     const ev=new Date(tip.event_time);
@@ -875,8 +876,7 @@ function renderTips() {
             (isProUser?'<div class="tcard-stake '+stakeClass(stake)+'">'+stakeLabel(stake)+'</div>':'')+
           '</div>'+
         '</div>'+
-        // Best Bet badge: Pro users only
-        (isBestBet && isProUser ? '<div style="padding:8px 18px;border-top:1px solid rgba(240,180,41,0.2);background:rgba(240,180,41,0.04);"><span class="best-bet-badge">🏆 Best Bet · '+(window._bestBetStreak||0)+' day streak</span></div>' : '')+
+        (isBestBet ? '<div style="padding:8px 18px;border-top:1px solid rgba(240,180,41,0.2);background:rgba(240,180,41,0.04);"><span class="best-bet-badge">🏆 Best Bet · '+(window._bestBetStreak||0)+' day streak</span></div>' : '')+
       '</div>'+
       (locked?'<div class="lock-overlay"><div class="lk-icon">🔒</div><div class="lk-title">Pro Members Only</div><div class="lk-sub">Unlock value edge data, signal analysis and stake recommendations on every tip.</div><button class="btn-unlock" onclick="handleProClick()">Go Pro — £9.99/mo</button></div>':'');
     grid.appendChild(d);
@@ -1215,4 +1215,4 @@ function setPricingToggle(plan){
 })();
 </script>
 </body>
-                                                                                     </html>
+</html>
