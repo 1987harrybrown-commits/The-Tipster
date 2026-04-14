@@ -714,19 +714,18 @@ async function loadLiveBar() {
 
 async function loadBestBetStreak() {
   try {
-    const [{ data: history }, { data: tips }] = await Promise.all([
-      db.from('results_history').select('tip_ref, result, settled_at, event, odds').order('settled_at', { ascending: true }).limit(1000),
-      db.from('tips').select('tip_ref, confidence'),
-    ]);
-    if (!history || !tips) return;
-    const confMap = {};
-    for (const t of tips) confMap[t.tip_ref] = t.confidence || 0;
+    const { data: history } = await db
+      .from('results_history')
+      .select('tip_ref, result, settled_at, confidence')
+      .order('settled_at', { ascending: true })
+      .limit(1000);
+    if (!history) return;
     const rows = history.filter(r => r.result === 'WON' || r.result === 'LOST');
     const byDay = {};
     for (const r of rows) {
       const day = new Date(r.settled_at).toISOString().split('T')[0];
       if (!byDay[day]) byDay[day] = [];
-      r._conf = confMap[r.tip_ref] || 0;
+      r._conf = parseFloat(r.confidence || 0);
       byDay[day].push(r);
     }
     const dailyBest = Object.entries(byDay).sort().map(([day, tips]) => ({
