@@ -763,10 +763,9 @@ function filterByPeriod(rows, period) {
   if (period === 'all') return rows;
   if (period === 'yesterday') {
     if (period === 'yesterday') {
-    const s = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()-1, 0, 0, 0, 0));
-    const e = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()-1, 23, 59, 59, 999));
-    return rows.filter(r => { const d=new Date(r.settled_at); return d>=s&&d<=e; });
-    }
+  const s = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()-1, 0, 0, 0, 0));
+  const e = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()-1, 23, 59, 59, 999));
+  return rows.filter(r => { const d=new Date(r.settled_at); return d>=s&&d<=e; }); }
   if (period === '7d')  { const s=new Date(now); s.setDate(s.getDate()-7);  return rows.filter(r=>new Date(r.settled_at)>=s); }
   if (period === '30d') { const s=new Date(now); s.setDate(s.getDate()-30); return rows.filter(r=>new Date(r.settled_at)>=s); }
   return rows;
