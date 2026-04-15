@@ -378,6 +378,10 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <div class="tips-toolbar">
         <h2 class="sec-title" style="margin-bottom:0">TIPS — <span style="color:var(--green)" id="todayDate"></span></h2>
         <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;">
+          <div class="tabs" id="dayTabs" style="margin-bottom:4px;">
+            <button class="tab on" onclick="filterByDay('today',this)">Today</button>
+            <button class="tab" onclick="filterByDay('tomorrow',this)">Tomorrow</button>
+          </div>
           <div class="tabs" id="sportTabs">
             <button class="tab on" onclick="filterTips('all',this)">All</button>
             <button class="tab" onclick="filterTips('Football',this)">⚽ Football</button>
@@ -712,7 +716,6 @@ async function loadLiveBar() {
   const rate  = total > 0 ? parseFloat((won / total * 100).toFixed(1)) : 0;
   const roi   = stk > 0 ? parseFloat((pl / stk * 100).toFixed(1)) : 0;
 
-  // Keep cachedStats in sync for anything else that reads it
   cachedStats = { total_tips: total, total_won: won, total_lost: lost, win_rate: rate, total_pl: pl, total_staked: stk, roi };
 
   document.getElementById('lb-tips').textContent  = total || 0;
@@ -823,7 +826,7 @@ function switchPeriod(p,btn) {
   renderDashboard(p);
 }
 
-let allTips=[], activeFilter='all';
+let allTips=[], activeFilter='all', activeDayFilter='today';
 
 async function loadTips() {
   const grid=document.getElementById('tipsGrid');
@@ -854,7 +857,21 @@ function stakeLabel(s) { s=parseFloat(s||1); if(s>=3)return s+'u — High Confid
 
 function renderTips() {
   const grid=document.getElementById('tipsGrid');
-  const list=activeFilter==='all'?allTips:allTips.filter(t=>t.sport===activeFilter);
+  const now=new Date();
+  // Get today and tomorrow date strings in UK time
+  const ukToday=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'});
+  const ukTomDate=new Date(); ukTomDate.setDate(ukTomDate.getDate()+1);
+  const ukTomorrow=ukTomDate.toLocaleDateString('en-CA',{timeZone:'Europe/London'});
+
+  // Filter: hide games already started + apply day filter + sport filter
+  let list=allTips.filter(t=>{
+    if(new Date(t.event_time)<=now) return false; // hide started games
+    const tipDay=new Date(t.event_time).toLocaleDateString('en-CA',{timeZone:'Europe/London'});
+    if(activeDayFilter==='today' && tipDay!==ukToday) return false;
+    if(activeDayFilter==='tomorrow' && tipDay!==ukTomorrow) return false;
+    return true;
+  });
+  if(activeFilter!=='all') list=list.filter(t=>t.sport===activeFilter);
   const sorted=[...list].sort((a,b)=>b.confidence-a.confidence);
   if(!sorted.length){grid.innerHTML='<div class="empty-state"><div class="ei">🔍</div><h3>No tips yet</h3><p>The engine is fetching the latest odds.</p></div>';return;}
   grid.innerHTML='';
@@ -903,8 +920,13 @@ function renderTips() {
 }
 
 function filterTips(sport,btn){
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');
+  document.querySelectorAll('#sportTabs .tab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');
   activeFilter=sport;renderTips();
+}
+
+function filterByDay(day,btn){
+  document.querySelectorAll('#dayTabs .tab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');
+  activeDayFilter=day;renderTips();
 }
 
 function renderTicker(){
