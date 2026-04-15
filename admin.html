@@ -616,8 +616,8 @@ async function loadBestBetSimulator() {
       const multiple = odds;
       if (multiple > bestWinMultiple) bestWinMultiple = multiple;
     } else {
-      bank = 0;
       wipes++;
+      bank = 1.0; // reset to 1u next day after wipe
     }
 
     const fmtDate  = new Date(day + 'T12:00:00Z').toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
@@ -633,7 +633,7 @@ async function loadBestBetSimulator() {
       <td style="font-family:Space Mono,monospace;font-size:11px;color:var(--muted)">${confStr}</td>
       <td style="font-family:Space Mono,monospace">${bankBefore.toFixed(4)}u</td>
       <td style="font-family:Space Mono,monospace;font-weight:700;color:${resCol}">${won ? 'WON' : '💀 WIPED'}</td>
-      <td style="font-family:Space Mono,monospace;font-weight:700;color:${bankCol}">${won ? bank.toFixed(4)+'u' : '0.0000u'}</td>
+      <td style="font-family:Space Mono,monospace;font-weight:700;color:${bankCol}">${won ? bank.toFixed(4)+'u' : '💀 → 1.0000u'}</td>
     </tr>`);
   }
 
