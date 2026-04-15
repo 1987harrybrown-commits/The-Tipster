@@ -698,14 +698,27 @@ document.getElementById('todayDate').textContent =
 let cachedStats = {}, isProUser = false;
 
 async function loadLiveBar() {
-  const { data } = await db.from('stats_cache').select('*').eq('id',1).single();
+  const { data } = await db
+    .from('results_history')
+    .select('result, profit_loss, stake')
+    .in('result', ['WON', 'LOST']);
   if (!data) return;
-  cachedStats = data;
-  const pl = parseFloat(data.total_pl||0), roi = parseFloat(data.roi||0);
-  document.getElementById('lb-tips').textContent  = data.total_tips||0;
-  document.getElementById('lb-won').textContent   = data.total_won||0;
-  document.getElementById('lb-lost').textContent  = data.total_lost||0;
-  document.getElementById('lb-rate').textContent  = (data.win_rate||0)+'%';
+
+  const won   = data.filter(r => r.result === 'WON').length;
+  const lost  = data.filter(r => r.result === 'LOST').length;
+  const total = won + lost;
+  const pl    = parseFloat(data.reduce((s, r) => s + parseFloat(r.profit_loss || 0), 0).toFixed(2));
+  const stk   = parseFloat(data.reduce((s, r) => s + parseFloat(r.stake || 0), 0).toFixed(2));
+  const rate  = total > 0 ? parseFloat((won / total * 100).toFixed(1)) : 0;
+  const roi   = stk > 0 ? parseFloat((pl / stk * 100).toFixed(1)) : 0;
+
+  // Keep cachedStats in sync for anything else that reads it
+  cachedStats = { total_tips: total, total_won: won, total_lost: lost, win_rate: rate, total_pl: pl, total_staked: stk, roi };
+
+  document.getElementById('lb-tips').textContent  = total || 0;
+  document.getElementById('lb-won').textContent   = won || 0;
+  document.getElementById('lb-lost').textContent  = lost || 0;
+  document.getElementById('lb-rate').textContent  = rate + '%';
   const plEl = document.getElementById('lb-pl'), roiEl = document.getElementById('lb-roi');
   plEl.textContent  = fmtU(pl);  plEl.className  = 'lb-val '+(pl>=0?'g':'r');
   roiEl.textContent = fmt(roi,1)+'%'; roiEl.className = 'lb-val '+(roi>=0?'g':'r');
@@ -961,7 +974,7 @@ function updatePLSummary(data){
 db.channel('live-updates')
   .on('postgres_changes',{event:'*',schema:'public',table:'tips'},          ()=>{loadTips();loadLiveBar();})
   .on('postgres_changes',{event:'*',schema:'public',table:'results_history'},()=>{loadHistory();loadLiveBar();})
-  .on('postgres_changes',{event:'*',schema:'public',table:'stats_cache'},   ()=>{loadLiveBar();})
+  .on('postgres_changes',{event:'*',schema:'public',table:'results_history'},()=>{loadLiveBar();})
   .subscribe();
 
 async function loadHistory(){
