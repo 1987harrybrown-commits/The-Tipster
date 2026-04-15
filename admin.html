@@ -332,6 +332,33 @@ td{padding:9px 11px;}
 </div>
 </div>
 
+  <!-- BEST BET COMPOUND SIMULATOR -->
+  <div class="section-title" style="margin-top:32px;">Best Bet Compound Simulator</div>
+  <div class="card full" style="margin-bottom:14px;">
+    <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:16px;">How it works: Start with 1u. Each day, go all in on the highest confidence tip. Win: bank × odds. Lose: bank resets to 0. Tracks the compounding power of the Best Bet streak.</div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;" id="bbSummary">
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Starting Bank</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--text);">1.00u</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Current Bank</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--green);" id="bb-current">—</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Peak Bank</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--gold);" id="bb-peak">—</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Times Wiped</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--red);" id="bb-wipes">—</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Days Tracked</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--text);" id="bb-days">—</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Best Win</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--green);" id="bb-bestwin">—</div></div>
+    </div>
+  </div>
+  <div class="card full" style="margin-bottom:24px;">
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Date</th><th>Best Bet</th><th>Selection</th><th>Odds</th><th>Conf</th><th>Bank Before</th><th>Result</th><th>Bank After</th>
+        </tr></thead>
+        <tbody id="bbTable"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+</div>
+
 <script>
 const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
@@ -384,6 +411,7 @@ async function loadAll() {
   loadSubscribers();
   loadAccaHistory();
   loadBankrollSimulator();
+  loadBestBetSimulator();
 }
 
 async function loadAccaHistory() {
@@ -540,6 +568,84 @@ async function loadBankrollSimulator() {
   document.getElementById('br-best').textContent     = bestDayPL > -Infinity ? `+£${bestDayPL.toFixed(2)}` : '—';
   document.getElementById('br-worst').textContent    = worstDayPL < Infinity ? `${worstDayPL>=0?'+':''}£${worstDayPL.toFixed(2)}` : '—';
   document.getElementById('br-worst').style.color    = 'var(--red)';
+}
+
+async function loadBestBetSimulator() {
+  const { data: history } = await db
+    .from('results_history')
+    .select('settled_at, odds, result, event, selection, confidence')
+    .in('result', ['WON', 'LOST'])
+    .order('settled_at', { ascending: true });
+
+  if (!history || !history.length) {
+    document.getElementById('bbTable').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No settled results yet.</td></tr>';
+    return;
+  }
+
+  // Group by day, pick highest confidence tip per day
+  const byDay = {};
+  for (const r of history) {
+    const day = r.settled_at?.slice(0, 10) || new Date(r.settled_at).toISOString().slice(0, 10);
+    if (!byDay[day]) byDay[day] = [];
+    byDay[day].push(r);
+  }
+
+  const days = Object.keys(byDay).sort();
+  let bank = 1.0;
+  let peak = 1.0;
+  let wipes = 0;
+  let bestWinMultiple = 0;
+  const rows = [];
+
+  for (const day of days) {
+    const tips = byDay[day];
+    // Pick highest confidence tip — if tie, pick highest odds
+    const best = tips.reduce((a, b) => {
+      if ((b.confidence || 0) > (a.confidence || 0)) return b;
+      if ((b.confidence || 0) === (a.confidence || 0) && parseFloat(b.odds) > parseFloat(a.odds)) return b;
+      return a;
+    });
+
+    const odds      = parseFloat(best.odds || 1);
+    const bankBefore = bank;
+    const won       = best.result === 'WON';
+
+    if (won) {
+      bank = parseFloat((bank * odds).toFixed(4));
+      if (bank > peak) peak = bank;
+      const multiple = odds;
+      if (multiple > bestWinMultiple) bestWinMultiple = multiple;
+    } else {
+      bank = 0;
+      wipes++;
+    }
+
+    const fmtDate  = new Date(day + 'T12:00:00Z').toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
+    const resCol   = won ? 'var(--green)' : 'var(--red)';
+    const bankCol  = bank > 1 ? 'var(--green)' : bank === 0 ? 'var(--red)' : 'var(--muted)';
+    const confStr  = best.confidence ? best.confidence + '%' : '—';
+
+    rows.push(`<tr>
+      <td style="font-family:Space Mono,monospace;font-size:11px;color:var(--muted)">${fmtDate}</td>
+      <td style="font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${best.event || '—'}</td>
+      <td style="font-size:11px;color:var(--green)">${best.selection || '—'}</td>
+      <td style="font-family:Space Mono,monospace;color:var(--gold);font-weight:700">${odds.toFixed(2)}</td>
+      <td style="font-family:Space Mono,monospace;font-size:11px;color:var(--muted)">${confStr}</td>
+      <td style="font-family:Space Mono,monospace">${bankBefore.toFixed(4)}u</td>
+      <td style="font-family:Space Mono,monospace;font-weight:700;color:${resCol}">${won ? 'WON' : '💀 WIPED'}</td>
+      <td style="font-family:Space Mono,monospace;font-weight:700;color:${bankCol}">${won ? bank.toFixed(4)+'u' : '0.0000u'}</td>
+    </tr>`);
+  }
+
+  document.getElementById('bbTable').innerHTML = rows.reverse().join('');
+
+  const curCol = bank > 1 ? 'var(--green)' : bank === 0 ? 'var(--red)' : 'var(--muted)';
+  document.getElementById('bb-current').textContent  = bank.toFixed(4) + 'u';
+  document.getElementById('bb-current').style.color  = curCol;
+  document.getElementById('bb-peak').textContent     = peak.toFixed(4) + 'u';
+  document.getElementById('bb-wipes').textContent    = wipes;
+  document.getElementById('bb-days').textContent     = days.length;
+  document.getElementById('bb-bestwin').textContent  = bestWinMultiple > 0 ? 'x' + bestWinMultiple.toFixed(2) : '—';
 }
 
 async function loadAllTimeStats() {
