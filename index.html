@@ -723,7 +723,7 @@ async function loadBestBetStreak() {
     const rows = history.filter(r => r.result === 'WON' || r.result === 'LOST');
     const byDay = {};
     for (const r of rows) {
-      const day = new Date(r.settled_at).toISOString().split('T')[0];
+      const day = r.settled_at ? r.settled_at.slice(0,10) : new Date(r.settled_at).toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
       if (!byDay[day]) byDay[day] = [];
       r._conf = parseFloat(r.confidence || 0);
       byDay[day].push(r);
@@ -850,7 +850,7 @@ function renderTips() {
     const conf=tip.confidence||0, cls=conf>=85?'':conf>=72?'med':'low';
     const isBestBet = isProUser && (window._bestBetStreak||0) > 0 && window._todayBestRef && tip.tip_ref === window._todayBestRef;
     const ev=new Date(tip.event_time);
-    const ts=ev.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+' . '+ev.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    const ts=ev.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/London'})+' . '+ev.toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'Europe/London'});
     const stake=parseFloat(tip.stake||1);
     const {edge}=deriveEdge(tip);
     const eStr=(edge>=0?'+':'')+edge.toFixed(1)+'%';
