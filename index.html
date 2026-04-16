@@ -696,8 +696,14 @@ function fmtOdds(decimal) {
     : parseFloat(decimal).toFixed(2);
 }
 
-document.getElementById('todayDate').textContent =
-  new Date().toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+function updateDateHeader() {
+  const d = activeDayFilter === 'tomorrow'
+    ? new Date(Date.now() + 86400000)
+    : new Date();
+  document.getElementById('todayDate').textContent =
+    d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+}
+updateDateHeader();
 
 let cachedStats = {}, isProUser = false;
 
@@ -843,6 +849,20 @@ async function loadTips() {
     const best = [...allTips].sort((a,b) => (b.confidence||0) - (a.confidence||0))[0];
     window._todayBestRef = best?.tip_ref || null;
   }
+  // Auto-switch to Tomorrow if no tips left today
+  const now = new Date();
+  const ukToday2 = now.toLocaleDateString('en-CA');
+  const todayRemaining = (data||[]).filter(t => {
+    const tipDay = new Date(t.event_time).toLocaleDateString('en-CA');
+    return tipDay === ukToday2 && new Date(t.event_time) > now;
+  });
+  if (!todayRemaining.length && activeDayFilter === 'today') {
+    activeDayFilter = 'tomorrow';
+    document.querySelectorAll('#dayTabs .tab').forEach((t,i) => {
+      t.classList.toggle('on', i === 1);
+    });
+    updateDateHeader();
+  }
   renderTips(); renderTicker(); renderSportsGrid();
 }
 
@@ -859,14 +879,14 @@ function renderTips() {
   const grid=document.getElementById('tipsGrid');
   const now=new Date();
   // Get today and tomorrow date strings in UK time
-  const ukToday=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'});
+  const ukToday=now.toLocaleDateString('en-CA');
   const ukTomDate=new Date(); ukTomDate.setDate(ukTomDate.getDate()+1);
-  const ukTomorrow=ukTomDate.toLocaleDateString('en-CA',{timeZone:'Europe/London'});
+  const ukTomorrow=ukTomDate.toLocaleDateString('en-CA');
 
   // Filter: hide games already started + apply day filter + sport filter
   let list=allTips.filter(t=>{
     if(new Date(t.event_time)<=now) return false; // hide started games
-    const tipDay=new Date(t.event_time).toLocaleDateString('en-CA',{timeZone:'Europe/London'});
+    const tipDay=new Date(t.event_time).toLocaleDateString('en-CA');
     if(activeDayFilter==='today' && tipDay!==ukToday) return false;
     if(activeDayFilter==='tomorrow' && tipDay!==ukTomorrow) return false;
     return true;
@@ -926,7 +946,7 @@ function filterTips(sport,btn){
 
 function filterByDay(day,btn){
   document.querySelectorAll('#dayTabs .tab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');
-  activeDayFilter=day;renderTips();
+  activeDayFilter=day;updateDateHeader();renderTips();
 }
 
 function renderTicker(){
