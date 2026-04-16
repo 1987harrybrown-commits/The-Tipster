@@ -696,6 +696,8 @@ function fmtOdds(decimal) {
     : parseFloat(decimal).toFixed(2);
 }
 
+let activeDayFilter = 'today';
+
 function updateDateHeader() {
   const d = activeDayFilter === 'tomorrow'
     ? new Date(Date.now() + 86400000)
@@ -832,7 +834,7 @@ function switchPeriod(p,btn) {
   renderDashboard(p);
 }
 
-let allTips=[], activeFilter='all', activeDayFilter='today';
+let allTips=[], activeFilter='all';
 
 async function loadTips() {
   const grid=document.getElementById('tipsGrid');
