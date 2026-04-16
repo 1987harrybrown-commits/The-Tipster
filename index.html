@@ -742,50 +742,61 @@ async function loadLiveBar() {
 
 async function loadBestBetStreak() {
   try {
-    const { data: history } = await db
-      .from('results_history')
-      .select('tip_ref, result, settled_at, confidence')
-      .order('settled_at', { ascending: true })
-      .limit(1000);
-    if (!history) return;
-    const rows = history.filter(r => r.result === 'WON' || r.result === 'LOST');
+    // Load all tagged best bets from tips table — authoritative, locked at 07:00
+    const { data: bestBets } = await db
+      .from('tips')
+      .select('tip_ref, status, event_time, confidence')
+      .eq('is_best_bet', true)
+      .order('event_time', { ascending: true });
+
+    if (!bestBets) return;
+
+    // Group by UK date
     const byDay = {};
-    for (const r of rows) {
-      const day = r.settled_at ? r.settled_at.slice(0,10) : new Date(r.settled_at).toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
-      if (!byDay[day]) byDay[day] = [];
-      r._conf = parseFloat(r.confidence || 0);
-      byDay[day].push(r);
+    for (const t of bestBets) {
+      const day = new Date(t.event_time).toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
+      byDay[day] = t;
     }
-    const dailyBest = Object.entries(byDay).sort().map(([day, tips]) => ({
-      day, tip: tips.sort((a,b) => b._conf - a._conf)[0]
-    }));
-    const today = new Date().toLocaleDateString('en-CA');
-    const todayBest = byDay[today]?.sort((a,b) => b._conf - a._conf)[0];
+
+    const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
+    const todayBest = byDay[today] || null;
+    if (todayBest && !window._todayBestRef) window._todayBestRef = todayBest.tip_ref;
+
+    const days = Object.keys(byDay).sort();
 
     // Count streak from most recent day backwards
-    // Skip today if no settled result yet — don't break streak on pending day
+    // Skip today if still pending — don't break streak
     let streak = 0;
-    for (let i = dailyBest.length - 1; i >= 0; i--) {
-      const isToday = dailyBest[i].day === today;
-      const result = dailyBest[i].tip.result;
-      if (result === 'WON') { streak++; }
-      else if (isToday && result !== 'LOST') { continue; } // today not settled yet — skip
+    for (let i = days.length - 1; i >= 0; i--) {
+      const day = days[i];
+      const tip = byDay[day];
+      const isToday = day === today;
+      if (tip.status === 'won') { streak++; }
+      else if (isToday && tip.status === 'pending') { continue; } // pending today — skip
       else { break; }
     }
+
     window._bestBetStreak = streak;
-    window._bestBetDays = new Set(dailyBest.map(d => d.day));
-    if (!window._todayBestRef) window._todayBestRef = todayBest?.tip_ref || null;
+
+    const settled = days.filter(d => ['won','lost'].includes(byDay[d].status));
+    const won = settled.filter(d => byDay[d].status === 'won').length;
+    const winRate = settled.length > 0 ? ((won / settled.length) * 100).toFixed(1) + '%' : '--';
+
+    let bestEver = 0, tmp = 0;
+    for (const day of days) {
+      if (byDay[day].status === 'won') { tmp++; bestEver = Math.max(bestEver, tmp); }
+      else if (byDay[day].status === 'lost') { tmp = 0; }
+    }
+
     const el = document.getElementById('lb-streak');
     if (el) { el.textContent = streak + ' days'; el.className = 'lb-val g'; }
-    const winRate = dailyBest.length > 0 ? ((dailyBest.filter(d=>d.tip.result==='WON').length / dailyBest.length)*100).toFixed(1)+'%' : '--';
-    let bestEver = 0, tmp = 0;
-    for (const {tip} of dailyBest) { if(tip.result==='WON'){tmp++;bestEver=Math.max(bestEver,tmp);}else tmp=0; }
     const daysEl = document.getElementById('streak-days');
     const rateEl = document.getElementById('streak-rate');
     const bestEl = document.getElementById('streak-best');
     if (daysEl) daysEl.textContent = streak;
     if (rateEl) rateEl.textContent = winRate;
     if (bestEl) bestEl.textContent = bestEver;
+
     // Re-render tips now that _todayBestRef is set
     if (allTips && allTips.length) renderTips();
   } catch(e) { console.error('Streak error:', e.message); }
