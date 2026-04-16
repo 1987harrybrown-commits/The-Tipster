@@ -755,15 +755,21 @@ async function loadBestBetStreak() {
     const dailyBest = Object.entries(byDay).sort().map(([day, tips]) => ({
       day, tip: tips.sort((a,b) => b._conf - a._conf)[0]
     }));
+    const today = new Date().toLocaleDateString('en-CA');
+    const todayBest = byDay[today]?.sort((a,b) => b._conf - a._conf)[0];
+
+    // Count streak from most recent day backwards
+    // Skip today if no settled result yet — don't break streak on pending day
     let streak = 0;
     for (let i = dailyBest.length - 1; i >= 0; i--) {
-      if (dailyBest[i].tip.result === 'WON') streak++;
-      else break;
+      const isToday = dailyBest[i].day === today;
+      const result = dailyBest[i].tip.result;
+      if (result === 'WON') { streak++; }
+      else if (isToday && result !== 'LOST') { continue; } // today not settled yet — skip
+      else { break; }
     }
     window._bestBetStreak = streak;
     window._bestBetDays = new Set(dailyBest.map(d => d.day));
-    const today = new Date().toISOString().split('T')[0];
-    const todayBest = byDay[today]?.sort((a,b) => b._conf - a._conf)[0];
     if (!window._todayBestRef) window._todayBestRef = todayBest?.tip_ref || null;
     const el = document.getElementById('lb-streak');
     if (el) { el.textContent = streak + ' days'; el.className = 'lb-val g'; }
