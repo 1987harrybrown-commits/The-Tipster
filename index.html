@@ -385,6 +385,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
           <div class="tabs" id="dayTabs" style="margin-bottom:4px;">
             <button class="tab on" onclick="filterByDay('today',this)">Today</button>
             <button class="tab" onclick="filterByDay('tomorrow',this)">Tomorrow</button>
+            <button class="tab" onclick="filterByDay('all',this)">All</button>
           </div>
           <div class="tabs" id="sportTabs">
             <button class="tab on" onclick="filterTips('all',this)">All</button>
@@ -703,6 +704,10 @@ function fmtOdds(decimal) {
 let activeDayFilter = 'today';
 
 function updateDateHeader() {
+  if (activeDayFilter === 'all') {
+    document.getElementById('todayDate').textContent = 'UPCOMING';
+    return;
+  }
   const d = activeDayFilter === 'tomorrow'
     ? new Date(Date.now() + 86400000)
     : new Date();
@@ -742,7 +747,7 @@ async function loadLiveBar() {
 
 async function loadBestBetStreak() {
   try {
-    // Load all tagged best bets from tips table — authoritative, locked at 07:00
+    // Load all tagged best bets from tips table
     const { data: bestBets } = await db
       .from('tips')
       .select('tip_ref, status, event_time, confidence')
@@ -751,11 +756,23 @@ async function loadBestBetStreak() {
 
     if (!bestBets) return;
 
-    // Group by UK date
+    // Cross-reference results_history for accurate settled status
+    const tipRefs = bestBets.map(t => t.tip_ref);
+    const { data: settledResults } = await db
+      .from('results_history')
+      .select('tip_ref, result')
+      .in('tip_ref', tipRefs);
+
+    const settledMap = {};
+    for (const r of (settledResults || [])) {
+      settledMap[r.tip_ref] = r.result === 'WON' ? 'won' : 'lost';
+    }
+
+    // Group by UK date, use results_history status where available
     const byDay = {};
     for (const t of bestBets) {
       const day = new Date(t.event_time).toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
-      byDay[day] = t;
+      byDay[day] = { ...t, status: settledMap[t.tip_ref] || t.status };
     }
 
     const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
@@ -767,23 +784,21 @@ async function loadBestBetStreak() {
 
     const days = Object.keys(byDay).sort();
 
-    // Count streak from most recent day backwards
-    // Skip today if still pending — don't break streak
+    // Count streak from most recent settled day backwards
+    // Skip pending days — don't break streak on unplayed games
     let streak = 0;
     for (let i = days.length - 1; i >= 0; i--) {
-      const day = days[i];
-      const tip = byDay[day];
-      const isToday = day === today;
+      const tip = byDay[days[i]];
       if (tip.status === 'won') { streak++; }
-      else if (isToday && tip.status === 'pending') { continue; } // pending today — skip
+      else if (tip.status === 'pending') { continue; }
       else { break; }
     }
 
     window._bestBetStreak = streak;
 
-    const settled = days.filter(d => ['won','lost'].includes(byDay[d].status));
-    const won = settled.filter(d => byDay[d].status === 'won').length;
-    const winRate = settled.length > 0 ? ((won / settled.length) * 100).toFixed(1) + '%' : '--';
+    const settledDays = days.filter(d => ['won','lost'].includes(byDay[d].status));
+    const wonCount = settledDays.filter(d => byDay[d].status === 'won').length;
+    const winRate = settledDays.length > 0 ? ((wonCount / settledDays.length) * 100).toFixed(1) + '%' : '--';
 
     let bestEver = 0, tmp = 0;
     for (const day of days) {
@@ -800,7 +815,6 @@ async function loadBestBetStreak() {
     if (rateEl) rateEl.textContent = winRate;
     if (bestEl) bestEl.textContent = bestEver;
 
-    // Re-render tips now that _todayBestRef is set
     if (allTips && allTips.length) renderTips();
   } catch(e) { console.error('Streak error:', e.message); }
 }
@@ -864,7 +878,7 @@ async function loadTips() {
   const grid=document.getElementById('tipsGrid');
   grid.innerHTML=Array(6).fill('<div class="skeleton"></div>').join('');
   const today=new Date(); today.setHours(0,0,0,0);
-  const tom=new Date(today); tom.setDate(tom.getDate()+2);
+  const tom=new Date(today); tom.setDate(tom.getDate()+3);
   const {data,error}=await db.from('tips').select('*')
     .gte('event_time',today.toISOString()).lte('event_time',tom.toISOString())
     .order('confidence',{ascending:false}).limit(50);
@@ -912,6 +926,7 @@ function renderTips() {
   // Filter: hide games already started + apply day filter + sport filter
   let list=allTips.filter(t=>{
     if(new Date(t.event_time)<=now) return false; // hide started games
+    if(activeDayFilter==='all') return true;
     const tipDay=new Date(t.event_time).toLocaleDateString('en-CA');
     if(activeDayFilter==='today' && tipDay!==ukToday) return false;
     if(activeDayFilter==='tomorrow' && tipDay!==ukTomorrow) return false;
