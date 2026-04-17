@@ -332,26 +332,55 @@ td{padding:9px 11px;}
 </div>
 </div>
 
-  <!-- BEST BET COMPOUND SIMULATOR -->
-  <div class="section-title" style="margin-top:32px;">Best Bet Compound Simulator</div>
+  <!-- FOOTBALL LAB -->
+  <div class="section-title" style="margin-top:32px;">⚽ Football Lab — Market Research</div>
   <div class="card full" style="margin-bottom:14px;">
-    <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:16px;">How it works: Start with 1u. Each day, go all in on the highest confidence tip. Win: bank × odds. Lose: bank resets to 0. Tracks the compounding power of the Best Bet streak.</div>
-    <div style="display:flex;gap:24px;flex-wrap:wrap;" id="bbSummary">
-      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Starting Bank</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--text);">1.00u</div></div>
-      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Current Bank</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--green);" id="bb-current">—</div></div>
-      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Peak Bank</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--gold);" id="bb-peak">—</div></div>
-      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Times Wiped</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--red);" id="bb-wipes">—</div></div>
-      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Days Tracked</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--text);" id="bb-days">—</div></div>
-      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Best Win</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--green);" id="bb-bestwin">—</div></div>
+    <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:16px;">Experimental football market tracker. All P&L is completely separate from main stats. 1u flat stake per selection. Not live — research only.</div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;" id="labSummary">
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Total Tracked</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--text);" id="lab-total">—</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Settled</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--text);" id="lab-settled">—</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Win Rate</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--green);" id="lab-rate">—</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">P&L</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;" id="lab-pl">—</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">ROI</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--gold);" id="lab-roi">—</div></div>
+      <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Pending</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--muted);" id="lab-pending">—</div></div>
     </div>
   </div>
-  <div class="card full" style="margin-bottom:24px;">
+
+  <!-- BY MARKET -->
+  <div class="card full" style="margin-bottom:14px;">
+    <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:16px;">Performance by Market</div>
     <div class="tbl-wrap">
       <table>
         <thead><tr>
-          <th>Date</th><th>Best Bet</th><th>Selection</th><th>Odds</th><th>Conf</th><th>Bank Before</th><th>Result</th><th>Bank After</th>
+          <th>Market</th><th>Bets</th><th>Won</th><th>Lost</th><th>Win Rate</th><th>P&L</th><th>ROI</th><th>Avg Edge</th>
         </tr></thead>
-        <tbody id="bbTable"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr></tbody>
+        <tbody id="labByMarket"><tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- BY LEAGUE -->
+  <div class="card full" style="margin-bottom:14px;">
+    <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:16px;">Performance by League</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>League</th><th>Bets</th><th>Won</th><th>Lost</th><th>Win Rate</th><th>P&L</th><th>ROI</th>
+        </tr></thead>
+        <tbody id="labByLeague"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- RECENT LAB TIPS -->
+  <div class="card full" style="margin-bottom:24px;">
+    <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:16px;">Recent Lab Tips</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr>
+          <th>Date</th><th>League</th><th>Match</th><th>Market</th><th>Selection</th><th>Odds</th><th>Edge</th><th>Model%</th><th>Result</th><th>P&L</th>
+        </tr></thead>
+        <tbody id="labRecent"><tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">Loading...</td></tr></tbody>
       </table>
     </div>
   </div>
@@ -411,7 +440,7 @@ async function loadAll() {
   loadSubscribers();
   loadAccaHistory();
   loadBankrollSimulator();
-  loadBestBetSimulator();
+  loadFootballLab();
 }
 
 async function loadAccaHistory() {
@@ -570,82 +599,113 @@ async function loadBankrollSimulator() {
   document.getElementById('br-worst').style.color    = 'var(--red)';
 }
 
-async function loadBestBetSimulator() {
-  const { data: history } = await db
-    .from('results_history')
-    .select('settled_at, odds, result, event, selection, confidence')
-    .in('result', ['WON', 'LOST'])
-    .order('settled_at', { ascending: true });
+async function loadFootballLab() {
+  const { data, error } = await db
+    .from('football_lab')
+    .select('*')
+    .order('event_time', { ascending: false });
 
-  if (!history || !history.length) {
-    document.getElementById('bbTable').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No settled results yet.</td></tr>';
+  if (error || !data) {
+    document.getElementById('labRecent').innerHTML = '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">No data yet.</td></tr>';
     return;
   }
 
-  // Group by day, pick highest confidence tip per day
-  const byDay = {};
-  for (const r of history) {
-    const day = r.settled_at?.slice(0, 10) || new Date(r.settled_at).toISOString().slice(0, 10);
-    if (!byDay[day]) byDay[day] = [];
-    byDay[day].push(r);
+  const settled = data.filter(r => r.result === 'WON' || r.result === 'LOST');
+  const pending = data.filter(r => r.result === 'pending');
+  const won = settled.filter(r => r.result === 'WON');
+  const lost = settled.filter(r => r.result === 'LOST');
+  const pl = settled.reduce((s, r) => s + parseFloat(r.profit_loss || 0), 0);
+  const staked = settled.reduce((s, r) => s + parseFloat(r.stake || 1), 0);
+  const roi = staked > 0 ? (pl / staked) * 100 : 0;
+  const rate = settled.length > 0 ? (won.length / settled.length) * 100 : 0;
+
+  // Summary
+  document.getElementById('lab-total').textContent = data.length;
+  document.getElementById('lab-settled').textContent = settled.length;
+  document.getElementById('lab-pending').textContent = pending.length;
+  document.getElementById('lab-rate').textContent = settled.length > 0 ? rate.toFixed(1) + '%' : '—';
+  const plEl = document.getElementById('lab-pl');
+  plEl.textContent = settled.length > 0 ? (pl >= 0 ? '+' : '') + pl.toFixed(2) + 'u' : '—';
+  plEl.style.color = pl >= 0 ? 'var(--green)' : 'var(--red)';
+  const roiEl = document.getElementById('lab-roi');
+  roiEl.textContent = settled.length > 0 ? (roi >= 0 ? '+' : '') + roi.toFixed(1) + '%' : '—';
+  roiEl.style.color = roi >= 0 ? 'var(--green)' : 'var(--red)';
+
+  // By market
+  const markets = ['h2h_home', 'h2h_draw', 'h2h_away', 'over25', 'under25', 'over35', 'under35'];
+  const marketLabels = { h2h_home: 'Home Win', h2h_draw: 'Draw', h2h_away: 'Away Win', over25: 'Over 2.5', under25: 'Under 2.5', over35: 'Over 3.5', under35: 'Under 3.5' };
+  const marketRows = markets.map(m => {
+    const mData = settled.filter(r => r.market === m);
+    if (!mData.length) return null;
+    const mWon = mData.filter(r => r.result === 'WON').length;
+    const mPl = mData.reduce((s, r) => s + parseFloat(r.profit_loss || 0), 0);
+    const mStaked = mData.reduce((s, r) => s + parseFloat(r.stake || 1), 0);
+    const mRoi = mStaked > 0 ? (mPl / mStaked) * 100 : 0;
+    const mRate = (mWon / mData.length * 100).toFixed(1);
+    const mEdge = (mData.reduce((s, r) => s + parseFloat(r.edge_pct || 0), 0) / mData.length).toFixed(1);
+    const plCol = mPl >= 0 ? 'var(--green)' : 'var(--red)';
+    const roiCol = mRoi >= 0 ? 'var(--green)' : 'var(--red)';
+    return `<tr>
+      <td style="font-weight:700">${marketLabels[m]}</td>
+      <td style="font-family:Space Mono,monospace">${mData.length}</td>
+      <td style="font-family:Space Mono,monospace;color:var(--green)">${mWon}</td>
+      <td style="font-family:Space Mono,monospace;color:var(--red)">${mData.length - mWon}</td>
+      <td style="font-family:Space Mono,monospace">${mRate}%</td>
+      <td style="font-family:Space Mono,monospace;color:${plCol}">${mPl >= 0 ? '+' : ''}${mPl.toFixed(2)}u</td>
+      <td style="font-family:Space Mono,monospace;color:${roiCol}">${mRoi >= 0 ? '+' : ''}${mRoi.toFixed(1)}%</td>
+      <td style="font-family:Space Mono,monospace;color:var(--muted)">${mEdge >= 0 ? '+' : ''}${mEdge}%</td>
+    </tr>`;
+  }).filter(Boolean);
+  document.getElementById('labByMarket').innerHTML = marketRows.length ? marketRows.join('') : '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No settled data yet.</td></tr>';
+
+  // By league
+  const leagueMap = {};
+  for (const r of settled) {
+    if (!leagueMap[r.league]) leagueMap[r.league] = [];
+    leagueMap[r.league].push(r);
   }
-
-  const days = Object.keys(byDay).sort();
-  let bank = 1.0;
-  let peak = 1.0;
-  let wipes = 0;
-  let bestWinMultiple = 0;
-  const rows = [];
-
-  for (const day of days) {
-    const tips = byDay[day];
-    // Pick highest confidence tip — if tie, pick highest odds
-    const best = tips.reduce((a, b) => {
-      if ((b.confidence || 0) > (a.confidence || 0)) return b;
-      if ((b.confidence || 0) === (a.confidence || 0) && parseFloat(b.odds) > parseFloat(a.odds)) return b;
-      return a;
+  const leagueRows = Object.entries(leagueMap)
+    .sort((a, b) => b[1].length - a[1].length)
+    .map(([league, rows]) => {
+      const lWon = rows.filter(r => r.result === 'WON').length;
+      const lPl = rows.reduce((s, r) => s + parseFloat(r.profit_loss || 0), 0);
+      const lStaked = rows.reduce((s, r) => s + parseFloat(r.stake || 1), 0);
+      const lRoi = lStaked > 0 ? (lPl / lStaked) * 100 : 0;
+      const lRate = (lWon / rows.length * 100).toFixed(1);
+      const plCol = lPl >= 0 ? 'var(--green)' : 'var(--red)';
+      const roiCol = lRoi >= 0 ? 'var(--green)' : 'var(--red)';
+      return `<tr>
+        <td style="font-weight:700">${league}</td>
+        <td style="font-family:Space Mono,monospace">${rows.length}</td>
+        <td style="font-family:Space Mono,monospace;color:var(--green)">${lWon}</td>
+        <td style="font-family:Space Mono,monospace;color:var(--red)">${rows.length - lWon}</td>
+        <td style="font-family:Space Mono,monospace">${lRate}%</td>
+        <td style="font-family:Space Mono,monospace;color:${plCol}">${lPl >= 0 ? '+' : ''}${lPl.toFixed(2)}u</td>
+        <td style="font-family:Space Mono,monospace;color:${roiCol}">${lRoi >= 0 ? '+' : ''}${lRoi.toFixed(1)}%</td>
+      </tr>`;
     });
+  document.getElementById('labByLeague').innerHTML = leagueRows.length ? leagueRows.join('') : '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">No settled data yet.</td></tr>';
 
-    const odds      = parseFloat(best.odds || 1);
-    const bankBefore = bank;
-    const won       = best.result === 'WON';
-
-    if (won) {
-      bank = parseFloat((bank * odds).toFixed(4));
-      if (bank > peak) peak = bank;
-      const multiple = odds;
-      if (multiple > bestWinMultiple) bestWinMultiple = multiple;
-    } else {
-      wipes++;
-      bank = 1.0; // reset to 1u next day after wipe
-    }
-
-    const fmtDate  = new Date(day + 'T12:00:00Z').toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' });
-    const resCol   = won ? 'var(--green)' : 'var(--red)';
-    const bankCol  = bank > 1 ? 'var(--green)' : bank === 0 ? 'var(--red)' : 'var(--muted)';
-    const confStr  = best.confidence ? best.confidence + '%' : '—';
-
-    rows.push(`<tr>
+  // Recent tips (last 50)
+  const recentRows = data.slice(0, 50).map(r => {
+    const resCol = r.result === 'WON' ? 'var(--green)' : r.result === 'LOST' ? 'var(--red)' : 'var(--muted)';
+    const plStr = r.profit_loss !== null ? (parseFloat(r.profit_loss) >= 0 ? '+' : '') + parseFloat(r.profit_loss).toFixed(2) + 'u' : '—';
+    const edgeCol = parseFloat(r.edge_pct || 0) >= 0 ? 'var(--green)' : 'var(--red)';
+    const fmtDate = new Date(r.event_time).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    return `<tr>
       <td style="font-family:Space Mono,monospace;font-size:11px;color:var(--muted)">${fmtDate}</td>
-      <td style="font-size:12px;max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${best.event || '—'}</td>
-      <td style="font-size:11px;color:var(--green)">${best.selection || '—'}</td>
-      <td style="font-family:Space Mono,monospace;color:var(--gold);font-weight:700">${odds.toFixed(2)}</td>
-      <td style="font-family:Space Mono,monospace;font-size:11px;color:var(--muted)">${confStr}</td>
-      <td style="font-family:Space Mono,monospace">${bankBefore.toFixed(4)}u</td>
-      <td style="font-family:Space Mono,monospace;font-weight:700;color:${resCol}">${won ? 'WON' : '💀 WIPED'}</td>
-      <td style="font-family:Space Mono,monospace;font-weight:700;color:${bankCol}">${won ? bank.toFixed(4)+'u' : '💀 → 1.0000u'}</td>
-    </tr>`);
-  }
-
-  document.getElementById('bbTable').innerHTML = rows.reverse().join('');
-
-  const curCol = bank > 1 ? 'var(--green)' : bank === 0 ? 'var(--red)' : 'var(--muted)';
-  document.getElementById('bb-current').textContent  = bank.toFixed(4) + 'u';
-  document.getElementById('bb-current').style.color  = curCol;
-  document.getElementById('bb-peak').textContent     = peak.toFixed(4) + 'u';
-  document.getElementById('bb-wipes').textContent    = wipes;
-  document.getElementById('bb-days').textContent     = days.length;
-  document.getElementById('bb-bestwin').textContent  = bestWinMultiple > 0 ? 'x' + bestWinMultiple.toFixed(2) : '—';
+      <td style="font-size:11px">${r.league || '—'}</td>
+      <td style="font-size:11px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.home_team} vs ${r.away_team}</td>
+      <td style="font-family:Space Mono,monospace;font-size:11px">${r.market || '—'}</td>
+      <td style="font-size:11px;color:var(--green)">${r.selection || '—'}</td>
+      <td style="font-family:Space Mono,monospace;color:var(--gold)">${parseFloat(r.odds || 0).toFixed(2)}</td>
+      <td style="font-family:Space Mono,monospace;font-size:11px;color:${edgeCol}">${parseFloat(r.edge_pct || 0) >= 0 ? '+' : ''}${parseFloat(r.edge_pct || 0).toFixed(1)}%</td>
+      <td style="font-family:Space Mono,monospace;font-size:11px;color:var(--muted)">${(parseFloat(r.model_prob || 0) * 100).toFixed(1)}%</td>
+      <td style="font-family:Space Mono,monospace;font-weight:700;color:${resCol}">${r.result === 'pending' ? '⏳' : r.result}</td>
+      <td style="font-family:Space Mono,monospace;font-weight:700;color:${resCol}">${plStr}</td>
+    </tr>`;
+  });
+  document.getElementById('labRecent').innerHTML = recentRows.length ? recentRows.join('') : '<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:24px">No data yet.</td></tr>';
 }
 
 async function loadAllTimeStats() {
