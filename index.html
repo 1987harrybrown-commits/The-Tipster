@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Tipster Edge | AI Sports Betting Tips — 61% Win Rate</title>
+<title>The Tipster Edge | AI Sports Betting Tips — NHL, NBA & Football Predictions</title>
 <meta name="description" content="Serious betting starts here. Data-led tips, clear edges and disciplined staking across major sports. Upgrade to Pro with The Tipster Edge.">
 <meta name="keywords" content="free football tips, football predictions today, sports betting tips, value bets, betting tips today, premier league predictions, football tips today, best betting tips, free betting tips, sports predictions">
 <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
@@ -33,7 +33,9 @@
       {"@type":"Question","name":"Are the football tips free?","acceptedAnswer":{"@type":"Answer","text":"Yes. 3 free tips are available every day with no account required. Pro members get access to the full daily card of 15+ tips across all sports, including confidence ratings, value edge % and stake recommendations."}},
       {"@type":"Question","name":"How often are tips updated?","acceptedAnswer":{"@type":"Answer","text":"Tips are refreshed every 15 minutes, pulling live odds from over 40 bookmakers to identify value across Premier League, La Liga, Bundesliga, NBA, NHL and more."}},
       {"@type":"Question","name":"How is the win rate calculated?","acceptedAnswer":{"@type":"Answer","text":"Every tip is tracked from the moment it is published. Results are recorded automatically when fixtures complete and the win rate reflects every settled bet in the database — nothing is excluded."}},
-      {"@type":"Question","name":"What sports are covered?","acceptedAnswer":{"@type":"Answer","text":"Ice Hockey (NHL), Basketball (NBA) and Football (Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions League)."}}
+      {"@type":"Question","name":"What sports are covered?","acceptedAnswer":{"@type":"Answer","text":"Ice Hockey (NHL), Basketball (NBA) and Football (Premier League, La Liga, Bundesliga, Serie A, Ligue 1, Champions League)."}},
+      {"@type":"Question","name":"How do you find value bets?","acceptedAnswer":{"@type":"Answer","text":"The engine fetches live odds every 15 minutes, strips bookmaker margin to find true implied probability, then compares to the statistical model. When the gap is significant, that is a value bet."}},
+      {"@type":"Question","name":"Are these tips profitable long term?","acceptedAnswer":{"@type":"Answer","text":"The verified track record shows a 61%+ win rate and positive ROI across hundreds of settled tips. Profitability requires following stake recommendations consistently over volume."}}
     ]}
   ]
 }
@@ -328,6 +330,20 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 
   <div class="ticker"><div class="ticker-track" id="tickerTrack"><div class="tick"><span>Loading...</span></div></div></div>
 
+  <!-- HERO SECTION -->
+  <section id="hero" aria-label="Introduction" style="padding:56px 0 48px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(24,224,122,0.03) 0%,transparent 100%);">
+    <div class="wrap" style="text-align:center;max-width:680px;">
+      <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:3px;color:var(--green);margin-bottom:14px;">AI-Powered Sports Betting Tips</div>
+      <h1 style="font-family:'Syne',sans-serif;font-size:clamp(28px,7vw,52px);font-weight:800;letter-spacing:-1px;color:var(--text);line-height:1.1;margin:0 0 16px;">Where the edge is <span style="color:var(--green);">real.</span></h1>
+      <p style="font-size:15px;color:var(--muted);line-height:1.7;margin:0 0 28px;max-width:520px;margin-left:auto;margin-right:auto;">A statistical model that strips bookmaker margin, calculates true probability and surfaces genuine value across NHL, NBA and football. Every tip is logged, tracked and published — nothing hidden, nothing adjusted.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <button class="btn btn-green" onclick="openModal('signup')" style="padding:14px 28px;font-size:14px;">Get Free Tips Daily</button>
+        <a href="#record" class="btn btn-ghost" style="padding:14px 28px;font-size:14px;">View Track Record</a>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin:16px 0 0;font-family:'Space Mono',monospace;">No credit card · Free tips every day · 18+ only</p>
+    </div>
+  </section>
+
   <section id="performance" class="perf-section" aria-label="Performance statistics and track record">
     <div class="wrap">
       <div class="perf-header">
@@ -470,6 +486,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
     <div class="wrap">
       <div class="sec-label">Coverage</div>
       <h2 class="sec-title">EVERY SPORT. EVERY DAY.</h2>
+      <p style="font-size:14px;color:var(--muted);line-height:1.7;max-width:600px;margin:0 0 24px;">The engine covers NHL ice hockey tips, NBA basketball predictions and football tips across the Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League. Tips are generated from a Dixon-Coles Poisson model, updated every 15 minutes as odds move.</p>
       <div class="sports-grid" id="sportsGrid"></div>
     </div>
   </div>
@@ -485,6 +502,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">What sports are covered?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Ice Hockey (NHL) and Basketball (NBA) are our primary focus, with Football as a secondary market covering Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">What does value edge mean?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Value edge is the gap between what our model thinks the true probability of a result is, and what the bookmaker's odds imply. Consistently backing positive-edge selections is how you build a profitable record over time.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">Which bookmakers do you use?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">The engine scans odds from leading UK-licensed bookmakers in real time — including William Hill, Betfair, Paddy Power, Unibet, Sky Bet, Ladbrokes and more — to find the best available price on every selection.</p></div></div>
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How do you find value bets?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">The engine fetches live odds from leading UK bookmakers every 15 minutes and runs each fixture through a statistical model — Dixon-Coles Poisson for football, pace-adjusted scoring for NBA, and a Poisson goals model for NHL. It strips the bookmaker's margin to find the true implied probability, then compares that to the model's probability. When the gap is large enough, that's a value bet.</p></div></div>
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">Are these tips profitable long term?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">The verified track record shows a 61%+ win rate and positive ROI across hundreds of settled tips. Profitability depends on following stake recommendations consistently and thinking in weeks and months rather than individual results. No tipster wins every bet — the edge plays out over volume.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How much does Pro cost?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Pro is £9.99 per month billed monthly, or £99.90 per year — 2 months free. Cancel any time, no contracts.</p></div></div>
       </div>
     </div>
