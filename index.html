@@ -904,16 +904,25 @@ let allTips=[], activeFilter='all';
 async function loadTips() {
   const grid=document.getElementById('tipsGrid');
   grid.innerHTML=Array(6).fill('<div class="skeleton"></div>').join('');
-  const today=new Date(); today.setHours(0,0,0,0);
-  const tom=new Date(today); tom.setDate(tom.getDate()+3);
-  const {data,error}=await db.from('tips').select('*')
-    .gte('event_time',today.toISOString()).lte('event_time',tom.toISOString())
-    .order('confidence',{ascending:false}).limit(50);
-  if(error){grid.innerHTML='<div class="empty-state"><div class="ei">⚠️</div><h3>Could not load tips</h3><p>'+error.message+'</p></div>';return;}
-  allTips=data||[];
+  try {
+    // Get session token to send to engine for server-side auth check
+    const { data: { session } } = await db.auth.getSession();
+    const token = session?.access_token || '';
+    const res = await fetch(ENGINE_URL + '/tips', {
+      headers: token ? { 'Authorization': 'Bearer ' + token } : {}
+    });
+    if (!res.ok) throw new Error('Failed to load tips');
+    const payload = await res.json();
+    // Update pro status from server response — can't be spoofed via dev tools
+    isProUser = payload.isPro || false;
+    allTips = payload.tips || [];
+  } catch(e) {
+    grid.innerHTML='<div class="empty-state"><div class="ei">⚠️</div><h3>Could not load tips</h3><p>'+e.message+'</p></div>';
+    return;
+  }
   // Set today's best bet ref immediately from loaded tips
   if (allTips.length) {
-    const best = [...allTips].sort((a,b) => (b.confidence||0) - (a.confidence||0))[0];
+    const best = [...allTips].filter(t=>!t.locked).sort((a,b) => (b.confidence||0) - (a.confidence||0))[0];
     window._todayBestRef = best?.tip_ref || null;
   }
   // Auto-switch to Tomorrow if no tips left today
@@ -964,7 +973,7 @@ function renderTips() {
   if(!sorted.length){grid.innerHTML='<div class="empty-state"><div class="ei">🔍</div><h3>No tips yet</h3><p>The engine is fetching the latest odds.</p></div>';return;}
   grid.innerHTML='';
   sorted.forEach((tip,i)=>{
-    const free=isProUser||(i>0&&i<4), locked=!free;
+    const locked = tip.locked === true;
     const conf=tip.confidence||0, cls=conf>=85?'':conf>=72?'med':'low';
     const isBestBet = isProUser && window._todayBestRef && tip.tip_ref === window._todayBestRef || isProUser && window._tomorrowBestRef && tip.tip_ref === window._tomorrowBestRef;
     const ev=new Date(tip.event_time);
@@ -1237,7 +1246,7 @@ async function updateNavAuth(){
   if(!rightEl)return;
   if(session){
     const {data:profile}=await db.from('users').select('subscription_status').eq('id',session.user.id).single();
-    isProUser=profile&&profile.subscription_status==='pro';
+    // isProUser is now set server-side in loadTips() — not from DB profile
     rightEl.innerHTML='<a href="/account.html" class="btn btn-ghost" style="text-decoration:none;font-size:13px;padding:7px 16px;border-radius:4px;border:1px solid var(--border2);color:var(--text);">'+(isProUser?'<span style="color:var(--gold);margin-right:5px;">PRO</span>':'')+'My Account</a><button class="btn btn-ghost" onclick="handleLogout()">Log Out</button>';
     if(allTips.length)renderTips();
     const convBlock=document.getElementById('proConversion');
