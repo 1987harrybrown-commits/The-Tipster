@@ -346,7 +346,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <h1 style="font-family:'Syne',sans-serif;font-size:clamp(28px,7vw,52px);font-weight:800;letter-spacing:-1px;color:var(--text);line-height:1.1;margin:0 0 16px;">Where the edge is <span style="color:var(--green);">real.</span></h1>
       <p style="font-size:15px;color:var(--muted);line-height:1.7;margin:0 0 28px;max-width:520px;margin-left:auto;margin-right:auto;">A statistical model that strips bookmaker margin, calculates true probability and surfaces genuine value across NHL, NBA and football. Every tip is logged, tracked and published — nothing hidden, nothing adjusted.</p>
       <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-        <button class="btn btn-green" onclick="openModal('signup')" style="padding:14px 28px;font-size:14px;">Get Free Tips Daily</button>
+        <button class="btn btn-green" id="heroCta" onclick="openModal('signup')" style="padding:14px 28px;font-size:14px;">Get Free Tips Daily</button>
         <a href="#record" class="btn btn-ghost" style="padding:14px 28px;font-size:14px;">View Track Record</a>
       </div>
       <p style="font-size:11px;color:var(--muted);margin:16px 0 0;font-family:'Space Mono',monospace;">No credit card · Free tips every day · 18+ only</p>
@@ -1353,6 +1353,11 @@ async function updateNavAuth(){
     if(allTips.length)renderTips();
     const convBlock=document.getElementById('proConversion');
     if(convBlock)convBlock.style.display='none';
+    const heroCta=document.getElementById('heroCta');
+    if(heroCta){
+      heroCta.textContent=isProUser?'View Pro Tips':'View My Tips';
+      heroCta.onclick=()=>document.getElementById('tips')?.scrollIntoView({behavior:'smooth'});
+    }
   }else{
     isProUser=false;
     rightEl.innerHTML='<button class="btn btn-ghost" onclick="openModal(&quot;login&quot;)">Log In</button><button class="btn btn-green" onclick="openModal(&quot;signup&quot;)">Join Free</button>';
