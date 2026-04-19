@@ -46,6 +46,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root {
   --bg:#07090d; --bg2:#0c0f15; --bg3:#111620;
@@ -483,6 +484,10 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         <div class="pl-s-cell"><div class="pl-s-label">Lost</div><div class="pl-s-val" id="ps-lost" style="color:var(--red)">&mdash;</div></div>
         <div class="pl-s-cell"><div class="pl-s-label">Total P&amp;L</div><div class="pl-s-val" id="ps-pl">&mdash;</div></div>
         <div id="ps-rate" style="display:none">&mdash;</div>
+      </div>
+      <div id="roiGraphWrap" style="margin-bottom:24px;background:var(--card);border-radius:10px;padding:16px 12px 8px;border:1px solid var(--border);">
+        <div style="font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:12px;">Cumulative P&L (units)</div>
+        <canvas id="roiChart" height="140"></canvas>
       </div>
       <div id="plBody" style="display:flex;flex-direction:column;gap:0;">
         <div style="text-align:center;color:var(--muted);padding:36px;font-size:13px;">Loading results...</div>
@@ -1041,6 +1046,110 @@ function filterBySport(sport){
 }
 
 let activePLTab='all';
+let roiChartInstance = null;
+
+function renderROIGraph(rows) {
+  const canvas = document.getElementById('roiChart');
+  if (!canvas) return;
+
+  // Filter to settled rows only, sort chronologically
+  const settled = [...rows]
+    .filter(r => r.result === 'WON' || r.result === 'LOST')
+    .sort((a, b) => new Date(a.settled_at) - new Date(b.settled_at));
+
+  if (!settled.length) {
+    document.getElementById('roiGraphWrap').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('roiGraphWrap').style.display = 'block';
+
+  // Build cumulative PL from running_pl (already correct after recalculation)
+  const labels = [];
+  const values = [];
+  let running = 0;
+
+  // Group by date for cleaner x-axis
+  const byDate = {};
+  for (const r of settled) {
+    const date = new Date(r.settled_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    byDate[date] = parseFloat(r.running_pl || 0);
+  }
+
+  // Add a zero start point
+  const dateKeys = Object.keys(byDate);
+  labels.push('Start');
+  values.push(0);
+  for (const d of dateKeys) {
+    labels.push(d);
+    values.push(byDate[d]);
+  }
+
+  const isPositive = values[values.length - 1] >= 0;
+  const lineColor = isPositive ? '#18e07a' : '#e05555';
+  const fillColor = isPositive ? 'rgba(24,224,122,0.08)' : 'rgba(224,85,85,0.08)';
+
+  if (roiChartInstance) roiChartInstance.destroy();
+
+  roiChartInstance = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [{
+        data: values,
+        borderColor: lineColor,
+        backgroundColor: fillColor,
+        borderWidth: 2,
+        pointRadius: 0,
+        pointHoverRadius: 4,
+        pointHoverBackgroundColor: lineColor,
+        fill: true,
+        tension: 0.3,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a2035',
+          titleColor: '#8899aa',
+          bodyColor: '#dde6f0',
+          borderColor: '#2a3548',
+          borderWidth: 1,
+          callbacks: {
+            label: ctx => {
+              const v = ctx.parsed.y;
+              return (v >= 0 ? '+' : '') + v.toFixed(2) + 'u';
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: {
+            color: '#8899aa',
+            font: { family: 'Space Mono', size: 9 },
+            maxTicksLimit: 8,
+            maxRotation: 0,
+          }
+        },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: {
+            color: '#8899aa',
+            font: { family: 'Space Mono', size: 9 },
+            callback: v => (v >= 0 ? '+' : '') + v.toFixed(1) + 'u'
+          }
+        }
+      }
+    }
+  });
+}
+
 function switchPLTab(tab){
   activePLTab=tab;
   document.querySelectorAll('[id^="plTab-"]').forEach(t=>t.classList.remove('on'));
@@ -1052,6 +1161,7 @@ function renderHistoryTable(){
   const container=document.getElementById('plBody');
   let rows=allHistory;
   if(activePLTab!=='all')rows=rows.filter(r=>(r.tier||'free')===activePLTab);
+  renderROIGraph(rows);
   if(!rows.length){container.innerHTML='<div style="text-align:center;color:var(--muted);padding:36px;font-size:13px;">No settled results yet.</div>';updatePLSummary(rows);return;}
   let running=0;
   container.innerHTML=rows.map(r=>{
