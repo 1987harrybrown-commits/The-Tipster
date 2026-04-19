@@ -391,7 +391,7 @@ td{padding:9px 11px;}
 <script>
 const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
-const ENGINE_URL    = 'https://tipster-engine.onrender.com';
+const ENGINE_URL    = 'https://tipster-engine-1.onrender.com';
 const ADMIN_KEY     = localStorage.getItem('tipster_admin_key') || '';
 
 const { createClient } = supabase;
@@ -507,7 +507,7 @@ async function triggerAccaGenerate() {
   btn.disabled = true; btn.textContent = 'Generating...';
   try {
     const ADMIN_KEY = localStorage.getItem('tipster_admin_key') || '';
-    const res = await fetch(`${ENGINE_URL}/admin/generate-acca?key=${ADMIN_KEY}`);
+    const res = await fetch(`${ENGINE_URL}/admin/generate-acca`, { headers: { 'Authorization': `Bearer ${ADMIN_KEY}` } });
     const data = await res.json();
     if (data.started) {
       btn.textContent = 'Triggered!';
