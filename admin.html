@@ -293,6 +293,8 @@ td{padding:9px 11px;}
         </div>
       </div>
       <button class="btn btn-gold" onclick="triggerAccaGenerate()" id="accaGenBtn">Generate Today's Acca</button>
+      <button class="btn btn-red" onclick="triggerResettle()" id="resettleBtn" style="margin-left:10px;">Re-settle All History</button>
+      <div id="resettleLog" style="display:none;margin-top:14px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:14px;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);max-height:260px;overflow-y:auto;white-space:pre-wrap;"></div>
     </div>
   </div>
   <div class="card full" style="margin-bottom:24px;">
@@ -500,6 +502,33 @@ function updateAccaSummary(data) {
   const roiEl = document.getElementById('acca-roi');
   roiEl.textContent = total > 0 ? fmt(roi,1)+'%' : '—';
   roiEl.style.color = roi >= 0 ? 'var(--green)' : 'var(--red)';
+}
+
+async function triggerResettle() {
+  if (!confirm('This will re-evaluate every settled tip and rebuild results_history from scratch. Are you sure?')) return;
+  const btn = document.getElementById('resettleBtn');
+  const logEl = document.getElementById('resettleLog');
+  btn.disabled = true; btn.textContent = 'Running...';
+  logEl.style.display = 'block'; logEl.textContent = 'Starting resettlement...\n';
+  try {
+    const ADMIN_KEY = localStorage.getItem('tipster_admin_key') || '';
+    const res = await fetch(`${ENGINE_URL}/admin/resettle`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${ADMIN_KEY}` }
+    });
+    const data = await res.json();
+    if (data.success) {
+      logEl.textContent = data.log.join('\n');
+      btn.textContent = `Done — ${data.corrected} corrected`;
+      setTimeout(() => { btn.disabled=false; btn.textContent='Re-settle All History'; loadStats(); }, 4000);
+    } else {
+      logEl.textContent = 'Error: ' + (data.error || 'Unknown error');
+      btn.disabled=false; btn.textContent='Re-settle All History';
+    }
+  } catch(e) {
+    logEl.textContent = 'Request failed: ' + e.message;
+    btn.disabled=false; btn.textContent='Re-settle All History';
+  }
 }
 
 async function triggerAccaGenerate() {
