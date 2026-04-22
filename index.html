@@ -1163,20 +1163,33 @@ function renderHistoryTable(){
   if(activePLTab!=='all')rows=rows.filter(r=>(r.tier||'free')===activePLTab);
   renderROIGraph(rows);
   if(!rows.length){container.innerHTML='<div style="text-align:center;color:var(--muted);padding:36px;font-size:13px;">No settled results yet.</div>';updatePLSummary(rows);return;}
+
+  // Sort by event_time ascending to calculate running P&L correctly
+  const sorted=[...rows].sort((a,b)=>new Date(a.event_time)-new Date(b.event_time));
   let running=0;
-  container.innerHTML=rows.map(r=>{
+  const rowsWithRunning=sorted.map(r=>{
     const pl=parseFloat(r.profit_loss||0);
     running=parseFloat((running+pl).toFixed(2));
-    const date=new Date(r.settled_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    return {...r,_running:running};
+  });
+
+  // Display newest event first
+  const displayed=[...rowsWithRunning].reverse();
+
+  let running2=0;
+  container.innerHTML=displayed.map(r=>{
+    const pl=parseFloat(r.profit_loss||0);
+    const rpl=r._running;
+    const date=new Date(r.event_time).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     const won=r.result==='WON',tier=r.tier||'free';
-    const plCol=pl>=0?'var(--green)':'var(--red)',rplCol=running>=0?'var(--green)':'var(--red)';
+    const plCol=pl>=0?'var(--green)':'var(--red)',rplCol=rpl>=0?'var(--green)':'var(--red)';
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);gap:10px;">'+
       '<div style="flex:1;min-width:0;">'+
         '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;"><span style="font-family:Space Mono,monospace;font-size:10px;color:var(--muted);">'+date+'</span><span class="tcard-badge '+tier+'" style="font-size:8px;padding:2px 5px;">'+tier.toUpperCase()+'</span><span style="font-size:10px;color:var(--muted);">'+(r.sport||'')+'</span></div>'+
         '<div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">'+(r.event||'')+'</div>'+
         '<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+(r.selection||'')+' <span style="color:var(--gold);font-family:Space Mono,monospace;">@ '+fmtOdds(r.odds)+'</span></div>'+
       '</div>'+
-      '<div style="text-align:right;flex-shrink:0;"><span class="res-pill '+(won?'w':'l')+'" style="display:inline-block;margin-bottom:5px;">'+r.result+'</span><div style="font-family:Space Mono,monospace;font-size:12px;font-weight:700;color:'+plCol+';">'+fmtU(pl)+'</div><div style="font-family:Space Mono,monospace;font-size:10px;color:'+rplCol+';">'+fmtU(running)+'</div></div>'+
+      '<div style="text-align:right;flex-shrink:0;"><span class="res-pill '+(won?'w':'l')+'" style="display:inline-block;margin-bottom:5px;">'+r.result+'</span><div style="font-family:Space Mono,monospace;font-size:12px;font-weight:700;color:'+plCol+';">'+fmtU(pl)+'</div><div style="font-family:Space Mono,monospace;font-size:10px;color:'+rplCol+';">'+fmtU(rpl)+'</div></div>'+
     '</div>';
   }).join('');
   updatePLSummary(rows);
@@ -1199,7 +1212,7 @@ db.channel('live-updates')
   .subscribe();
 
 async function loadHistory(){
-  const {data,error}=await db.from('results_history').select('*').order('settled_at',{ascending:false}).limit(500);
+  const {data,error}=await db.from('results_history').select('*').order('event_time',{ascending:true}).limit(500);
   if(error){console.error('Results load error:',error.message);return;}
   allHistory=data||[];
   renderDashboard('yesterday');
