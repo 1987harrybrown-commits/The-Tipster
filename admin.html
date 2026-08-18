@@ -343,24 +343,76 @@ const ADMIN_KEY     = localStorage.getItem('tipster_admin_key') || '';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ── AUTH ──────────────────────────────────────────────────
+/// ── AUTH ──────────────────────────────────────────────────
+// A Supabase session alone does NOT make someone an admin — every subscriber
+// who signs up on the main site has one, and the dashboard used to render for
+// any of them. Authorisation is carried in app_metadata, which can only be
+// written with the service-role key, so a user cannot promote themselves.
+// (user_metadata is user-editable and deliberately NOT trusted here.)
+//
+// Grant admin with the service-role key:
+//   supabase.auth.admin.updateUserById(USER_ID, { app_metadata: { role: 'admin' } })
+//
+// This gate stops the dashboard rendering for non-admins. It is not the
+// security boundary — Row Level Security on users/email_log/email_overrides/
+// admin_jobs is what actually protects the data from a direct API call.
+function isAdmin(user) {
+  const meta = user?.app_metadata || {};
+  return meta.role === 'admin' || meta.is_admin === true;
+}
+
 (async () => {
   const { data: { session } } = await db.auth.getSession();
-  if (session) { showDash(); loadAll(); }
+  if (!session) return;                    // not signed in — login screen stays
+  if (!isAdmin(session.user)) {
+    // Signed in, but not an admin. Drop the session so the page cannot be
+    // left in a half-authorised state, and say why.
+    await db.auth.signOut();
+    localStorage.removeItem('tipster_admin_key');
+    const el = document.getElementById('loginAlert');
+    if (el) showAlert(el, 'That account is not an administrator.', 'error');
+    return;
+  }
+  showDash(); loadAll();
 })();
 
 async function adminLogin() {
   const btn = document.getElementById('loginBtn');
+  const alertEl = document.getElementById('loginAlert');
   btn.disabled = true; btn.textContent = 'Signing in...';
-  const email = document.getElementById('adminEmail').value;
+  const email = document.getElementById('adminEmail').value.trim();
   const pw    = document.getElementById('adminPw').value;
-  const key   = prompt('Enter admin API key:');
-  if (!key) { btn.disabled=false; btn.textContent='Sign In'; return; }
-  localStorage.setItem('tipster_admin_key', key);
 
-  const { error } = await db.auth.signInWithPassword({ email, password: pw });
-  btn.disabled = false; btn.textContent = 'Sign In';
-  if (error) { showAlert(document.getElementById('loginAlert'), error.message, 'error'); return; }
+  if (!email || !pw) {
+    showAlert(alertEl, 'Enter both an email and a password.', 'error');
+    btn.disabled = false; btn.textContent = 'Sign In';
+    return;
+  }
+
+  // Authenticate FIRST. The old order prompted for the admin API key and wrote
+  // it to localStorage before checking the password, so a failed sign-in — or
+  // anyone who opened the page — left a valid engine key sitting in storage.
+  const { data, error } = await db.auth.signInWithPassword({ email, password: pw });
+  if (error) {
+    showAlert(alertEl, error.message, 'error');
+    btn.disabled = false; btn.textContent = 'Sign In';
+    return;
+  }
+  if (!isAdmin(data.user)) {
+    await db.auth.signOut();
+    showAlert(alertEl, 'That account is not an administrator.', 'error');
+    btn.disabled = false; btn.textContent = 'Sign In';
+    return;
+  }
+
+  const key = prompt('Enter admin API key:');
+  if (!key) {
+    await db.auth.signOut();
+    showAlert(alertEl, 'Admin API key is required — signed out.', 'error');
+    btn.disabled = false; btn.textContent = 'Sign In';
+    return;
+  }
+  localStorage.setItem('tipster_admin_key', key.trim());
   location.reload();
 }
 
