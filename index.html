@@ -1042,7 +1042,13 @@ function renderTips() {
   if(!sorted.length){grid.innerHTML='<div class="empty-state"><div class="ei">🔍</div><h3>No tips yet</h3><p>The engine is fetching the latest odds.</p></div>';return;}
   grid.innerHTML='';
   sorted.forEach((tip,i)=>{
-    const free=isProUser||(i>0&&i<4), locked=!free;
+    // Which tips are free is a stored fact now (engine: tagFreeTips), not a
+    // position. It was computed differently here than everywhere else — this
+    // locked index 0 while the engine route, the four sport pages and the free
+    // email all treated the top three as free. Falls back to the old rule for
+    // rows written before the column existed.
+    const isFree = tip.is_free != null ? !!tip.is_free : (i>0&&i<4);
+    const free=isProUser||isFree, locked=!free;
     const conf=tip.confidence||0, cls=conf>=85?'':conf>=72?'med':'low';
     const isBestBet = isProUser && window._todayBestRef && tip.tip_ref === window._todayBestRef || isProUser && window._tomorrowBestRef && tip.tip_ref === window._tomorrowBestRef;
     const ev=new Date(tip.event_time);
