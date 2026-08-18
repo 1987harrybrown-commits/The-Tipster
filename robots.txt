@@ -1,5 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /admin.html
+Disallow: /admin
+Disallow: /account.html
+Disallow: /account
 
 Sitemap: https://www.thetipsteredge.com/sitemap.xml
