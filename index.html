@@ -1270,7 +1270,6 @@ function updatePLSummary(data){
 db.channel('live-updates')
   .on('postgres_changes',{event:'*',schema:'public',table:'tips'},          ()=>{loadTips();loadLiveBar();})
   .on('postgres_changes',{event:'*',schema:'public',table:'results_history'},()=>{loadHistory();loadLiveBar();})
-  .on('postgres_changes',{event:'*',schema:'public',table:'results_history'},()=>{loadLiveBar();})
   .subscribe();
 
 async function loadHistory(){
