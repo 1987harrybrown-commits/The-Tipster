@@ -5,6 +5,16 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// Escape anything interpolated into the HTML below. None of these fields is
+// meant to contain markup — they are team names, leagues and selections that
+// originate from an upstream feed — so a stray < or & should render, not parse.
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+
 const SPORT_ICONS = { Football: '⚽', Basketball: '🏀', 'Ice Hockey': '🏒' };
 
 function fmtOdds(o) { return parseFloat(o).toFixed(2); }
@@ -33,15 +43,15 @@ module.exports = async (req, res) => {
 
   const tipCards = freeTips.map(t => `
     <article class="tip-card" itemscope itemtype="https://schema.org/Event">
-      <div class="tip-sport">${SPORT_ICONS[t.sport]||'🏅'} ${t.sport} · ${t.league}</div>
-      <h3 itemprop="name">${t.home_team} vs ${t.away_team}</h3>
+      <div class="tip-sport">${SPORT_ICONS[t.sport]||'🏅'} ${esc(t.sport)} · ${esc(t.league)}</div>
+      <h3 itemprop="name">${esc(t.home_team)} vs ${esc(t.away_team)}</h3>
       <div class="tip-meta">
-        <span class="tip-pick">📌 ${t.selection}</span>
+        <span class="tip-pick">📌 ${esc(t.selection)}</span>
         <span class="tip-odds">Odds: <strong>${fmtOdds(t.odds)}</strong></span>
         <span class="tip-time">🕐 ${fmtTime(t.event_time)} UK</span>
       </div>
-      <div class="tip-conf">Confidence: ${t.confidence}%
-        <div class="conf-bar"><div class="conf-fill" style="width:${t.confidence}%"></div></div>
+      <div class="tip-conf">Confidence · <strong>Pro only 🔒</strong>
+        <div class="conf-bar"><div class="conf-fill conf-locked"></div></div>
       </div>
     </article>`).join('');
 
@@ -68,8 +78,8 @@ module.exports = async (req, res) => {
   "itemListElement": freeTips.map((t,i) => ({
     "@type":"ListItem",
     "position": i+1,
-    "name":`${t.home_team} vs ${t.away_team} — ${t.selection}`,
-    "description":`${t.sport} tip at odds ${fmtOdds(t.odds)} with ${t.confidence}% confidence`
+    "name":`${esc(t.home_team)} vs ${esc(t.away_team)} — ${esc(t.selection)}`,
+    "description":`${esc(t.sport)} tip: ${esc(t.selection)} at odds ${fmtOdds(t.odds)}`
   }))
 })}</script>
 <style>
@@ -102,6 +112,7 @@ h2{font-size:22px;font-weight:800;margin-bottom:20px;}
 .tip-time{font-size:12px;color:#4a5a70;}
 .tip-conf{font-size:12px;color:#4a5a70;margin-top:8px;}
 .conf-bar{height:3px;background:#1c2535;border-radius:2px;margin-top:5px;}
+.conf-locked{width:100%;background:repeating-linear-gradient(90deg,#2a3444 0 6px,transparent 6px 12px);}
 .conf-fill{height:100%;background:#18e07a;border-radius:2px;}
 .locked-card{background:#0f141c;border:1px solid rgba(240,180,41,0.2);border-radius:8px;padding:18px;border-top:3px solid #f0b429;text-align:center;}
 .locked-card h3{font-size:14px;color:#4a5a70;margin-bottom:10px;}
@@ -179,9 +190,9 @@ footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
   <div>
     <a href="/">Home</a>
     <a href="/results">Track Record</a>
-    <a href="/football-tips.html">Football Tips</a>
-    <a href="/nhl-tips.html">NHL Tips</a>
-    <a href="/nba-tips.html">NBA Tips</a>
+    <a href="/football-tips-today">Football Tips</a>
+    <a href="/nhl-tips-today">NHL Tips</a>
+    <a href="/nba-tips-today">NBA Tips</a>
     <a href="/terms.html">Terms</a>
     <a href="/responsible-gambling.html">Responsible Gambling</a>
   </div>

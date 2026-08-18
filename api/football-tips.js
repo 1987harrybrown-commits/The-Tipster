@@ -4,6 +4,16 @@ const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// Escape anything interpolated into the HTML below. None of these fields is
+// meant to contain markup — they are team names, leagues and selections that
+// originate from an upstream feed — so a stray < or & should render, not parse.
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+
 function fmtDate(d){return new Date(d).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
 function fmtTime(d){return new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/London'});}
 
@@ -33,15 +43,15 @@ module.exports = async (req, res) => {
 
   const tipCards = freeTips.map(t=>`
     <article class="tip-card">
-      <div class="tip-league">${t.league}</div>
-      <h3>${t.home_team} vs ${t.away_team}</h3>
+      <div class="tip-league">${esc(t.league)}</div>
+      <h3>${esc(t.home_team)} vs ${esc(t.away_team)}</h3>
       <div class="tip-row">
-        <span>📌 ${t.selection}</span>
+        <span>📌 ${esc(t.selection)}</span>
         <span style="color:#f0b429;font-family:monospace;font-weight:700">${parseFloat(t.odds).toFixed(2)}</span>
       </div>
       <div class="tip-row">
         <span style="color:#4a5a70">🕐 ${fmtTime(t.event_time)} UK</span>
-        <span style="color:#4a5a70">Conf: ${t.confidence}%</span>
+        <span style="color:#4a5a70">Conf: <strong>Pro 🔒</strong></span>
       </div>
     </article>`).join('');
 
@@ -63,8 +73,8 @@ module.exports = async (req, res) => {
   "url":"https://www.thetipsteredge.com/football-tips-today",
   "itemListElement": freeTips.map((t,i)=>({
     "@type":"ListItem","position":i+1,
-    "name":`${t.home_team} vs ${t.away_team} — ${t.selection}`,
-    "description":`${t.league} tip at ${parseFloat(t.odds).toFixed(2)} odds`
+    "name":`${esc(t.home_team)} vs ${esc(t.away_team)} — ${esc(t.selection)}`,
+    "description":`${esc(t.league)} tip at ${parseFloat(t.odds).toFixed(2)} odds`
   }))
 })}</script>
 <style>
@@ -118,7 +128,7 @@ footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
     <div class="stat"><div class="sl">Net P&L</div><div class="sv" style="color:${pl>=0?'#18e07a':'#ff3d5a'};font-family:monospace">${pl>=0?'+':''}${pl.toFixed(1)}u</div></div>
   </div>
 
-  ${leagues.length?`<div class="leagues">${leagues.map(l=>`<span class="league-pill">⚽ ${l}</span>`).join('')}</div>`:''}
+  ${leagues.length?`<div class="leagues">${leagues.map(l=>`<span class="league-pill">⚽ ${esc(l)}</span>`).join('')}</div>`:''}
 
   <div class="label">Today's Picks</div>
   <h2>Free Football Tips — ${todayStr}</h2>
@@ -157,7 +167,7 @@ footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
   <p style="margin-bottom:10px">© 2026 The Tipster · Free football tips updated every 15 minutes · 18+ only · Please gamble responsibly</p>
   <div>
     <a href="/">Home</a><a href="/tips">All Tips</a><a href="/results">Track Record</a>
-    <a href="/nhl-tips.html">NHL Tips</a><a href="/nba-tips.html">NBA Tips</a>
+    <a href="/nhl-tips-today">NHL Tips</a><a href="/nba-tips-today">NBA Tips</a>
     <a href="/responsible-gambling.html">Responsible Gambling</a>
   </div>
 </footer>

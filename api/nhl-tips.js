@@ -2,6 +2,16 @@ const { createClient } = require('@supabase/supabase-js');
 const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// Escape anything interpolated into the HTML below. None of these fields is
+// meant to contain markup — they are team names, leagues and selections that
+// originate from an upstream feed — so a stray < or & should render, not parse.
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function fmtDate(d){return new Date(d).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
 function fmtTime(d){return new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/London'});}
 
@@ -26,10 +36,10 @@ module.exports = async (req, res) => {
 
   const tipCards = freeTips.map(t=>`
     <article class="tip-card">
-      <div class="tip-league">🏒 ${t.league}</div>
-      <h3>${t.home_team} vs ${t.away_team}</h3>
-      <div class="tip-row"><span>📌 ${t.selection}</span><span style="color:#f0b429;font-family:monospace;font-weight:700">${parseFloat(t.odds).toFixed(2)}</span></div>
-      <div class="tip-row"><span style="color:#4a5a70">🕐 ${fmtTime(t.event_time)} UK</span><span style="color:#4a5a70">Conf: ${t.confidence}%</span></div>
+      <div class="tip-league">🏒 ${esc(t.league)}</div>
+      <h3>${esc(t.home_team)} vs ${esc(t.away_team)}</h3>
+      <div class="tip-row"><span>📌 ${esc(t.selection)}</span><span style="color:#f0b429;font-family:monospace;font-weight:700">${parseFloat(t.odds).toFixed(2)}</span></div>
+      <div class="tip-row"><span style="color:#4a5a70">🕐 ${fmtTime(t.event_time)} UK</span><span style="color:#4a5a70">Conf: <strong>Pro 🔒</strong></span></div>
     </article>`).join('');
 
   const html = `<!DOCTYPE html>
