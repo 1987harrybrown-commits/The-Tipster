@@ -749,30 +749,71 @@ updateDateHeader();
 
 let cachedStats = {}, isProUser = false;
 
+// PostgREST caps every response at 1000 rows. Any query over results_history
+// that can exceed that has to paginate or it truncates silently — which is how
+// the headline figures below stopped counting once the ledger passed 1000
+// settled tips.
+async function selectAllRows(table, columns, applyFilters) {
+  const PAGE = 1000;
+  let out = [], from = 0;
+  for (;;) {
+    let q = db.from(table).select(columns).order('id', { ascending: true }).range(from, from + PAGE - 1);
+    if (applyFilters) q = applyFilters(q);
+    const { data, error } = await q;
+    if (error) { console.error(`selectAllRows(${table}):`, error.message); break; }
+    if (!data || !data.length) break;
+    out = out.concat(data);
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
+  return out;
+}
+
 async function loadLiveBar() {
-  const { data } = await db
-    .from('results_history')
-    .select('result, profit_loss, stake')
-    .in('result', ['WON', 'LOST']);
-  if (!data) return;
+  // The engine maintains stats_cache from the whole ledger, and /api/tips,
+  // /api/results and /api/stats already treat it as the source for these
+  // numbers. Reading it here means one indexed row instead of pulling the
+  // entire ledger into the browser on every page load. The paginated fallback
+  // covers a missing or not-yet-written cache row.
+  let s = null;
+  const { data: cache } = await db.from('stats_cache').select('*').eq('id', 1).maybeSingle();
+  if (cache && cache.total_tips != null) {
+    s = {
+      total_tips:   Number(cache.total_tips)   || 0,
+      total_won:    Number(cache.total_won)    || 0,
+      total_lost:   Number(cache.total_lost)   || 0,
+      win_rate:     parseFloat(cache.win_rate)     || 0,
+      total_pl:     parseFloat(cache.total_pl)     || 0,
+      total_staked: parseFloat(cache.total_staked) || 0,
+      roi:          parseFloat(cache.roi)          || 0,
+    };
+  } else {
+    const data = await selectAllRows('results_history', 'result, profit_loss, stake',
+      q => q.in('result', ['WON', 'LOST']));
+    if (!data.length) return;
+    const won   = data.filter(r => r.result === 'WON').length;
+    const lost  = data.filter(r => r.result === 'LOST').length;
+    const total = won + lost;
+    const pl    = parseFloat(data.reduce((acc, r) => acc + parseFloat(r.profit_loss || 0), 0).toFixed(2));
+    const stk   = parseFloat(data.reduce((acc, r) => acc + parseFloat(r.stake || 0), 0).toFixed(2));
+    s = {
+      total_tips: total, total_won: won, total_lost: lost,
+      win_rate: total > 0 ? parseFloat((won / total * 100).toFixed(1)) : 0,
+      total_pl: pl, total_staked: stk,
+      roi: stk > 0 ? parseFloat((pl / stk * 100).toFixed(1)) : 0,
+    };
+  }
 
-  const won   = data.filter(r => r.result === 'WON').length;
-  const lost  = data.filter(r => r.result === 'LOST').length;
-  const total = won + lost;
-  const pl    = parseFloat(data.reduce((s, r) => s + parseFloat(r.profit_loss || 0), 0).toFixed(2));
-  const stk   = parseFloat(data.reduce((s, r) => s + parseFloat(r.stake || 0), 0).toFixed(2));
-  const rate  = total > 0 ? parseFloat((won / total * 100).toFixed(1)) : 0;
-  const roi   = stk > 0 ? parseFloat((pl / stk * 100).toFixed(1)) : 0;
+  cachedStats = s;
 
-  cachedStats = { total_tips: total, total_won: won, total_lost: lost, win_rate: rate, total_pl: pl, total_staked: stk, roi };
-
-  document.getElementById('lb-tips').textContent  = total || 0;
-  document.getElementById('lb-won').textContent   = won || 0;
-  document.getElementById('lb-lost').textContent  = lost || 0;
-  document.getElementById('lb-rate').textContent  = rate + '%';
+  document.getElementById('lb-tips').textContent  = s.total_tips || 0;
+  document.getElementById('lb-won').textContent   = s.total_won  || 0;
+  document.getElementById('lb-lost').textContent  = s.total_lost || 0;
+  document.getElementById('lb-rate').textContent  = s.win_rate + '%';
   const plEl = document.getElementById('lb-pl'), roiEl = document.getElementById('lb-roi');
-  plEl.textContent  = fmtU(pl);  plEl.className  = 'lb-val '+(pl>=0?'g':'r');
-  roiEl.textContent = fmt(roi,1)+'%'; roiEl.className = 'lb-val '+(roi>=0?'g':'r');
+  plEl.textContent  = fmtU(s.total_pl);  plEl.className  = 'lb-val '+(s.total_pl>=0?'g':'r');
+  roiEl.textContent = fmt(s.roi,1)+'%';  roiEl.className = 'lb-val '+(s.roi>=0?'g':'r');
+
   loadBestBetStreak();
 }
 
@@ -1233,7 +1274,12 @@ db.channel('live-updates')
   .subscribe();
 
 async function loadHistory(){
-  const {data,error}=await db.from('results_history').select('*').order('settled_at',{ascending:true}).limit(500);
+  // Was ascending — i.e. the OLDEST 500 rows — so once the ledger passed 500
+  // settled tips this dashboard stopped advancing and renderDashboard('yesterday')
+  // had nothing recent to show. Take the newest 500, then restore chronological
+  // order for the cumulative rendering below.
+  const {data:recent,error}=await db.from('results_history').select('*').order('settled_at',{ascending:false}).limit(500);
+  const data=(recent||[]).slice().reverse();
   if(error){console.error('Results load error:',error.message);return;}
   allHistory=data||[];
   renderDashboard('yesterday');

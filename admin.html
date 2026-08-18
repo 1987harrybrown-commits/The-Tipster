@@ -361,6 +361,26 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 // directly and inside email_log.subject. Anything from the database that lands
 // in innerHTML here has to be escaped, or a visitor can run script in the
 // admin's session and read the engine key out of localStorage.
+// PostgREST caps every response at 1000 rows. The all-time stats and the
+// bankroll simulator both aggregate the whole ledger, so an unbounded select
+// quietly stopped counting past 1000 settled tips — the "all-time" figures on
+// this dashboard were neither all-time nor correct.
+async function selectAllRows(table, columns, applyFilters) {
+  const PAGE = 1000;
+  let out = [], from = 0;
+  for (;;) {
+    let q = db.from(table).select(columns).order('id', { ascending: true }).range(from, from + PAGE - 1);
+    if (applyFilters) q = applyFilters(q);
+    const { data, error } = await q;
+    if (error) { console.error('selectAllRows(' + table + '):', error.message); break; }
+    if (!data || !data.length) break;
+    out = out.concat(data);
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
+  return out;
+}
+
 function esc(v) {
   return String(v == null ? '' : v)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -574,11 +594,13 @@ async function triggerAccaGenerate() {
 }
 
 async function loadBankrollSimulator() {
-  const { data: history } = await db
-    .from('results_history')
-    .select('settled_at, stake, odds, result, event, sport')
-    .in('result', ['WON', 'LOST'])
-    .order('settled_at', { ascending: true });
+  // Paginated, then sorted here: the helper pages by id, and a bankroll curve
+  // only makes sense in settlement order.
+  const history = (await selectAllRows(
+    'results_history',
+    'settled_at, stake, odds, result, event, sport',
+    q => q.in('result', ['WON', 'LOST'])
+  )).sort((a, b) => new Date(a.settled_at) - new Date(b.settled_at));
 
   if (!history || !history.length) {
     document.getElementById('bankrollTable').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No settled results yet.</td></tr>';
@@ -657,10 +679,8 @@ async function loadBankrollSimulator() {
 }
 
 async function loadAllTimeStats() {
-  const { data, error } = await db
-    .from('results_history')
-    .select('result, profit_loss, stake, odds');
-  if (error || !data) return;
+  const data = await selectAllRows('results_history', 'result, profit_loss, stake, odds');
+  if (!data.length) return;
 
   const won   = data.filter(r => r.result === 'WON').length;
   const lost  = data.filter(r => r.result === 'LOST').length;

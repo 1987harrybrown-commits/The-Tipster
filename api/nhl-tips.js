@@ -3,6 +3,27 @@ const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// PostgREST caps every response at 1000 rows, so an unbounded select over
+// results_history silently truncates and every figure derived from it is wrong
+// once the ledger passes that. Returns { data } to match the shape the callers
+// already destructure.
+async function selectAllRows(table, columns, applyFilters) {
+  const PAGE = 1000;
+  let out = [], from = 0;
+  for (;;) {
+    let q = db.from(table).select(columns).order('id', { ascending: true }).range(from, from + PAGE - 1);
+    if (applyFilters) q = applyFilters(q);
+    const { data, error } = await q;
+    if (error) { console.error('selectAllRows(' + table + '):', error.message); break; }
+    if (!data || !data.length) break;
+    out = out.concat(data);
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
+  return { data: out };
+}
+
+
 // Escape anything interpolated into the HTML below. None of these fields is
 // meant to contain markup — they are team names, leagues and selections that
 // originate from an upstream feed — so a stray < or & should render, not parse.
@@ -24,7 +45,7 @@ module.exports = async (req, res) => {
     db.from('tips').select('*').eq('sport','Ice Hockey').eq('status','pending')
       .gte('event_time', today.toISOString()).lte('event_time', tom.toISOString())
       .order('confidence',{ascending:false}).limit(10),
-    db.from('results_history').select('result,profit_loss').eq('sport','Ice Hockey')
+    selectAllRows('results_history','result,profit_loss', q => q.eq('sport','Ice Hockey'))
   ]);
 
   const h = history||[];
