@@ -1008,8 +1008,17 @@ function deriveEdge(tip) {
   return { modelProb, impliedProb, edge };
 }
 
-function stakeClass(s) { s=parseFloat(s||1); return s>=3?'s3':s>=2?'s2':s>=1.5?'s15':'s1'; }
-function stakeLabel(s) { s=parseFloat(s||1); if(s>=3)return s+'u — High Confidence'; if(s>=2)return s+'u — Medium'; if(s>=1.5)return s+'u'; return s+'u'; }
+function stakeClass(s) { s=parseFloat(s??1); return s>0 ? (s>=3?'s3':s>=2?'s2':s>=1.5?'s15':'s1') : 's1'; }
+// The engine publishes short-price selections with stake 0 — informational,
+// not a bet ("insight" tier). `s||1` turned that into 1 and they rendered as a
+// 1u recommendation, indistinguishable from a real pick.
+function stakeLabel(s) {
+  s = parseFloat(s ?? 1);
+  if (!(s > 0)) return 'No stake — insight only';
+  if (s >= 3) return s+'u — High Confidence';
+  if (s >= 2) return s+'u — Medium';
+  return s+'u';
+}
 
 function renderTips() {
   const grid=document.getElementById('tipsGrid');
