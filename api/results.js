@@ -5,6 +5,16 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// Escape anything interpolated into the HTML below. None of these fields is
+// meant to contain markup — they are team names, leagues and selections that
+// originate from an upstream feed — so a stray < or & should render, not parse.
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+
 function fmt(n,d=2){return(n>=0?'+':'')+parseFloat(n).toFixed(d);}
 function fmtDate(d){return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
 
@@ -48,11 +58,11 @@ module.exports = async (req, res) => {
   const recentRows = rows.slice(0,30).map(r=>`
     <tr>
       <td>${fmtDate(r.settled_at)}</td>
-      <td>${r.sport||''}</td>
-      <td>${r.event||''}</td>
-      <td>${r.selection||''}</td>
+      <td>${esc(r.sport||'')}</td>
+      <td>${esc(r.event||'')}</td>
+      <td>${esc(r.selection||'')}</td>
       <td style="color:#f0b429;font-family:monospace">${parseFloat(r.odds||0).toFixed(2)}</td>
-      <td><span style="display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;font-family:monospace;background:${r.result==='WON'?'rgba(24,224,122,0.1)':'rgba(255,61,90,0.1)'};color:${r.result==='WON'?'#18e07a':'#ff3d5a'}">${r.result}</span></td>
+      <td><span style="display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;font-family:monospace;background:${r.result==='WON'?'rgba(24,224,122,0.1)':'rgba(255,61,90,0.1)'};color:${r.result==='WON'?'#18e07a':'#ff3d5a'}">${esc(r.result)}</span></td>
       <td style="color:${parseFloat(r.profit_loss||0)>=0?'#18e07a':'#ff3d5a'};font-family:monospace">${fmt(parseFloat(r.profit_loss||0))}u</td>
     </tr>`).join('');
 

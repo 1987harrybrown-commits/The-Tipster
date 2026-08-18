@@ -2,6 +2,16 @@ const { createClient } = require('@supabase/supabase-js');
 const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+
+// Escape anything interpolated into the HTML below. None of these fields is
+// meant to contain markup — they are team names, leagues and selections that
+// originate from an upstream feed — so a stray < or & should render, not parse.
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
 function fmt(n,d=2){return(n>=0?'+':'')+parseFloat(n).toFixed(d);}
 
 module.exports = async (req, res) => {
@@ -28,7 +38,7 @@ module.exports = async (req, res) => {
     const avgOdds=d.odds.length>0?(d.odds.reduce((a,b)=>a+b,0)/d.odds.length).toFixed(2):0;
     const icon={Football:'⚽',Basketball:'🏀','Ice Hockey':'🏒'}[sport]||'🏅';
     return `<tr>
-      <td style="font-weight:700">${icon} ${sport}</td>
+      <td style="font-weight:700">${icon} ${esc(sport)}</td>
       <td>${total}</td>
       <td style="color:#18e07a">${d.won}</td>
       <td style="color:#ff3d5a">${d.lost}</td>

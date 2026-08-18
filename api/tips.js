@@ -5,6 +5,16 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// Escape anything interpolated into the HTML below. None of these fields is
+// meant to contain markup — they are team names, leagues and selections that
+// originate from an upstream feed — so a stray < or & should render, not parse.
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+
 const SPORT_ICONS = { Football: '⚽', Basketball: '🏀', 'Ice Hockey': '🏒' };
 
 function fmtOdds(o) { return parseFloat(o).toFixed(2); }
@@ -33,15 +43,15 @@ module.exports = async (req, res) => {
 
   const tipCards = freeTips.map(t => `
     <article class="tip-card" itemscope itemtype="https://schema.org/Event">
-      <div class="tip-sport">${SPORT_ICONS[t.sport]||'🏅'} ${t.sport} · ${t.league}</div>
-      <h3 itemprop="name">${t.home_team} vs ${t.away_team}</h3>
+      <div class="tip-sport">${SPORT_ICONS[t.sport]||'🏅'} ${esc(t.sport)} · ${esc(t.league)}</div>
+      <h3 itemprop="name">${esc(t.home_team)} vs ${esc(t.away_team)}</h3>
       <div class="tip-meta">
-        <span class="tip-pick">📌 ${t.selection}</span>
+        <span class="tip-pick">📌 ${esc(t.selection)}</span>
         <span class="tip-odds">Odds: <strong>${fmtOdds(t.odds)}</strong></span>
         <span class="tip-time">🕐 ${fmtTime(t.event_time)} UK</span>
       </div>
-      <div class="tip-conf">Confidence: ${t.confidence}%
-        <div class="conf-bar"><div class="conf-fill" style="width:${t.confidence}%"></div></div>
+      <div class="tip-conf">Confidence: ${Number(t.confidence)||0}%
+        <div class="conf-bar"><div class="conf-fill" style="width:${Number(t.confidence)||0}%"></div></div>
       </div>
     </article>`).join('');
 
@@ -68,8 +78,8 @@ module.exports = async (req, res) => {
   "itemListElement": freeTips.map((t,i) => ({
     "@type":"ListItem",
     "position": i+1,
-    "name":`${t.home_team} vs ${t.away_team} — ${t.selection}`,
-    "description":`${t.sport} tip at odds ${fmtOdds(t.odds)} with ${t.confidence}% confidence`
+    "name":`${esc(t.home_team)} vs ${esc(t.away_team)} — ${esc(t.selection)}`,
+    "description":`${esc(t.sport)} tip at odds ${fmtOdds(t.odds)} with ${Number(t.confidence)||0}% confidence`
   }))
 })}</script>
 <style>
