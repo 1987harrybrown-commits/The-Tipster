@@ -145,6 +145,7 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
 // ── SUPABASE ──────────────────────────────────────────────
 const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
+const ENGINE_URL    = 'https://tipster-engine-1.onrender.com';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
@@ -366,12 +367,16 @@ async function renderPage() {
       <div class="alert" id="pwAlert"></div>
       <div class="account-grid">
         <div class="form-group">
+          <label>Current Password</label>
+          <input type="password" id="currentPw" placeholder="Your current password" autocomplete="current-password">
+        </div>
+        <div class="form-group">
           <label>New Password</label>
-          <input type="password" id="newPw" placeholder="Minimum 8 characters">
+          <input type="password" id="newPw" placeholder="Minimum 8 characters" autocomplete="new-password">
         </div>
         <div class="form-group">
           <label>Confirm Password</label>
-          <input type="password" id="confirmPw" placeholder="Repeat new password">
+          <input type="password" id="confirmPw" placeholder="Repeat new password" autocomplete="new-password">
         </div>
       </div>
       <button class="btn-save" onclick="changePassword()">Update password</button>
@@ -415,14 +420,39 @@ async function savePref(field, value) {
 
 // ── CHANGE PASSWORD ───────────────────────────────────────
 async function changePassword() {
+  const currentEl = document.getElementById('currentPw');
+  const current = currentEl.value;
   const pw      = document.getElementById('newPw').value;
   const confirm = document.getElementById('confirmPw').value;
   const alert   = document.getElementById('pwAlert');
-  if (pw.length < 8) { showAlert(alert, 'Password must be at least 8 characters.', 'error'); return; }
+
+  if (!current)       { showAlert(alert, 'Enter your current password.', 'error'); return; }
+  if (pw.length < 8)  { showAlert(alert, 'New password must be at least 8 characters.', 'error'); return; }
   if (pw !== confirm) { showAlert(alert, 'Passwords do not match.', 'error'); return; }
+  if (pw === current) { showAlert(alert, 'New password must be different from your current one.', 'error'); return; }
+
+  // Re-authenticate first. Supabase updates the password from any live session,
+  // so without this an unattended logged-in browser is enough for someone to
+  // take the account over and lock the real owner out.
+  const { error: reauthErr } = await db.auth.signInWithPassword({ email: currentUser.email, password: current });
+  if (reauthErr) { showAlert(alert, 'Current password is incorrect.', 'error'); return; }
+
   const { error } = await db.auth.updateUser({ password: pw });
-  showAlert(alert, error ? error.message : 'Password updated successfully.', error ? 'error' : 'success');
-  if (!error) { document.getElementById('newPw').value = ''; document.getElementById('confirmPw').value = ''; }
+  if (error) { showAlert(alert, error.message, 'error'); return; }
+
+  currentEl.value = '';
+  document.getElementById('newPw').value = '';
+  document.getElementById('confirmPw').value = '';
+
+  // Evict every other session, so changing the password actually removes
+  // whoever prompted the change. This session stays signed in.
+  let evicted = true;
+  try { const { error: soErr } = await db.auth.signOut({ scope: 'others' }); if (soErr) evicted = false; }
+  catch (_) { evicted = false; }
+
+  showAlert(alert, evicted
+    ? 'Password updated. Other devices have been signed out.'
+    : 'Password updated.', 'success');
 }
 
 // ── RESEND VERIFICATION ───────────────────────────────────
@@ -434,6 +464,25 @@ async function resendVerification() {
 
 // ── LOGOUT ────────────────────────────────────────────────
 async function manageSubscription() {
+  // Ask the engine for a portal session tied to this account. That drops the
+  // user straight into their billing page; the hosted login link below only
+  // emails them a magic link, which is a round trip they do not need.
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    if (session) {
+      const res = await fetch(ENGINE_URL + '/stripe/portal', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + session.access_token },
+      });
+      let data = {};
+      try { data = await res.json(); } catch (_) {}
+      if (data.url) { window.location.href = data.url; return; }
+    }
+  } catch (e) {
+    console.error('Portal session failed, falling back to hosted login:', e.message);
+  }
+  // Fallback keeps billing reachable if the engine is down, or is still on a
+  // build whose /stripe/portal predates JWT auth.
   window.location.href = 'https://billing.stripe.com/p/login/aFaeVdbdwfNMaKQ3LM2oE00';
 }
 
@@ -444,9 +493,23 @@ async function handleLogout() {
 
 // ── DELETE ACCOUNT ────────────────────────────────────────
 function confirmDeleteAccount() {
-  if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
-    db.auth.admin ? alert('Please contact support to delete your account.') : alert('Please contact support to delete your account.');
-  }
+  // This used to warn "this cannot be undone", then do nothing but say
+  // "contact support" — without saying how. Deletion is handled by request;
+  // say so plainly up front, and open a prefilled email so it actually happens.
+  const email = (currentUser && currentUser.email) || '';
+  const ok = confirm(
+    'Account deletion is handled by our support team.\n\n' +
+    'Click OK to open an email requesting deletion. We will confirm once your ' +
+    'account and personal data have been removed.\n\n' +
+    'If you have an active subscription, cancel it first under Manage Billing — ' +
+    'deleting your account does not stop billing.'
+  );
+  if (!ok) return;
+  const subject = encodeURIComponent('Account deletion request');
+  const body = encodeURIComponent(
+    'Please delete my account and associated personal data.\n\nAccount email: ' + email + '\n'
+  );
+  window.location.href = 'mailto:support@thetipsteredge.com?subject=' + subject + '&body=' + body;
 }
 
 // ── ALERT HELPER ─────────────────────────────────────────
