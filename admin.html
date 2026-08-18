@@ -207,11 +207,11 @@ td{padding:9px 11px;}
     </p>
     <div id="accaRows">
       <div class="grid acca-row" style="margin-bottom:10px;">
-        <div class="fg"><label>Match</label><input type="text" class="acca-match" placeholder="Liverpool vs Wolves"></div>
+        <div class="fg"><label>Match</label><input type="text" class="acca-match" aria-label="Accumulator leg — match" placeholder="Liverpool vs Wolves"></div>
         <div class="fg"><label>Selection @ Odds</label>
           <div style="display:flex;gap:8px;">
-            <input type="text" class="acca-sel" placeholder="Liverpool Win" style="flex:2;">
-            <input type="number" class="acca-odds" placeholder="1.65" step="0.01" style="flex:1;">
+            <input type="text" class="acca-sel" aria-label="Accumulator leg — selection" placeholder="Liverpool Win" style="flex:2;">
+            <input type="number" class="acca-odds" aria-label="Accumulator leg — odds" placeholder="1.65" step="0.01" style="flex:1;">
           </div>
         </div>
       </div>
@@ -854,9 +854,9 @@ function addAccaRow() {
   const row = document.createElement('div');
   row.className = 'grid acca-row';
   row.style.marginBottom = '10px';
-  row.innerHTML = `<div class="fg"><label>Match</label><input type="text" class="acca-match" placeholder="Match name"></div>
+  row.innerHTML = `<div class="fg"><label>Match</label><input type="text" class="acca-match" aria-label="Accumulator leg — match" placeholder="Match name"></div>
     <div class="fg"><label>Selection @ Odds</label>
-      <div style="display:flex;gap:8px;"><input type="text" class="acca-sel" placeholder="Selection" style="flex:2;"><input type="number" class="acca-odds" placeholder="Odds" step="0.01" style="flex:1;"></div>
+      <div style="display:flex;gap:8px;"><input type="text" class="acca-sel" aria-label="Accumulator leg — selection" placeholder="Selection" style="flex:2;"><input type="number" class="acca-odds" aria-label="Accumulator leg — odds" placeholder="Odds" step="0.01" style="flex:1;"></div>
     </div>`;
   document.getElementById('accaRows').appendChild(row);
 }

@@ -284,7 +284,7 @@ async function renderPage() {
         </div>
         <div class="form-group">
           <label>Email Address</label>
-          <input type="email" value="${currentUser.email}" disabled style="opacity:0.5;cursor:not-allowed;">
+          <input type="email" aria-label="Your account email address" value="${currentUser.email}" disabled style="opacity:0.5;cursor:not-allowed;">
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
           <button class="btn-save" onclick="saveProfile()" id="saveProfileBtn">Save changes</button>
