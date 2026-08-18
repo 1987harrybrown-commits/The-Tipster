@@ -1360,6 +1360,7 @@ async function updateNavAuth(){
   if(session){
     const {data:profile}=await db.from('users').select('subscription_status').eq('id',session.user.id).single();
     isProUser=profile&&profile.subscription_status==='pro';
+    syncProCta();
     rightEl.innerHTML='<a href="/account.html" class="btn btn-ghost" style="text-decoration:none;font-size:13px;padding:7px 16px;border-radius:4px;border:1px solid var(--border2);color:var(--text);">'+(isProUser?'<span style="color:var(--gold);margin-right:5px;">PRO</span>':'')+'My Account</a><button class="btn btn-ghost" onclick="handleLogout()">Log Out</button>';
     if(allTips.length)renderTips();
     const convBlock=document.getElementById('proConversion');
@@ -1371,6 +1372,7 @@ async function updateNavAuth(){
     }
   }else{
     isProUser=false;
+    syncProCta();
     rightEl.innerHTML='<button class="btn btn-ghost" onclick="openModal(&quot;login&quot;)">Log In</button><button class="btn btn-green" onclick="openModal(&quot;signup&quot;)">Join Free</button>';
   }
 }
@@ -1422,17 +1424,56 @@ async function handleProClick(){
 
 const ENGINE_URL='https://tipster-engine-1.onrender.com';
 
+// The pricing CTA has one label rule, used by the plan toggle, the auth
+// refresh and every checkout error path — so a failed checkout can never
+// leave the button stuck reading "Loading...", which is what happened when
+// the catch block re-enabled it without restoring its text.
+function proCtaLabel(){
+  if(isProUser)return 'Manage Subscription';
+  return activePricingPlan==='annual'?'Start Annual — £99.90/yr':'Start Pro — £9.99/mo';
+}
+
+function syncProCta(){
+  const btn=document.getElementById('pro-cta-btn');
+  if(!btn)return;
+  btn.disabled=false;
+  btn.textContent=proCtaLabel();
+}
+
 async function startCheckout(plan){
   const {data:{session}}=await db.auth.getSession();
   if(!session){openModal('signup');return;}
+
+  // Already subscribed — send them to the account page rather than opening a
+  // second checkout. The engine refuses this too (409), but stopping here
+  // saves a pointless round trip and a confusing error message.
+  if(isProUser){window.location.href='/account.html';return;}
+
   const btn=document.getElementById('pro-cta-btn');
   if(btn){btn.disabled=true;btn.textContent='Loading...';}
   try{
     const res=await fetch(ENGINE_URL+'/stripe/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:session.user.id,email:session.user.email,plan})});
-    const data=await res.json();
-    if(data.url)window.location.href=data.url;
-    else{alert('Could not start checkout. Please try again.');if(btn){btn.disabled=false;btn.textContent=activePricingPlan==='annual'?'Start Annual — £99.90/yr':'Start Pro — £9.99/mo';}}
-  }catch(e){console.error('Checkout error:',e.message);alert('Could not connect to payment system. Please try again.');if(btn)btn.disabled=false;}
+    let data={};
+    try{data=await res.json();}catch(_){}
+
+    // The engine is the authority: this client's isProUser can be stale if the
+    // subscription was created in another tab or on another device.
+    if(res.status===409&&data.alreadySubscribed){
+      isProUser=true;
+      syncProCta();
+      alert('You already have an active subscription. You can manage it from your account page.');
+      window.location.href='/account.html';
+      return;
+    }
+    if(data.url){window.location.href=data.url;return;}
+
+    alert('Could not start checkout. Please try again.');
+    syncProCta();
+  }catch(e){
+    console.error('Checkout error:',e.message);
+    alert('Could not connect to payment system. Please try again.');
+    syncProCta();
+  }
 }
 
 let activePricingPlan='monthly';
@@ -1446,7 +1487,7 @@ function setPricingToggle(plan){
   if(monthlyBtn){monthlyBtn.style.background=isAnnual?'none':'var(--text)';monthlyBtn.style.color=isAnnual?'var(--muted)':'var(--bg)';annualBtn.style.background=isAnnual?'var(--green)':'none';annualBtn.style.color=isAnnual?'#07090d':'var(--muted)';}
   if(priceM)priceM.style.display=isAnnual?'none':'block';
   if(priceA)priceA.style.display=isAnnual?'block':'none';
-  if(ctaBtn)ctaBtn.textContent=isAnnual?'Start Annual — £99.90/yr':'Start Pro — £9.99/mo';
+  if(ctaBtn)syncProCta();
   if(badge)badge.textContent=isAnnual?'Best Value':'Most Popular';
 }
 
