@@ -938,10 +938,33 @@ async function loadTips() {
   renderTips(); renderTicker(); renderSportsGrid();
 }
 
+// renderTips builds its card with innerHTML, so anything from the database
+// that lands in it has to be escaped. These are team names and leagues from an
+// upstream feed — none of them is meant to carry markup.
+function esc(v){
+  return String(v==null?'':v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 function deriveEdge(tip) {
-  const conf=parseFloat(tip.confidence||0), odds=parseFloat(tip.odds||0);
-  const impliedProb=odds>0?(1/odds)*100:0;
-  return { modelProb:conf, impliedProb, edge:conf-impliedProb };
+  // Use the figures the engine actually decided on. Every tip row carries
+  // model_prob (raw model probability), implied_prob (de-vigged — the
+  // bookmaker margin removed) and model_edge, and the emails render model_edge.
+  //
+  // Recomputing as `confidence - 1/odds` gave a different, always smaller
+  // number on two counts: confidence is model_prob AFTER games-played and
+  // data-quality penalties and a per-sport cap, and 1/odds still includes the
+  // margin. The same tip therefore showed one edge in the Pro email and a
+  // lower one on the site.
+  //
+  // The fallback is only for legacy rows predating these columns.
+  const odds = parseFloat(tip.odds || 0);
+  const rawImplied = odds > 0 ? (1 / odds) * 100 : 0;
+  const modelProb   = tip.model_prob   != null ? parseFloat(tip.model_prob)   : parseFloat(tip.confidence || 0);
+  const impliedProb = tip.implied_prob != null ? parseFloat(tip.implied_prob) : rawImplied;
+  const edge        = tip.model_edge   != null ? parseFloat(tip.model_edge)   : (modelProb - impliedProb);
+  return { modelProb, impliedProb, edge };
 }
 
 function stakeClass(s) { s=parseFloat(s||1); return s>=3?'s3':s>=2?'s2':s>=1.5?'s15':'s1'; }
@@ -984,14 +1007,14 @@ function renderTips() {
     d.innerHTML=
       '<div class="tcard-top"></div>'+
       '<div class="tcard-body">'+
-        '<div class="tcard-meta"><div class="tcard-sport">'+sportIcon(tip.sport)+' '+(tip.sport||'')+'</div><span class="tcard-badge '+(free?'free':'pro')+'">'+(free?'FREE':'PRO')+'</span></div>'+
-        '<div class="tcard-match">'+(tip.home_team||'')+' vs '+(tip.away_team||'')+'</div>'+
-        '<div class="tcard-league">'+(tip.league||'')+'</div>'+
+        '<div class="tcard-meta"><div class="tcard-sport">'+sportIcon(tip.sport)+' '+esc(tip.sport||'')+'</div><span class="tcard-badge '+(free?'free':'pro')+'">'+(free?'FREE':'PRO')+'</span></div>'+
+        '<div class="tcard-match">'+esc(tip.home_team||'')+' vs '+esc(tip.away_team||'')+'</div>'+
+        '<div class="tcard-league">'+esc(tip.league||'')+'</div>'+
         '<div class="tcard-pick-row">'+
-          '<div class="tcard-pick-l"><div class="label">Selection</div><div class="value">'+(tip.selection||'')+'</div></div>'+
+          '<div class="tcard-pick-l"><div class="label">Selection</div><div class="value">'+esc(tip.selection||'')+'</div></div>'+
           '<div style="text-align:right">'+
             '<div class="tcard-odds">'+oddsDisplay+'</div>'+
-            (tip.bookmaker?'<div style="font-size:9px;color:#4a9eff;font-family:Space Mono,monospace;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">'+tip.bookmaker.replace(/_/g,' ')+'</div>':'')+
+            (tip.bookmaker?'<div style="font-size:9px;color:#4a9eff;font-family:Space Mono,monospace;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">'+esc(tip.bookmaker.replace(/_/g,' '))+'</div>':'')+
           '</div>'+
         '</div>'+
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;">'+
@@ -1221,8 +1244,8 @@ function writeTipAnalysis(tip){
   const home=tip.home_team||'Home', away=tip.away_team||'Away';
   const odds=parseFloat(tip.odds||0), conf=parseFloat(tip.confidence||0);
   const sel=(tip.selection||'').toLowerCase(), league=tip.league||'', sport=tip.sport||'';
-  const implied=odds>0?(1/odds)*100:0;
-  const edge=conf-implied, edgeNum=parseFloat(edge.toFixed(1));
+  const {modelProb,impliedProb:implied,edge}=deriveEdge(tip);
+  const edgeNum=parseFloat(edge.toFixed(1));
   const teamName=(tip.selection||'').replace(/ win$/i,'').trim();
   const opponent = teamName.toLowerCase()===home.toLowerCase() ? away : home;
   const isHome   = teamName.toLowerCase()===home.toLowerCase();
@@ -1234,7 +1257,7 @@ function writeTipAnalysis(tip){
       return teamName+' enter this '+league+' fixture as clear market leaders, priced at '+odds.toFixed(2)+' by the books. That implies a '+implied.toFixed(0)+'% chance — our model has it '+gap+'% higher at '+conf+'%. '+opponent+' arrive '+(isHome?'at this ground':'here')+' without the firepower to trouble a side of this quality over 90 minutes. The favourite tag is deserved and the price holds value.';
     }
     if(odds<=1.80){
-      const mktGap=(conf-implied).toFixed(0);
+      const mktGap=(modelProb-implied).toFixed(0);
       const venue=isHome?'in front of their own crowd':'away from home';
       return 'The market has '+teamName+' at '+implied.toFixed(0)+'% — our model puts them '+mktGap+'% clear of that at '+conf+'%. Playing '+venue+' in '+league+', the structural edge here is not reflected in the current price. '+opponent+' have the capacity to make it uncomfortable, but the model consistently identifies this type of mis-pricing as a long-term positive-expectation position.';
     }
@@ -1280,7 +1303,7 @@ function writeTipAnalysis(tip){
 
 function openTipModal(tip){
   const odds=parseFloat(tip.odds||0),conf=parseFloat(tip.confidence||0);
-  const implied=odds>0?(1/odds)*100:0,edge=conf-implied;
+  const {modelProb,impliedProb:implied,edge}=deriveEdge(tip);
   const eCls=edge>=5?'pos':edge>=0?'neu':'neg',eStr=(edge>=0?'+':'')+edge.toFixed(1)+'%';
   const stake=parseFloat(tip.stake||1),confCls=conf>=85?'var(--green)':conf>=72?'var(--gold)':'var(--red)';
   document.getElementById('tm-sport').textContent    =(sportIcon(tip.sport)||'')+' '+(tip.sport||'');
@@ -1288,7 +1311,7 @@ function openTipModal(tip){
   document.getElementById('tm-league').textContent   =tip.league||'';
   document.getElementById('tm-selection').textContent=tip.selection||'';
   document.getElementById('tm-odds').textContent     =fmtOdds(odds);
-  document.getElementById('tm-model-prob').textContent =conf.toFixed(0)+'%';
+  document.getElementById('tm-model-prob').textContent =modelProb.toFixed(0)+'%';
   document.getElementById('tm-implied-prob').textContent=implied.toFixed(0)+'%';
   const edgeEl=document.getElementById('tm-edge');edgeEl.textContent=eStr;edgeEl.className='tm-edge-val '+eCls;
   document.getElementById('tm-analysis').textContent=writeTipAnalysis(tip);
@@ -1360,6 +1383,7 @@ async function updateNavAuth(){
   if(session){
     const {data:profile}=await db.from('users').select('subscription_status').eq('id',session.user.id).single();
     isProUser=profile&&profile.subscription_status==='pro';
+    syncProCta();
     rightEl.innerHTML='<a href="/account.html" class="btn btn-ghost" style="text-decoration:none;font-size:13px;padding:7px 16px;border-radius:4px;border:1px solid var(--border2);color:var(--text);">'+(isProUser?'<span style="color:var(--gold);margin-right:5px;">PRO</span>':'')+'My Account</a><button class="btn btn-ghost" onclick="handleLogout()">Log Out</button>';
     if(allTips.length)renderTips();
     const convBlock=document.getElementById('proConversion');
@@ -1371,6 +1395,7 @@ async function updateNavAuth(){
     }
   }else{
     isProUser=false;
+    syncProCta();
     rightEl.innerHTML='<button class="btn btn-ghost" onclick="openModal(&quot;login&quot;)">Log In</button><button class="btn btn-green" onclick="openModal(&quot;signup&quot;)">Join Free</button>';
   }
 }
@@ -1422,17 +1447,56 @@ async function handleProClick(){
 
 const ENGINE_URL='https://tipster-engine-1.onrender.com';
 
+// The pricing CTA has one label rule, used by the plan toggle, the auth
+// refresh and every checkout error path — so a failed checkout can never
+// leave the button stuck reading "Loading...", which is what happened when
+// the catch block re-enabled it without restoring its text.
+function proCtaLabel(){
+  if(isProUser)return 'Manage Subscription';
+  return activePricingPlan==='annual'?'Start Annual — £99.90/yr':'Start Pro — £9.99/mo';
+}
+
+function syncProCta(){
+  const btn=document.getElementById('pro-cta-btn');
+  if(!btn)return;
+  btn.disabled=false;
+  btn.textContent=proCtaLabel();
+}
+
 async function startCheckout(plan){
   const {data:{session}}=await db.auth.getSession();
   if(!session){openModal('signup');return;}
+
+  // Already subscribed — send them to the account page rather than opening a
+  // second checkout. The engine refuses this too (409), but stopping here
+  // saves a pointless round trip and a confusing error message.
+  if(isProUser){window.location.href='/account.html';return;}
+
   const btn=document.getElementById('pro-cta-btn');
   if(btn){btn.disabled=true;btn.textContent='Loading...';}
   try{
     const res=await fetch(ENGINE_URL+'/stripe/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:session.user.id,email:session.user.email,plan})});
-    const data=await res.json();
-    if(data.url)window.location.href=data.url;
-    else{alert('Could not start checkout. Please try again.');if(btn){btn.disabled=false;btn.textContent=activePricingPlan==='annual'?'Start Annual — £99.90/yr':'Start Pro — £9.99/mo';}}
-  }catch(e){console.error('Checkout error:',e.message);alert('Could not connect to payment system. Please try again.');if(btn)btn.disabled=false;}
+    let data={};
+    try{data=await res.json();}catch(_){}
+
+    // The engine is the authority: this client's isProUser can be stale if the
+    // subscription was created in another tab or on another device.
+    if(res.status===409&&data.alreadySubscribed){
+      isProUser=true;
+      syncProCta();
+      alert('You already have an active subscription. You can manage it from your account page.');
+      window.location.href='/account.html';
+      return;
+    }
+    if(data.url){window.location.href=data.url;return;}
+
+    alert('Could not start checkout. Please try again.');
+    syncProCta();
+  }catch(e){
+    console.error('Checkout error:',e.message);
+    alert('Could not connect to payment system. Please try again.');
+    syncProCta();
+  }
 }
 
 let activePricingPlan='monthly';
@@ -1446,7 +1510,7 @@ function setPricingToggle(plan){
   if(monthlyBtn){monthlyBtn.style.background=isAnnual?'none':'var(--text)';monthlyBtn.style.color=isAnnual?'var(--muted)':'var(--bg)';annualBtn.style.background=isAnnual?'var(--green)':'none';annualBtn.style.color=isAnnual?'#07090d':'var(--muted)';}
   if(priceM)priceM.style.display=isAnnual?'none':'block';
   if(priceA)priceA.style.display=isAnnual?'block':'none';
-  if(ctaBtn)ctaBtn.textContent=isAnnual?'Start Annual — £99.90/yr':'Start Pro — £9.99/mo';
+  if(ctaBtn)syncProCta();
   if(badge)badge.textContent=isAnnual?'Best Value':'Most Popular';
 }
 
