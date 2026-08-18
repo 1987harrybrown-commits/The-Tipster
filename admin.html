@@ -514,7 +514,7 @@ function updateAccaSummary(data) {
   const lost = settled.filter(a => a.result === 'LOST').length;
   const total = won + lost;
   const pl = settled.reduce((s,a) => s + parseFloat(a.profit_loss||0), 0);
-  const staked = settled.reduce((s,a) => s + parseFloat(a.stake||1), 0);
+  const staked = settled.reduce((s,a) => s + parseFloat(a.stake??1), 0);
   const roi = staked > 0 ? (pl/staked)*100 : 0;
   const rate = total > 0 ? (won/total)*100 : 0;
   const fmt = (n,d=2) => (n>=0?'+':'')+n.toFixed(d);
@@ -625,14 +625,14 @@ async function loadBankrollSimulator() {
     const tipCount = tips.length;
     // Sum all unit stakes first, then 1u = bankroll ÷ total units
     // This ensures total staked never exceeds the bankroll
-    const totalUnits = tips.reduce((s, t) => s + parseFloat(t.stake || 1), 0);
+    const totalUnits = tips.reduce((s, t) => s + parseFloat(t.stake ?? 1), 0);
     const unitValue = bankroll / totalUnits; // 1u = bankroll ÷ total units staked
 
     let totalStaked = 0;
     let totalReturn = 0;
 
     for (const tip of tips) {
-      const stake     = parseFloat(tip.stake || 1);
+      const stake     = parseFloat(tip.stake ?? 1);
       const odds      = parseFloat(tip.odds  || 1);
       const betAmount = unitValue * stake;
       totalStaked += betAmount;
@@ -686,7 +686,7 @@ async function loadAllTimeStats() {
   const lost  = data.filter(r => r.result === 'LOST').length;
   const total = won + lost;
   const pl    = data.reduce((s,r) => s + parseFloat(r.profit_loss||0), 0);
-  const staked= data.reduce((s,r) => s + parseFloat(r.stake||1), 0);
+  const staked= data.reduce((s,r) => s + parseFloat(r.stake??1), 0);
   const roi   = staked > 0 ? (pl/staked)*100 : 0;
   const avgOdds = total > 0 ? data.reduce((s,r) => s + parseFloat(r.odds||0), 0) / total : 0;
   const rate  = total > 0 ? (won/total)*100 : 0;

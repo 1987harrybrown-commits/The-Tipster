@@ -48,7 +48,7 @@ module.exports = async (req, res) => {
     if(r.result==='WON') bySport[r.sport].won++;
     if(r.result==='LOST') bySport[r.sport].lost++;
     bySport[r.sport].pl+=parseFloat(r.profit_loss||0);
-    bySport[r.sport].staked+=parseFloat(r.stake||1);
+    bySport[r.sport].staked+=parseFloat(r.stake??1);
     if(r.odds) bySport[r.sport].odds.push(parseFloat(r.odds));
   });
 

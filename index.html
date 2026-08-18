@@ -914,7 +914,7 @@ function renderDashboard(period) {
   const total   = won+lost;
   const rate    = total>0?(won/total)*100:0;
   const pl      = rows.reduce((s,r)=>s+parseFloat(r.profit_loss||0),0);
-  const staked  = rows.reduce((s,r)=>s+parseFloat(r.stake||1),0);
+  const staked  = rows.reduce((s,r)=>s+parseFloat(r.stake??1),0);
   const roi     = staked>0?(pl/staked)*100:0;
   const avgOdds = total>0?rows.reduce((s,r)=>s+parseFloat(r.odds||0),0)/total:0;
   const labels  = {yesterday:'Yesterday','7d':'Last 7 Days','30d':'Last 30 Days'};
@@ -1038,7 +1038,7 @@ function renderTips() {
     const isBestBet = isProUser && window._todayBestRef && tip.tip_ref === window._todayBestRef || isProUser && window._tomorrowBestRef && tip.tip_ref === window._tomorrowBestRef;
     const ev=new Date(tip.event_time);
     const ts=ev.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/London'})+' . '+ev.toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'Europe/London'});
-    const stake=parseFloat(tip.stake||1);
+    const stake=parseFloat(tip.stake??1);
     const {edge}=deriveEdge(tip);
     const eStr=(edge>=0?'+':'')+edge.toFixed(1)+'%';
     const oddsDisplay=fmtOdds(tip.odds);
@@ -1350,7 +1350,7 @@ function openTipModal(tip){
   const odds=parseFloat(tip.odds||0),conf=parseFloat(tip.confidence||0);
   const {modelProb,impliedProb:implied,edge}=deriveEdge(tip);
   const eCls=edge>=5?'pos':edge>=0?'neu':'neg',eStr=(edge>=0?'+':'')+edge.toFixed(1)+'%';
-  const stake=parseFloat(tip.stake||1),confCls=conf>=85?'var(--green)':conf>=72?'var(--gold)':'var(--red)';
+  const stake=parseFloat(tip.stake??1),confCls=conf>=85?'var(--green)':conf>=72?'var(--gold)':'var(--red)';
   document.getElementById('tm-sport').textContent    =(sportIcon(tip.sport)||'')+' '+(tip.sport||'');
   document.getElementById('tm-match').textContent    =(tip.home_team||'')+' vs '+(tip.away_team||'');
   document.getElementById('tm-league').textContent   =tip.league||'';
