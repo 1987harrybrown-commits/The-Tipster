@@ -1402,6 +1402,9 @@ async function doSignup(){
   const {data,error}=await db.auth.signUp({email,password:pw,options:{data:{first_name:name}}});
   btn.disabled=false;btn.textContent='Create Free Account \u2192';
   if(error){showMAlert(alert,error.message,'error');return;}
+  // Create the profile row now rather than waiting for the next page load.
+  const {data:{session:newSession}}=await db.auth.getSession();
+  if(newSession) await ensureProfile(newSession);
   document.getElementById('successEmail').textContent=email;
   showPanel('mSuccess');updateNavAuth();
 }
@@ -1430,13 +1433,35 @@ async function doForgot(){
 
 async function handleLogout(){await db.auth.signOut();updateNavAuth();}
 
+// Nothing in the codebase creates the public.users row after signup — it is
+// assumed to arrive via a database trigger. If that trigger is missing, a
+// subscriber ends up with an auth record and no profile: no emails, and no
+// column for subscription_status to live in, so they can never resolve as Pro
+// even after paying. The engine creates it with the service role.
+async function ensureProfile(session){
+  try{
+    const res=await fetch(ENGINE_URL+'/ensure-profile',{
+      method:'POST',
+      headers:{'Authorization':'Bearer '+session.access_token}
+    });
+    return res.ok;
+  }catch(e){ console.error('ensure-profile failed:',e.message); return false; }
+}
+
 async function updateNavAuth(){
   const {data:{session}}=await db.auth.getSession();
   const rightEl=document.querySelector('.nav-right');
   if(!rightEl)return;
   if(session){
-    const {data:profile}=await db.from('users').select('subscription_status').eq('id',session.user.id).single();
-    isProUser=profile&&profile.subscription_status==='pro';
+    let {data:profile}=await db.from('users').select('subscription_status').eq('id',session.user.id).single();
+    // No row means the trigger never ran for this account. Repair it once, so
+    // anyone who signed up during a gap is fixed on their next visit rather
+    // than staying invisible to the mailer forever.
+    if(!profile && await ensureProfile(session)){
+      ({data:profile}=await db.from('users').select('subscription_status').eq('id',session.user.id).single());
+    }
+    // Coerce: `profile && ...` yields null, not false, when there is no row.
+    isProUser=!!(profile&&profile.subscription_status==='pro');
     syncProCta();
     rightEl.innerHTML='<a href="/account.html" class="btn btn-ghost" style="text-decoration:none;font-size:13px;padding:7px 16px;border-radius:4px;border:1px solid var(--border2);color:var(--text);">'+(isProUser?'<span style="color:var(--gold);margin-right:5px;">PRO</span>':'')+'My Account</a><button class="btn btn-ghost" onclick="handleLogout()">Log Out</button>';
     if(allTips.length)renderTips();
