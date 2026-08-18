@@ -938,6 +938,15 @@ async function loadTips() {
   renderTips(); renderTicker(); renderSportsGrid();
 }
 
+// renderTips builds its card with innerHTML, so anything from the database
+// that lands in it has to be escaped. These are team names and leagues from an
+// upstream feed — none of them is meant to carry markup.
+function esc(v){
+  return String(v==null?'':v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 function deriveEdge(tip) {
   // Use the figures the engine actually decided on. Every tip row carries
   // model_prob (raw model probability), implied_prob (de-vigged — the
@@ -998,14 +1007,14 @@ function renderTips() {
     d.innerHTML=
       '<div class="tcard-top"></div>'+
       '<div class="tcard-body">'+
-        '<div class="tcard-meta"><div class="tcard-sport">'+sportIcon(tip.sport)+' '+(tip.sport||'')+'</div><span class="tcard-badge '+(free?'free':'pro')+'">'+(free?'FREE':'PRO')+'</span></div>'+
-        '<div class="tcard-match">'+(tip.home_team||'')+' vs '+(tip.away_team||'')+'</div>'+
-        '<div class="tcard-league">'+(tip.league||'')+'</div>'+
+        '<div class="tcard-meta"><div class="tcard-sport">'+sportIcon(tip.sport)+' '+esc(tip.sport||'')+'</div><span class="tcard-badge '+(free?'free':'pro')+'">'+(free?'FREE':'PRO')+'</span></div>'+
+        '<div class="tcard-match">'+esc(tip.home_team||'')+' vs '+esc(tip.away_team||'')+'</div>'+
+        '<div class="tcard-league">'+esc(tip.league||'')+'</div>'+
         '<div class="tcard-pick-row">'+
-          '<div class="tcard-pick-l"><div class="label">Selection</div><div class="value">'+(tip.selection||'')+'</div></div>'+
+          '<div class="tcard-pick-l"><div class="label">Selection</div><div class="value">'+esc(tip.selection||'')+'</div></div>'+
           '<div style="text-align:right">'+
             '<div class="tcard-odds">'+oddsDisplay+'</div>'+
-            (tip.bookmaker?'<div style="font-size:9px;color:#4a9eff;font-family:Space Mono,monospace;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">'+tip.bookmaker.replace(/_/g,' ')+'</div>':'')+
+            (tip.bookmaker?'<div style="font-size:9px;color:#4a9eff;font-family:Space Mono,monospace;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">'+esc(tip.bookmaker.replace(/_/g,' '))+'</div>':'')+
           '</div>'+
         '</div>'+
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;">'+
