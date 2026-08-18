@@ -3,6 +3,31 @@ const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+// Start of the current UK day, as a real instant.
+//
+// Vercel runs in UTC, so `new Date(); d.setHours(0,0,0,0)` anchors to UTC
+// midnight — which is 01:00 UK during BST. Between 00:00 and 01:00 UK the
+// window therefore still covered the previous day, so these pages queried
+// yesterday's tips and advertised yesterday's date in the title, the H1 and
+// the structured data.
+function ukDayStart(now = new Date()) {
+  // The calendar date as London sees it, e.g. "2026-08-18".
+  const ymd = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit',
+  }).format(now);
+
+  // Take UTC midnight of that date, then subtract whatever offset London was
+  // on at that instant. Reading the offset from the guess (rather than assuming
+  // GMT or BST) keeps this correct across both transitions.
+  const guess = new Date(ymd + 'T00:00:00Z');
+  const hourInLondon = Number(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London', hour: '2-digit', hour12: false,
+  }).format(guess)) % 24;
+
+  return new Date(guess.getTime() - hourInLondon * 3600000);
+}
+
+
 // PostgREST caps every response at 1000 rows, so an unbounded select over
 // results_history silently truncates and every figure derived from it is wrong
 // once the ledger passes that. Returns { data } to match the shape the callers
@@ -33,11 +58,11 @@ function esc(v) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-function fmtDate(d){return new Date(d).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}
+function fmtDate(d){return new Date(d).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'Europe/London'});}
 function fmtTime(d){return new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/London'});}
 
 module.exports = async (req, res) => {
-  const today = new Date(); today.setHours(0,0,0,0);
+  const today = ukDayStart();
   const tom = new Date(today); tom.setDate(tom.getDate()+2);
   const todayStr = fmtDate(new Date());
 

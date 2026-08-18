@@ -16,7 +16,7 @@ function esc(v) {
 
 
 function fmt(n,d=2){return(n>=0?'+':'')+parseFloat(n).toFixed(d);}
-function fmtDate(d){return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});}
+function fmtDate(d){return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Europe/London'});}
 
 module.exports = async (req, res) => {
   const [{ data: history }, { data: stats }] = await Promise.all([
