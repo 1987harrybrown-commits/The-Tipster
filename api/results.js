@@ -169,8 +169,8 @@ footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
 <footer>
   <p style="margin-bottom:10px">© 2026 The Tipster · Verified betting tips track record · 18+ only · Please gamble responsibly</p>
   <div>
-    <a href="/">Home</a><a href="/tips">Today's Tips</a><a href="/football-tips.html">Football</a>
-    <a href="/nhl-tips.html">NHL</a><a href="/nba-tips.html">NBA</a>
+    <a href="/">Home</a><a href="/tips">Today's Tips</a><a href="/football-tips-today">Football</a>
+    <a href="/nhl-tips-today">NHL</a><a href="/nba-tips-today">NBA</a>
     <a href="/terms.html">Terms</a><a href="/responsible-gambling.html">Responsible Gambling</a>
   </div>
 </footer>

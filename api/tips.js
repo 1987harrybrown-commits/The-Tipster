@@ -190,9 +190,9 @@ footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
   <div>
     <a href="/">Home</a>
     <a href="/results">Track Record</a>
-    <a href="/football-tips.html">Football Tips</a>
-    <a href="/nhl-tips.html">NHL Tips</a>
-    <a href="/nba-tips.html">NBA Tips</a>
+    <a href="/football-tips-today">Football Tips</a>
+    <a href="/nhl-tips-today">NHL Tips</a>
+    <a href="/nba-tips-today">NBA Tips</a>
     <a href="/terms.html">Terms</a>
     <a href="/responsible-gambling.html">Responsible Gambling</a>
   </div>

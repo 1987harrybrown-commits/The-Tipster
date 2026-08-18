@@ -167,7 +167,7 @@ footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
   <p style="margin-bottom:10px">© 2026 The Tipster · Free football tips updated every 15 minutes · 18+ only · Please gamble responsibly</p>
   <div>
     <a href="/">Home</a><a href="/tips">All Tips</a><a href="/results">Track Record</a>
-    <a href="/nhl-tips.html">NHL Tips</a><a href="/nba-tips.html">NBA Tips</a>
+    <a href="/nhl-tips-today">NHL Tips</a><a href="/nba-tips-today">NBA Tips</a>
     <a href="/responsible-gambling.html">Responsible Gambling</a>
   </div>
 </footer>
