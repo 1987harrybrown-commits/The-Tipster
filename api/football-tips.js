@@ -51,7 +51,7 @@ module.exports = async (req, res) => {
       </div>
       <div class="tip-row">
         <span style="color:#4a5a70">🕐 ${fmtTime(t.event_time)} UK</span>
-        <span style="color:#4a5a70">Conf: ${Number(t.confidence)||0}%</span>
+        <span style="color:#4a5a70">Conf: <strong>Pro 🔒</strong></span>
       </div>
     </article>`).join('');
 

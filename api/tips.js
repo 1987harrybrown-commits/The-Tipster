@@ -50,8 +50,8 @@ module.exports = async (req, res) => {
         <span class="tip-odds">Odds: <strong>${fmtOdds(t.odds)}</strong></span>
         <span class="tip-time">🕐 ${fmtTime(t.event_time)} UK</span>
       </div>
-      <div class="tip-conf">Confidence: ${Number(t.confidence)||0}%
-        <div class="conf-bar"><div class="conf-fill" style="width:${Number(t.confidence)||0}%"></div></div>
+      <div class="tip-conf">Confidence · <strong>Pro only 🔒</strong>
+        <div class="conf-bar"><div class="conf-fill conf-locked"></div></div>
       </div>
     </article>`).join('');
 
@@ -79,7 +79,7 @@ module.exports = async (req, res) => {
     "@type":"ListItem",
     "position": i+1,
     "name":`${esc(t.home_team)} vs ${esc(t.away_team)} — ${esc(t.selection)}`,
-    "description":`${esc(t.sport)} tip at odds ${fmtOdds(t.odds)} with ${Number(t.confidence)||0}% confidence`
+    "description":`${esc(t.sport)} tip: ${esc(t.selection)} at odds ${fmtOdds(t.odds)}`
   }))
 })}</script>
 <style>
@@ -112,6 +112,7 @@ h2{font-size:22px;font-weight:800;margin-bottom:20px;}
 .tip-time{font-size:12px;color:#4a5a70;}
 .tip-conf{font-size:12px;color:#4a5a70;margin-top:8px;}
 .conf-bar{height:3px;background:#1c2535;border-radius:2px;margin-top:5px;}
+.conf-locked{width:100%;background:repeating-linear-gradient(90deg,#2a3444 0 6px,transparent 6px 12px);}
 .conf-fill{height:100%;background:#18e07a;border-radius:2px;}
 .locked-card{background:#0f141c;border:1px solid rgba(240,180,41,0.2);border-radius:8px;padding:18px;border-top:3px solid #f0b429;text-align:center;}
 .locked-card h3{font-size:14px;color:#4a5a70;margin-bottom:10px;}

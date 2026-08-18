@@ -39,7 +39,7 @@ module.exports = async (req, res) => {
       <div class="tip-league">🏒 ${esc(t.league)}</div>
       <h3>${esc(t.home_team)} vs ${esc(t.away_team)}</h3>
       <div class="tip-row"><span>📌 ${esc(t.selection)}</span><span style="color:#f0b429;font-family:monospace;font-weight:700">${parseFloat(t.odds).toFixed(2)}</span></div>
-      <div class="tip-row"><span style="color:#4a5a70">🕐 ${fmtTime(t.event_time)} UK</span><span style="color:#4a5a70">Conf: ${Number(t.confidence)||0}%</span></div>
+      <div class="tip-row"><span style="color:#4a5a70">🕐 ${fmtTime(t.event_time)} UK</span><span style="color:#4a5a70">Conf: <strong>Pro 🔒</strong></span></div>
     </article>`).join('');
 
   const html = `<!DOCTYPE html>
