@@ -448,26 +448,48 @@ function updateAccaSummary(data) {
 }
 
 async function triggerResettle() {
-  if (!confirm('This will re-evaluate every settled tip and rebuild results_history from scratch. Are you sure?')) return;
+  // The engine grades pending tips whose events have finished and restores
+  // results_history rows for tips missing one. It does NOT re-grade or
+  // overwrite results that already exist.
+  if (!confirm('Run the settler now?\n\nIt grades any pending tips whose events have finished, and restores results_history rows for tips that are missing one. Existing results are not re-graded or overwritten.')) return;
   const btn = document.getElementById('resettleBtn');
   const logEl = document.getElementById('resettleLog');
-  btn.disabled = true; btn.textContent = 'Running...';
-  logEl.style.display = 'block'; logEl.textContent = 'Starting resettlement...\n';
+  btn.disabled = true; btn.textContent = 'Starting...';
+  logEl.style.display = 'block'; logEl.textContent = 'Requesting resettlement...\n';
   try {
     const ADMIN_KEY = localStorage.getItem('tipster_admin_key') || '';
     const res = await fetch(`${ENGINE_URL}/admin/resettle`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${ADMIN_KEY}` }
     });
-    const data = await res.json();
-    if (data.success) {
-      logEl.textContent = data.log.join('\n');
-      btn.textContent = `Done — ${data.corrected} corrected`;
-      setTimeout(() => { btn.disabled=false; btn.textContent='Re-settle All History'; loadStats(); }, 4000);
-    } else {
-      logEl.textContent = 'Error: ' + (data.error || 'Unknown error');
+
+    // A rejected admin key returns plain text, not JSON — parse defensively so
+    // the failure surfaces as its real cause instead of a JSON parse error.
+    let data = {};
+    try { data = await res.json(); } catch(_) {}
+
+    if (res.status === 403) {
+      logEl.textContent = 'Rejected: the engine did not accept this admin key.\nCheck the key saved in this browser.';
       btn.disabled=false; btn.textContent='Re-settle All History';
+      return;
     }
+    if (res.status === 409) {
+      logEl.textContent = 'A settle is already running.\nThe engine also settles automatically every hour — try again in a few minutes.';
+      btn.disabled=false; btn.textContent='Re-settle All History';
+      return;
+    }
+    if (!res.ok || !data.started) {
+      logEl.textContent = 'Error: ' + (data.error || `HTTP ${res.status}`);
+      btn.disabled=false; btn.textContent='Re-settle All History';
+      return;
+    }
+
+    // The engine dispatches the settle in the background — a full run outlives
+    // the request timeout, so there are no counts to report here. Per-tip detail
+    // goes to the Render logs; stats are refreshed once it has had time to run.
+    logEl.textContent = 'Resettlement started.\n\nThe engine runs it in the background, so there is no live progress here — see the Render logs for per-tip detail.\n\nStats refresh automatically in 30s.';
+    btn.textContent = 'Started';
+    setTimeout(() => { btn.disabled=false; btn.textContent='Re-settle All History'; loadStats(); }, 30000);
   } catch(e) {
     logEl.textContent = 'Request failed: ' + e.message;
     btn.disabled=false; btn.textContent='Re-settle All History';
