@@ -767,9 +767,14 @@ async function updateUserPlan() {
   const plan  = document.getElementById('editPlan').value;
   if (!email) { showAlert(alert, 'Enter an email address.', 'error'); return; }
   btn.disabled = true; btn.textContent = 'Updating...';
-  const { error } = await db.from('users').update({ subscription_status: plan }).eq('email', email);
+  // .select() so we can tell "updated" from "matched nothing". PostgREST
+  // returns no error when an update matches zero rows, so a mistyped address
+  // used to report "updated to PRO" while changing nothing at all.
+  const { data, error } = await db.from('users')
+    .update({ subscription_status: plan }).eq('email', email).select('email');
   btn.disabled = false; btn.textContent = 'Update Plan';
   if (error) { showAlert(alert, error.message, 'error'); return; }
+  if (!data || !data.length) { showAlert(alert, 'No user found with that email — nothing changed.', 'error'); return; }
   showAlert(alert, email + ' updated to ' + plan.toUpperCase(), 'success');
   loadSubscribers();
 }
@@ -784,9 +789,11 @@ async function toggleUserEmail() {
   if (!data) { showAlert(alert, 'User not found.', 'error'); return; }
   const newState = !data.email_opt_in;
   btn.disabled = true;
-  const { error } = await db.from('users').update({ email_opt_in: newState }).eq('email', email);
+  const { data: updated, error } = await db.from('users')
+    .update({ email_opt_in: newState }).eq('email', email).select('email');
   btn.disabled = false;
   if (error) { showAlert(alert, error.message, 'error'); return; }
+  if (!updated || !updated.length) { showAlert(alert, 'Nothing was updated — the write was rejected.', 'error'); return; }
   showAlert(alert, email + ' email opt-in set to ' + (newState ? 'ON' : 'OFF'), 'success');
   loadSubscribers();
 }
@@ -893,9 +900,25 @@ async function saveSaturdayOverride() {
 
 async function clearOverride(type) {
   if (!confirm('Clear ' + type + ' override? Engine will use automatic selection.')) return;
-  const today = new Date().toISOString().split('T')[0];
-  await db.from('email_overrides').delete().eq('date', today).eq('type', type);
-  showAlert(document.getElementById('ov' + (type==='daily'?'Daily':'Sat') + 'Alert'), 'Override cleared.', 'success');
+  const el = document.getElementById('ov' + (type==='daily'?'Daily':'Sat') + 'Alert');
+
+  // UK date, not UTC. toISOString() gives the server-agnostic UTC day, so
+  // between 00:00 and 01:00 UK during BST this targeted YESTERDAY's override
+  // while the save form writes whatever date the admin picked — clear and save
+  // could disagree about which day they were acting on.
+  const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
+
+  // The delete result was discarded entirely and success was reported
+  // unconditionally. A failed delete — or one matching nothing — told the admin
+  // "Override cleared" while the engine went on using the override to build the
+  // email. Row Level Security makes that far more likely: a policy that denies
+  // the delete returns an error the old code never looked at.
+  const { data, error } = await db.from('email_overrides')
+    .delete().eq('date', today).eq('type', type).select('date');
+
+  if (error) { showAlert(el, 'Could not clear override: ' + error.message, 'error'); return; }
+  if (!data || !data.length) { showAlert(el, 'No ' + type + ' override was set for ' + today + '.', 'error'); return; }
+  showAlert(el, 'Override cleared for ' + today + '.', 'success');
 }
 
 // ── ALERT ─────────────────────────────────────────────────
