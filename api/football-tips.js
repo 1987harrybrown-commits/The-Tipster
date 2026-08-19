@@ -143,7 +143,24 @@ module.exports = async (req, res) => {
   const winRate = total>0?((won/total)*100).toFixed(1):0;
   const pl = h.reduce((s,r)=>s+parseFloat(r.profit_loss||0),0);
 
-  const freeTips = (tips||[]).slice(0,3);
+  // The engine tags exactly FREE_TIPS_PER_DAY tips a day with is_free, and
+  // index.html gates on that flag. These pages instead took the top N by
+  // confidence over their own window — and the sport pages take the top N
+  // *within one sport* — so the two sets could disagree and a pick the engine
+  // marked Pro could have its selection and price published here. The
+  // confidence is locked on these cards, but the pick itself is the paywalled
+  // thing.
+  //
+  // Prefer the flag. Fall back to the old behaviour only while the is_free
+  // column is unmigrated, which is still the case in production, so this is
+  // inert until that migration runs.
+  const freeOf = (rows, n) => {
+    const list = rows || [];
+    return list.some(t => t.is_free != null)
+      ? list.filter(t => t.is_free === true).slice(0, n)
+      : list.slice(0, n);
+  };
+  const freeTips = freeOf(tips, 3);
   const leagues = [...new Set((tips||[]).map(t=>t.league))];
 
   const tipCards = freeTips.map(t=>`
