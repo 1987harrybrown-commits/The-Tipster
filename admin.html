@@ -372,7 +372,11 @@ async function selectAllRows(table, columns, applyFilters) {
     let q = db.from(table).select(columns).order('id', { ascending: true }).range(from, from + PAGE - 1);
     if (applyFilters) q = applyFilters(q);
     const { data, error } = await q;
-    if (error) { console.error('selectAllRows(' + table + '):', error.message); break; }
+    // Returning the pages collected so far is worse than failing. Both
+    // callers aggregate the whole ledger, so a truncated read silently
+    // understates the all-time record and the bankroll curve — the numbers
+    // staking decisions get made on. Fail loudly.
+    if (error) throw new Error('selectAllRows(' + table + ') failed at offset ' + from + ': ' + error.message);
     if (!data || !data.length) break;
     out = out.concat(data);
     if (data.length < PAGE) break;
@@ -596,11 +600,19 @@ async function triggerAccaGenerate() {
 async function loadBankrollSimulator() {
   // Paginated, then sorted here: the helper pages by id, and a bankroll curve
   // only makes sense in settlement order.
-  const history = (await selectAllRows(
-    'results_history',
-    'settled_at, stake, odds, result, event, sport',
-    q => q.in('result', ['WON', 'LOST'])
-  )).sort((a, b) => new Date(a.settled_at) - new Date(b.settled_at));
+  let history;
+  try {
+    history = (await selectAllRows(
+      'results_history',
+      'settled_at, stake, odds, result, event, sport',
+      q => q.in('result', ['WON', 'LOST'])
+    )).sort((a, b) => new Date(a.settled_at) - new Date(b.settled_at));
+  } catch (err) {
+    document.getElementById('bankrollTable').innerHTML =
+      '<tr><td colspan="8" style="text-align:center;color:var(--red);padding:24px">Could not load the ledger: '
+      + esc(err.message) + '</td></tr>';
+    return;
+  }
 
   if (!history || !history.length) {
     document.getElementById('bankrollTable').innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">No settled results yet.</td></tr>';
@@ -679,7 +691,19 @@ async function loadBankrollSimulator() {
 }
 
 async function loadAllTimeStats() {
-  const data = await selectAllRows('results_history', 'result, profit_loss, stake, odds');
+  let data;
+  try {
+    data = await selectAllRows('results_history', 'result, profit_loss, stake, odds');
+  } catch (err) {
+    // Leaving the previous numbers on screen would be read as current. Blank
+    // them and say why, rather than showing an all-time figure that is not.
+    for (const id of ['at-bets','at-won','at-lost','at-rate','at-pl','at-roi','at-odds']) {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = '—'; el.title = 'Could not load: ' + err.message; }
+    }
+    console.error('loadAllTimeStats:', err.message);
+    return;
+  }
   if (!data.length) return;
 
   const won   = data.filter(r => r.result === 'WON').length;
