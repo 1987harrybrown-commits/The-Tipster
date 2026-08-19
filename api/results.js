@@ -18,6 +18,30 @@ function esc(v) {
 function fmt(n,d=2){return(n>=0?'+':'')+parseFloat(n).toFixed(d);}
 function fmtDate(d){return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Europe/London'});}
 
+// PostgREST caps every response at 1000 rows, so an unbounded select over
+// results_history silently truncates and every figure derived from it is wrong
+// once the ledger passes that. Returns { data } to match the shape the callers
+// already destructure.
+async function selectAllRows(table, columns, applyFilters) {
+  const PAGE = 1000;
+  let out = [], from = 0;
+  for (;;) {
+    let q = db.from(table).select(columns).order('id', { ascending: true }).range(from, from + PAGE - 1);
+    if (applyFilters) q = applyFilters(q);
+    const { data, error } = await q;
+    // Partial pages are worse than no answer: every published figure is
+    // derived from this, so a truncated ledger silently understates the
+    // record. Fail loudly and let the handler return 503.
+    if (error) throw new Error('selectAllRows(' + table + ') failed at offset ' + from + ': ' + error.message);
+    if (!data || !data.length) break;
+    out = out.concat(data);
+    if (data.length < PAGE) break;
+    from += PAGE;
+  }
+  return { data: out };
+}
+
+
 // A failed read must never be dressed up as real data. Returning 200 with
 // zeros publishes a 0% win rate, and the s-maxage header then lets the CDN
 // serve that for the next 15-30 minutes. A 503 with no-store is retried
@@ -43,8 +67,19 @@ module.exports = async (req, res) => {
   // Body intentionally not re-indented: these handlers are mostly one large
   // HTML template literal, and re-indenting would rewrite its contents.
   try {
-  const [r_history, r_stats] = await Promise.all([
-    db.from('results_history').select('*').order('settled_at',{ascending:false}).limit(100),
+  // Three different needs, three different reads.
+  //
+  // The daily table below is labelled "last 30 days" but was built from a
+  // single .limit(100) query ordered by recency. At the ~15 tips a day the
+  // engine publishes, 30 days is roughly 450 rows, so the table silently
+  // covered only the most recent stretch of the month and presented it as the
+  // whole month. The window now drives its own paginated read.
+  const thirtyAgo = new Date(); thirtyAgo.setDate(thirtyAgo.getDate()-30);
+
+  const [r_recent, r_window, r_stats] = await Promise.all([
+    db.from('results_history').select('*').order('settled_at',{ascending:false}).limit(30),
+    selectAllRows('results_history','result,profit_loss,stake,tier,settled_at',
+                  q => q.gte('settled_at', thirtyAgo.toISOString())),
     db.from('stats_cache').select('*').eq('id',1).single()
   ]);
   // Both reads are fatal. selectAllRows throws on failure; the direct
@@ -52,28 +87,41 @@ module.exports = async (req, res) => {
   // .single(), which errors when the row is missing. Publishing a page
   // that quietly drops either one means publishing numbers that do not
   // describe the record — a 0% win rate reads as a real result.
-  if (r_history.error) throw new Error('history read failed: ' + r_history.error.message);
-  if (r_stats.error) throw new Error('stats read failed: ' + r_stats.error.message);
-  const history = r_history.data, stats = r_stats.data;
+  if (r_recent.error) throw new Error('recent results read failed: ' + r_recent.error.message);
+  if (r_stats.error) throw new Error('stats_cache read failed: ' + r_stats.error.message);
+  const recent = r_recent.data, window30 = r_window.data, stats = r_stats.data;
 
   // Staked bets only, so win rate and P/L describe the same population.
   // Short-price "insight" picks carry stake 0 and were never advised as bets:
   // they counted towards win rate but contributed nothing to profit.
   const staked = r => r.tier !== 'insight' && parseFloat(r.stake ?? 1) > 0;
-  const rows      = (history || []).filter(staked);
-  const won       = rows.filter(r=>r.result==='WON').length;
-  const lost      = rows.filter(r=>r.result==='LOST').length;
-  const total     = won + lost;
-  const winRate   = stats?.win_rate || (total>0?((won/total)*100).toFixed(1):0);
-  const pl        = stats?.total_pl || rows.reduce((s,r)=>s+parseFloat(r.profit_loss||0),0);
-  const roi       = stats?.roi || 0;
-  const totalWon  = stats?.total_won || won;
-  const totalLost = stats?.total_lost || lost;
+  const rows      = (recent || []).filter(staked);
+  const windowRows = (window30 || []).filter(staked);
+
+  // The headline figures must describe the whole ledger, because the title,
+  // the meta description and the structured data all assert them next to the
+  // claim that every result is published and nothing excluded. They used to
+  // fall back to counting the rows fetched for the recent-results list, which
+  // would have stated a win rate over 100 tips while making that claim.
+  // stats_cache is the only source computed over the full ledger, so a missing
+  // or non-numeric field is fatal rather than quietly substituted.
+  //
+  // Note these were read with `||`, so a legitimate 0 — a genuinely 0% win
+  // rate, or a net P/L of exactly zero — also fell through to the fallback.
+  const num = (v, label) => {
+    const n = parseFloat(v);
+    if (!Number.isFinite(n)) throw new Error('stats_cache.' + label + ' is missing or not numeric');
+    return n;
+  };
+  const winRate   = num(stats?.win_rate,   'win_rate');
+  const pl        = num(stats?.total_pl,   'total_pl');
+  const roi       = num(stats?.roi,        'roi');
+  const totalWon  = num(stats?.total_won,  'total_won');
+  const totalLost = num(stats?.total_lost, 'total_lost');
 
   // Last 30 days by day
   const byDay = {};
-  const thirtyAgo = new Date(); thirtyAgo.setDate(thirtyAgo.getDate()-30);
-  rows.filter(r=>new Date(r.settled_at)>=thirtyAgo).forEach(r=>{
+  windowRows.forEach(r=>{
     const day = r.settled_at?.slice(0,10) || new Date(r.settled_at).toISOString().slice(0,10);
     if(!byDay[day]) byDay[day]={won:0,lost:0,pl:0};
     if(r.result==='WON') byDay[day].won++;
