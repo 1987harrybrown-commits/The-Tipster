@@ -146,7 +146,7 @@ module.exports = async (req, res) => {
       <td>${esc(r.event||'')}</td>
       <td>${esc(r.selection||'')}</td>
       <td style="color:#f0b429;font-family:monospace">${parseFloat(r.odds||0).toFixed(2)}</td>
-      <td><span style="display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;font-family:monospace;background:${r.result==='WON'?'rgba(24,224,122,0.1)':'rgba(255,61,90,0.1)'};color:${r.result==='WON'?'#18e07a':'#ff3d5a'}">${esc(r.result)}</span></td>
+      <td><span style="display:inline-block;padding:2px 8px;border-radius:3px;font-size:11px;font-weight:700;font-family:monospace;background:${r.result==='WON'?'rgba(24,224,122,0.1)':r.result==='VOID'?'rgba(108,131,163,0.15)':'rgba(255,61,90,0.1)'};color:${r.result==='WON'?'#18e07a':r.result==='VOID'?'#738cae':'#ff3d5a'}">${esc(r.result)}</span></td>
       <td style="color:${parseFloat(r.profit_loss||0)>=0?'#18e07a':'#ff3d5a'};font-family:monospace">${fmt(parseFloat(r.profit_loss||0))}u</td>
     </tr>`).join('');
 

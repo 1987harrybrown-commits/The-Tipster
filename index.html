@@ -190,6 +190,9 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:56px;display:flex;ali
 .res-pill.w{background:var(--green-dim);color:var(--green);}
 .res-pill.l{background:var(--red-dim);color:var(--red);}
 .res-pill.p{background:rgba(74,158,255,0.1);color:var(--blue);}
+/* A push: the total landed exactly on the line and the stake came back.
+   Neutral, because it is neither a win nor a loss. */
+.res-pill.v{background:rgba(108,131,163,0.15);color:var(--muted-tint);}
 .sports-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:11px;}
 .sport-pill{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:17px 12px;text-align:center;cursor:pointer;transition:all 0.2s;}
 .sport-pill:hover{border-color:rgba(24,224,122,0.3);transform:translateY(-2px);}
@@ -851,7 +854,10 @@ async function loadBestBetStreak() {
 
     const settledMap = {};
     for (const r of (settledResults || [])) {
-      settledMap[r.tip_ref] = r.result === 'WON' ? 'won' : 'lost';
+      // Anything that is not a win is not automatically a loss — a VOID row is
+      // a push, where the stake was returned.
+      settledMap[r.tip_ref] = r.result === 'WON' ? 'won'
+        : r.result === 'VOID' ? 'void' : 'lost';
     }
 
     // Group by UK date, use results_history status where available
@@ -876,7 +882,9 @@ async function loadBestBetStreak() {
     for (let i = days.length - 1; i >= 0; i--) {
       const tip = byDay[days[i]];
       if (tip.status === 'won') { streak++; }
-      else if (tip.status === 'pending') { continue; }
+      // A push returns the stake, so it neither extends nor ends a run — the
+      // same treatment an unplayed day already gets. Only a loss breaks it.
+      else if (tip.status === 'pending' || tip.status === 'void') { continue; }
       else { break; }
     }
 
@@ -1275,7 +1283,7 @@ function renderHistoryTable(){
     const pl=parseFloat(r.profit_loss||0);
     const rpl=r._running;
     const date=new Date(r.settled_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-    const won=r.result==='WON',tier=r.tier||'free';
+    const won=r.result==='WON',isVoid=r.result==='VOID',tier=r.tier||'free';
     const plCol=pl>=0?'var(--green)':'var(--red)',rplCol=rpl>=0?'var(--green)':'var(--red)';
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);gap:10px;">'+
       '<div style="flex:1;min-width:0;">'+
@@ -1283,7 +1291,7 @@ function renderHistoryTable(){
         '<div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">'+(r.event||'')+'</div>'+
         '<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+(r.selection||'')+' <span style="color:var(--gold);font-family:Space Mono,monospace;">@ '+fmtOdds(r.odds)+'</span></div>'+
       '</div>'+
-      '<div style="text-align:right;flex-shrink:0;"><span class="res-pill '+(won?'w':'l')+'" style="display:inline-block;margin-bottom:5px;">'+r.result+'</span><div style="font-family:Space Mono,monospace;font-size:12px;font-weight:700;color:'+plCol+';">'+fmtU(pl)+'</div><div style="font-family:Space Mono,monospace;font-size:10px;color:'+rplCol+';">'+fmtU(rpl)+'</div></div>'+
+      '<div style="text-align:right;flex-shrink:0;"><span class="res-pill '+(won?'w':isVoid?'v':'l')+'" style="display:inline-block;margin-bottom:5px;">'+r.result+'</span><div style="font-family:Space Mono,monospace;font-size:12px;font-weight:700;color:'+plCol+';">'+fmtU(pl)+'</div><div style="font-family:Space Mono,monospace;font-size:10px;color:'+rplCol+';">'+fmtU(rpl)+'</div></div>'+
     '</div>';
   }).join('');
   updatePLSummary(rows);
@@ -1517,7 +1525,10 @@ async function loadConversionBlock(){
   const {data:history}=await db.from('results_history').select('tier,result,profit_loss,stake').gte('settled_at',thirtyDaysAgo.toISOString());
   if(history&&history.length){
     const proRows=history.filter(r=>r.tier==='pro'),freeRows=history.filter(r=>r.tier==='free');
-    const calcStats=rows=>{const won=rows.filter(r=>r.result==='WON').length,total=rows.filter(r=>r.result!=='pending').length,pl=rows.reduce((s,r)=>s+parseFloat(r.profit_loss||0),0);return{wr:total>0?(won/total*100).toFixed(1)+'%':'--',pl:total>0?(pl>=0?'+':'')+pl.toFixed(2)+'u':'--',pos:pl>=0};};
+    // Denominator is wins + losses. It counted every row that was not 'pending',
+    // which holds while a row can only be WON or LOST, but a VOID push is
+    // neither and would otherwise drag the win rate down.
+    const calcStats=rows=>{const won=rows.filter(r=>r.result==='WON').length,total=won+rows.filter(r=>r.result==='LOST').length,pl=rows.reduce((s,r)=>s+parseFloat(r.profit_loss||0),0);return{wr:total>0?(won/total*100).toFixed(1)+'%':'--',pl:total>0?(pl>=0?'+':'')+pl.toFixed(2)+'u':'--',pos:pl>=0};};
     const proStats=calcStats(proRows),freeStats=calcStats(freeRows);
     const proWr=document.getElementById('pro-wr-display'),proPl=document.getElementById('pro-pl-display'),freeWr=document.getElementById('free-wr-display'),freePl=document.getElementById('free-pl-display');
     if(proWr)proWr.textContent=proStats.wr;if(proPl){proPl.textContent=proStats.pl;proPl.style.color=proStats.pos?'var(--green)':'var(--red)';}
