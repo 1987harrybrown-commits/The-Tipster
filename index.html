@@ -674,7 +674,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <div class="alert" id="signupAlert"></div>
       <div class="fg">
         <label>First Name <span style="color:var(--red);">*</span></label>
-        <input type="text" id="su-name" placeholder="Your first name" autocomplete="given-name">
+        <input type="text" id="su-name" placeholder="Your first name" autocomplete="given-name" maxlength="60">
       </div>
       <div class="fg"><label>Email <span style="color:var(--red);">*</span></label><input type="email" id="su-email" placeholder="you@email.com" autocomplete="email"></div>
       <div class="fg"><label>Password <span style="color:var(--red);">*</span></label><input type="password" id="su-pw" placeholder="Minimum 8 characters" autocomplete="new-password"></div>
@@ -748,6 +748,28 @@ function fmtOdds(decimal) {
 
 let activeDayFilter = 'today';
 
+// The UK calendar day, wherever the visitor is.
+//
+// Everything the engine publishes is anchored to the UK day: the scheduler
+// runs on it, tagFreeTips buckets by it, and the emails say "UK". These
+// grouped tips by the BROWSER's local day instead — three of the variables
+// were even named ukToday while holding a local date — so a visitor outside
+// the UK saw the wrong day's fixtures under "TODAY" and the day tabs
+// mis-bucketed. It agrees for a UK visitor, which is why it went unnoticed.
+//
+// Same implementation as the engine's ukDayStart and the one in api/tips.js.
+function ukDateString(d = new Date()) {
+  return d.toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
+}
+function ukDayStart(now = new Date()) {
+  const ymd = ukDateString(now);
+  const guess = new Date(ymd + 'T00:00:00Z');
+  const hourInLondon = Number(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Europe/London', hour: '2-digit', hour12: false,
+  }).format(guess)) % 24;
+  return new Date(guess.getTime() - hourInLondon * 3600000);
+}
+
 function updateDateHeader() {
   if (activeDayFilter === 'all') {
     document.getElementById('todayDate').textContent = 'UPCOMING';
@@ -757,7 +779,7 @@ function updateDateHeader() {
     ? new Date(Date.now() + 86400000)
     : new Date();
   document.getElementById('todayDate').textContent =
-    d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'}).toUpperCase();
+    d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',timeZone:'Europe/London'}).toUpperCase();
 }
 updateDateHeader();
 
@@ -976,8 +998,8 @@ let allTips=[], activeFilter='all';
 async function loadTips() {
   const grid=document.getElementById('tipsGrid');
   grid.innerHTML=Array(6).fill('<div class="skeleton"></div>').join('');
-  const today=new Date(); today.setHours(0,0,0,0);
-  const tom=new Date(today); tom.setDate(tom.getDate()+3);
+  const today=ukDayStart();
+  const tom=new Date(today.getTime()+3*24*3600000);
   const {data,error}=await db.from('tips').select('*')
     .gte('event_time',today.toISOString()).lte('event_time',tom.toISOString())
     .eq('status','pending')
@@ -994,9 +1016,9 @@ async function loadTips() {
   }
   // Auto-switch to Tomorrow if no tips left today
   const now = new Date();
-  const ukToday2 = now.toLocaleDateString('en-CA');
+  const ukToday2 = ukDateString(now);
   const todayRemaining = (data||[]).filter(t => {
-    const tipDay = new Date(t.event_time).toLocaleDateString('en-CA');
+    const tipDay = ukDateString(new Date(t.event_time));
     return tipDay === ukToday2 && new Date(t.event_time) > now;
   });
   if (!todayRemaining.length && activeDayFilter === 'today') {
@@ -1054,15 +1076,14 @@ function renderTips() {
   const grid=document.getElementById('tipsGrid');
   const now=new Date();
   // Get today and tomorrow date strings in UK time
-  const ukToday=now.toLocaleDateString('en-CA');
-  const ukTomDate=new Date(); ukTomDate.setDate(ukTomDate.getDate()+1);
-  const ukTomorrow=ukTomDate.toLocaleDateString('en-CA');
+  const ukToday=ukDateString(now);
+  const ukTomorrow=ukDateString(new Date(now.getTime()+86400000));
 
   // Filter: hide games already started + apply day filter + sport filter
   let list=allTips.filter(t=>{
     if(new Date(t.event_time)<=now) return false; // hide started games
     if(activeDayFilter==='all') return true;
-    const tipDay=new Date(t.event_time).toLocaleDateString('en-CA');
+    const tipDay=ukDateString(new Date(t.event_time));
     if(activeDayFilter==='today' && tipDay!==ukToday) return false;
     if(activeDayFilter==='tomorrow' && tipDay!==ukTomorrow) return false;
     return true;
@@ -1431,8 +1452,14 @@ async function doSignup(){
   const email=document.getElementById('su-email').value.trim();
   const pw=document.getElementById('su-pw').value;
   if(!name){document.getElementById('su-name').classList.add('error');showMAlert(alert,'Please enter your first name.','error');return;}
+  // The inputs are type="email" but sit outside a <form>, so the browser never
+  // validates them — the buttons call this directly. first_name also had no
+  // ceiling, and it is rendered in every email, on the account page and in the
+  // admin table.
+  if(name.length>60){document.getElementById('su-name').classList.add('error');showMAlert(alert,'Please use 60 characters or fewer.','error');return;}
   document.getElementById('su-name').classList.remove('error');
   if(!email){showMAlert(alert,'Please enter your email.','error');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){showMAlert(alert,'That does not look like an email address.','error');return;}
   if(pw.length<8){showMAlert(alert,'Password must be at least 8 characters.','error');return;}
   btn.disabled=true;btn.textContent='Creating account...';
   const {data,error}=await db.auth.signUp({email,password:pw,options:{data:{first_name:name}}});
@@ -1539,7 +1566,7 @@ async function loadConversionBlock(){
     if(proWr)proWr.textContent=proStats.wr;if(proPl){proPl.textContent=proStats.pl;proPl.style.color=proStats.pos?'var(--green)':'var(--red)';}
     if(freeWr)freeWr.textContent=freeStats.wr;if(freePl){freePl.textContent=freeStats.pl;freePl.style.color=freeStats.pos?'var(--green)':'var(--red)';}
   }
-  const todayStart=new Date();todayStart.setHours(0,0,0,0);
+  const todayStart=ukDayStart();
   const {data:todayResults}=await db.from('results_history').select('tier,result').gte('settled_at',todayStart.toISOString());
   if(todayResults){
     const proWins=todayResults.filter(r=>r.tier==='pro'&&r.result==='WON').length;
