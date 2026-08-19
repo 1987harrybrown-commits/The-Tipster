@@ -467,8 +467,15 @@ async function adminLogout() {
 function showDash() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('adminDash').style.display   = 'block';
-  // Set tomorrow as default override date
-  const tom = new Date(); tom.setDate(tom.getDate()+1);
+  // Tomorrow in the UK calendar, as the default override date. setDate() steps
+  // the browser's local day and toISOString() then formats in UTC, so for an
+  // admin anywhere ahead of UTC the two disagree and the field defaults to
+  // TODAY — the same drift already fixed in clearOverride and the Saturday
+  // form. Anchor to the UK date and do the arithmetic in UTC so neither shifts.
+  const [ty, tm, td] = new Date()
+    .toLocaleDateString('en-CA', { timeZone: 'Europe/London' }).split('-').map(Number);
+  const tom = new Date(Date.UTC(ty, tm - 1, td));
+  tom.setUTCDate(tom.getUTCDate() + 1);
   document.getElementById('ov-date').value = tom.toISOString().split('T')[0];
 }
 
