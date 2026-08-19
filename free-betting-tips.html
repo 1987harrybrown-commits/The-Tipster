@@ -42,7 +42,11 @@ h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;margin:0 0 8px;}
 p{font-size:15px;color:#8a9bb0;margin-bottom:14px;line-height:1.8;}
 strong{color:var(--text);}
 .sport-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;margin-bottom:40px;}
-.sport-card{background:#0f141c;border:1px solid var(--border);border-radius:10px;padding:24px;text-decoration:none;display:block;transition:all 0.2s;}
+/* The card is an <a> and set no colour, so it inherited the browser's
+   default link blue. Only the emoji icon actually shows it today — emoji
+   paint from the font rather than CSS — but any text added here later
+   would land at 1.97:1 on this background. */
+.sport-card{background:#0f141c;border:1px solid var(--border);border-radius:10px;padding:24px;text-decoration:none;display:block;color:var(--text);transition:all 0.2s;}
 .sport-card:hover{border-color:rgba(24,224,122,0.3);transform:translateY(-2px);}
 .sport-icon{font-size:32px;margin-bottom:12px;}
 .sport-card h3{color:var(--text);}
@@ -73,7 +77,7 @@ footer a{color:var(--muted);text-decoration:none;margin:0 8px;}
   <a class="logo" href="/">The <em>Tipster</em></a>
   <a class="nav-cta" href="/">View Today's Tips →</a>
 </nav>
-<div class="wrap">
+<main class="wrap" id="main">
   <nav class="breadcrumb"><a href="/">Home</a> › Free Betting Tips</nav>
   <div class="label">No Registration Required</div>
   <h1>Free Betting Tips — Football, NHL & NBA</h1>
@@ -170,7 +174,7 @@ footer a{color:var(--muted);text-decoration:none;margin:0 8px;}
     <p><strong>Do I need an account for free tips?</strong><br>No account required to view the top 3 free tips on the homepage. You need a free account to receive daily email delivery.</p>
     <p><strong>What bookmakers do you use?</strong><br>We scan 40+ UK-licensed bookmakers including Bet365, Betfair, William Hill, Paddy Power, Unibet, Sky Bet, Ladbrokes and more to find the best available price for each tip.</p>
   </div>
-</div>
+</main>
 
 <footer>
   <p style="margin-bottom:10px">© 2026 The Tipster · Free betting tips updated every 15 minutes · 18+ only · Please gamble responsibly</p>
