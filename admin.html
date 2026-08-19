@@ -8,7 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#07090d;--bg2:#0c0f15;--bg3:#111620;--card:#0f141c;--border:#1c2535;--border2:#243044;--green:#18e07a;--red:#ff3d5a;--gold:#f0b429;--text:#dde6f0;--muted:#6c83a3;--muted2:#7c828b;}
+:root{--bg:#07090d;--bg2:#0c0f15;--bg3:#111620;--card:#0f141c;--border:#1c2535;--border2:#243044;--green:#18e07a;--red:#ff3d5a;--gold:#f0b429;--text:#dde6f0;--muted:#6c83a3;--muted2:#7c828b;
+  /* Text on a translucent tinted badge. The tint lightens the card
+     underneath, so --muted lands at 4.04-4.31:1 there — under AA — even
+     though it clears comfortably on every flat background. Those tints
+     are rgba(74,90,112,...), the pre-AA muted colour in decimal form,
+     which is why the hex sweep did not catch them. */
+  --muted-tint:#738cae;}
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;min-height:100vh;}
 nav{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:var(--bg2);border-bottom:1px solid var(--border);position:fixed;top:0;left:0;right:0;z-index:100;}
@@ -57,7 +63,7 @@ td{padding:9px 11px;}
 .pill{display:inline-block;padding:2px 7px;border-radius:3px;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;text-transform:uppercase;}
 .pill.sent{background:rgba(24,224,122,0.1);color:var(--green);}
 .pill.failed{background:rgba(255,61,90,0.1);color:var(--red);}
-.pill.free{background:rgba(74,90,112,0.15);color:var(--muted);}
+.pill.free{background:rgba(74,90,112,0.15);color:var(--muted-tint);}
 .pill.pro{background:rgba(240,180,41,0.1);color:var(--gold);}
 /* Login screen */
 .login-screen{max-width:380px;margin:120px auto;padding:0 20px;}

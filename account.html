@@ -23,6 +23,12 @@
   --border:#1c2535;--border2:#243044;
   --green:#18e07a;--red:#ff3d5a;--gold:#f0b429;--blue:#3b82f6;
   --text:#dde6f0;--muted:#6c83a3;--muted2:#7c828b;
+  /* Text on a translucent tinted badge. The tint lightens the card
+     underneath, so --muted lands at 4.04-4.31:1 there — under AA — even
+     though it clears comfortably on every flat background. Those tints
+     are rgba(74,90,112,...), the pre-AA muted colour in decimal form,
+     which is why the hex sweep did not catch them. */
+  --muted-tint:#738cae;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;min-height:100vh;}
@@ -61,7 +67,7 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
 .status-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:4px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
 .status-badge.verified{background:rgba(24,224,122,0.1);color:var(--green);}
 .status-badge.unverified{background:rgba(255,61,90,0.1);color:var(--red);}
-.status-badge.free{background:rgba(74,90,112,0.2);color:var(--muted);}
+.status-badge.free{background:rgba(74,90,112,0.2);color:var(--muted-tint);}
 .status-badge.pro{background:rgba(240,180,41,0.12);color:var(--gold);}
 .status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
 
