@@ -50,8 +50,6 @@
 <link rel="preconnect" href="https://eyhlzzaaxrwisrtwyoyh.supabase.co">
 <link rel="preconnect" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root {
   --bg:#07090d; --bg2:#0c0f15; --bg3:#111620;
@@ -710,6 +708,16 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
   </div>
 </div>
 
+<!-- Moved out of <head>. Both are render-blocking with no defer, so ~320KB of
+     JS (chart.js ~200KB, supabase-js ~120KB) had to download and execute
+     before the browser painted anything. Nothing above this point uses
+     either — the only other inline script on the page is the analytics
+     config — so the whole document now parses and renders first.
+
+     defer is not an option here: the inline script below runs during parsing
+     and calls createClient immediately, and deferred scripts execute after
+     that. Position is what orders them. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
@@ -1177,9 +1185,49 @@ function filterBySport(sport){
 let activePLTab='all';
 let roiChartInstance = null;
 
-function renderROIGraph(rows) {
+// chart.js is ~200KB and draws one graph well below the fold. It used to load
+// eagerly in <head>, render-blocking, on every page view — including the many
+// that never scroll to it. Fetched on demand instead, once, the first time the
+// graph is actually drawn.
+//
+// Deferring the tag instead would have been a race rather than a guarantee:
+// renderROIGraph is reached after `await updateNavAuth()`, so it happens to run
+// after a network round-trip today, but nothing enforces that ordering.
+let _chartJsPromise = null;
+function loadChartJs() {
+  if (window.Chart) return Promise.resolve(window.Chart);
+  if (_chartJsPromise) return _chartJsPromise;
+  _chartJsPromise = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
+    s.onload = () => resolve(window.Chart);
+    s.onerror = () => { _chartJsPromise = null; reject(new Error('chart.js failed to load')); };
+    document.head.appendChild(s);
+  });
+  return _chartJsPromise;
+}
+
+// Pulls chart.js in the first time the graph is drawn, rather than eagerly in
+// <head> where it was render-blocking.
+//
+// An earlier attempt also deferred the DRAW until the canvas neared the
+// viewport, with an IntersectionObserver, so a visitor who never scrolled down
+// would not download the 200KB at all. That is backed out: the observer never
+// fired in any environment available here, and its failure mode is a graph
+// that silently never appears. Not worth shipping a mechanism that cannot be
+// verified for a saving on a request that is already off the critical path.
+async function renderROIGraph(rows) {
   const canvas = document.getElementById('roiChart');
   if (!canvas) return;
+  try {
+    await loadChartJs();
+  } catch (e) {
+    // The graph is supplementary — the table below it carries the same data.
+    // Say so rather than leaving an empty box.
+    const box = canvas.parentElement;
+    if (box) box.innerHTML = '<div style="text-align:center;color:var(--muted);padding:28px;font-size:12px;">Chart unavailable — the full record is in the table below.</div>';
+    return;
+  }
 
   // Filter to settled rows only, sort chronologically
   const settled = [...rows]
@@ -1290,7 +1338,7 @@ function renderHistoryTable(){
   const container=document.getElementById('plBody');
   let rows=allHistory;
   if(activePLTab!=='all')rows=rows.filter(r=>(r.tier||'free')===activePLTab);
-  renderROIGraph(rows);
+  renderROIGraph(rows).catch(e => console.error('ROI graph:', e.message));
   if(!rows.length){container.innerHTML='<div style="text-align:center;color:var(--muted);padding:36px;font-size:13px;">No settled results yet.</div>';updatePLSummary(rows);return;}
 
   // Sort by settled_at ascending to calculate running P&L correctly
