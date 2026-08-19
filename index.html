@@ -936,9 +936,14 @@ function renderDashboard(period) {
   const total   = won+lost;
   const rate    = total>0?(won/total)*100:0;
   const pl      = rows.reduce((s,r)=>s+parseFloat(r.profit_loss||0),0);
-  const staked  = rows.reduce((s,r)=>s+parseFloat(r.stake??1),0);
+  // A push returns the stake, so it is not turnover.
+  const staked  = rows.filter(r=>r.result==='WON'||r.result==='LOST')
+                      .reduce((s,r)=>s+parseFloat(r.stake??1),0);
   const roi     = staked>0?(pl/staked)*100:0;
-  const avgOdds = total>0?rows.reduce((s,r)=>s+parseFloat(r.odds||0),0)/total:0;
+  // Averaged over the same rows the denominator counts — a push is neither a
+  // win nor a loss, so its price does not belong in the average.
+  const avgOdds = total>0?rows.filter(r=>r.result==='WON'||r.result==='LOST')
+                              .reduce((s,r)=>s+parseFloat(r.odds||0),0)/total:0;
   const labels  = {yesterday:'Yesterday','7d':'Last 7 Days','30d':'Last 30 Days'};
   const set = (id,val,cls,sub) => {
     const e=document.getElementById(id); if(e){e.textContent=val;e.className='kpi-val '+cls;}

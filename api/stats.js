@@ -87,8 +87,11 @@ module.exports = async (req, res) => {
     if(r.result==='WON') bySport[r.sport].won++;
     if(r.result==='LOST') bySport[r.sport].lost++;
     bySport[r.sport].pl+=parseFloat(r.profit_loss||0);
-    bySport[r.sport].staked+=parseFloat(r.stake??1);
-    if(r.odds) bySport[r.sport].odds.push(parseFloat(r.odds));
+    // A push returns the stake, so it is not turnover — counting it would
+    // understate ROI for that sport.
+    if(r.result==='WON'||r.result==='LOST') bySport[r.sport].staked+=parseFloat(r.stake??1);
+    // Same set as won/lost — a push's price is not part of the average taken.
+    if(r.odds && (r.result==='WON'||r.result==='LOST')) bySport[r.sport].odds.push(parseFloat(r.odds));
   });
 
   const sportRows = Object.entries(bySport).map(([sport,d])=>{

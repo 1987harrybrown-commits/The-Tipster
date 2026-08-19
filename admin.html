@@ -765,9 +765,14 @@ async function loadAllTimeStats() {
   const lost  = data.filter(r => r.result === 'LOST').length;
   const total = won + lost;
   const pl    = data.reduce((s,r) => s + parseFloat(r.profit_loss||0), 0);
-  const staked= data.reduce((s,r) => s + parseFloat(r.stake??1), 0);
+  // A push returns the stake, so it is not turnover.
+  const staked= data.filter(r => r.result === 'WON' || r.result === 'LOST')
+                    .reduce((s,r) => s + parseFloat(r.stake??1), 0);
   const roi   = staked > 0 ? (pl/staked)*100 : 0;
-  const avgOdds = total > 0 ? data.reduce((s,r) => s + parseFloat(r.odds||0), 0) / total : 0;
+  // Averaged over the same rows the denominator counts — a push is neither a
+  // win nor a loss, so its price does not belong in the average.
+  const avgOdds = total > 0 ? data.filter(r => r.result === 'WON' || r.result === 'LOST')
+                                  .reduce((s,r) => s + parseFloat(r.odds||0), 0) / total : 0;
   const rate  = total > 0 ? (won/total)*100 : 0;
 
   const fmt = (n,d=2) => (n>=0?'+':'')+n.toFixed(d);
