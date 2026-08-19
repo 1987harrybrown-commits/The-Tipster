@@ -70,10 +70,14 @@ module.exports = async (req, res) => {
     db.from('tips').select('*').eq('sport','Basketball').eq('status','pending')
       .gte('event_time', today.toISOString()).lte('event_time', tom.toISOString())
       .order('confidence',{ascending:false}).limit(10),
-    selectAllRows('results_history','result,profit_loss', q => q.eq('sport','Basketball'))
+    selectAllRows('results_history','result,profit_loss,stake,tier', q => q.eq('sport','Basketball'))
   ]);
 
-  const h = history||[];
+  // Staked bets only, so win rate and P/L describe the same population.
+  // Short-price "insight" picks carry stake 0 and were never advised as bets:
+  // they counted towards win rate but contributed nothing to profit.
+  const staked = r => r.tier !== 'insight' && parseFloat(r.stake ?? 1) > 0;
+  const h = (history||[]).filter(staked);
   const won = h.filter(r=>r.result==='WON').length;
   const total = h.filter(r=>r.result==='WON'||r.result==='LOST').length;
   const winRate = total>0?((won/total)*100).toFixed(1):0;

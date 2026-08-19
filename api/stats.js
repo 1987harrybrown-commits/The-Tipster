@@ -37,11 +37,15 @@ function fmt(n,d=2){return(n>=0?'+':'')+parseFloat(n).toFixed(d);}
 
 module.exports = async (req, res) => {
   const [{ data: history }, { data: stats }] = await Promise.all([
-    selectAllRows('results_history','sport,result,profit_loss,stake,odds'),
+    selectAllRows('results_history','sport,result,profit_loss,stake,odds,tier'),
     db.from('stats_cache').select('*').eq('id',1).single()
   ]);
 
-  const rows = history||[];
+  // Same population for win rate and ROI. Short-price "insight" picks carry
+  // stake 0 and were never advised as bets: they counted towards win rate but
+  // contributed nothing to ROI, so the two columns described different sets of
+  // tips. Matches the engine's updateStatsCache.
+  const rows = (history||[]).filter(r => r.tier !== 'insight' && parseFloat(r.stake ?? 1) > 0);
   const bySport = {};
   rows.forEach(r=>{
     if(!bySport[r.sport]) bySport[r.sport]={won:0,lost:0,pl:0,staked:0,odds:[]};

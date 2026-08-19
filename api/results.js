@@ -24,7 +24,11 @@ module.exports = async (req, res) => {
     db.from('stats_cache').select('*').eq('id',1).single()
   ]);
 
-  const rows      = history || [];
+  // Staked bets only, so win rate and P/L describe the same population.
+  // Short-price "insight" picks carry stake 0 and were never advised as bets:
+  // they counted towards win rate but contributed nothing to profit.
+  const staked = r => r.tier !== 'insight' && parseFloat(r.stake ?? 1) > 0;
+  const rows      = (history || []).filter(staked);
   const won       = rows.filter(r=>r.result==='WON').length;
   const lost      = rows.filter(r=>r.result==='LOST').length;
   const total     = won + lost;
