@@ -620,9 +620,9 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 </main>
 
 <!-- TIP DETAIL MODAL -->
-<div class="tip-overlay" id="tipOverlay" onclick="closeTipOuter(event)">
+<div class="tip-overlay" id="tipOverlay" role="dialog" aria-modal="true" aria-label="Tip detail" onclick="closeTipOuter(event)">
   <div class="tip-modal" id="tipModal">
-    <button class="tm-close" onclick="closeTipModal()">&#x2715;</button>
+    <button class="tm-close" aria-label="Close" onclick="closeTipModal()">&#x2715;</button>
     <div class="tm-header">
       <div class="tm-sport" id="tm-sport"></div>
       <div class="tm-match" id="tm-match"></div>
@@ -654,9 +654,9 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 </div>
 
 <!-- AUTH MODAL -->
-<div class="overlay" id="overlay" onclick="closeOuter(event)">
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-label="Account" onclick="closeOuter(event)">
   <div class="modal" style="max-width:440px;">
-    <button class="modal-x" onclick="closeModal()">&#x2715;</button>
+    <button class="modal-x" aria-label="Close" onclick="closeModal()">&#x2715;</button>
     <div id="mSignup">
       <div style="text-align:center;margin-bottom:20px;">
         <div style="font-family:Space Mono,monospace;font-size:9px;text-transform:uppercase;letter-spacing:3px;color:var(--green);margin-bottom:8px;">Free Access</div>
@@ -1434,16 +1434,63 @@ function openTipModal(tip){
   if(bkEl)bkEl.textContent=tip.bookmaker?tip.bookmaker.replace(/_/g,' '):'Best available';
   if(mkEl)mkEl.textContent=tip.market||'Match winner';
   const fill=document.getElementById('tm-conf-fill');fill.style.width=conf+'%';fill.style.background=confCls;
-  document.getElementById('tipOverlay').classList.add('open');
-  document.body.style.overflow='hidden';
+  _openDialog(document.getElementById('tipOverlay'));
 }
 
-function closeTipModal(){document.getElementById('tipOverlay').classList.remove('open');document.body.style.overflow='';}
+function closeTipModal(){_closeDialog(document.getElementById('tipOverlay'));}
 function closeTipOuter(e){if(e.target===document.getElementById('tipOverlay'))closeTipModal();}
 
+// Dialog behaviour the markup did not have: focus moves into the panel on
+// open and returns to whatever opened it on close, Tab cycles inside rather
+// than walking the page behind, and Escape closes. Without a trap, a keyboard
+// or screen-reader user tabs straight out of the signup form into a page that
+// is visually covered — which on the primary conversion flow is the worst
+// place for it.
+let _lastFocus = null;
+
+function _focusable(root) {
+  return [...root.querySelectorAll(
+    'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
+    .filter(el => { const cs = getComputedStyle(el);
+      return cs.display !== 'none' && cs.visibility !== 'hidden' && el.getBoundingClientRect().width > 0; });
+}
+
+function _openDialog(el, focusFirst) {
+  _lastFocus = document.activeElement;
+  el.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  const targets = _focusable(el);
+  const first = focusFirst ? (el.querySelector(focusFirst) || targets[0]) : targets[0];
+  if (first) setTimeout(() => first.focus(), 0);
+}
+
+function _closeDialog(el) {
+  el.classList.remove('open');
+  document.body.style.overflow = '';
+  if (_lastFocus && document.contains(_lastFocus)) _lastFocus.focus();
+  _lastFocus = null;
+}
+
+document.addEventListener('keydown', (e) => {
+  const open = [document.getElementById('overlay'), document.getElementById('tipOverlay')]
+    .find(el => el && el.classList.contains('open'));
+  if (!open) return;
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    if (open.id === 'overlay') closeModal(); else closeTipModal();
+    return;
+  }
+  if (e.key !== 'Tab') return;
+  const targets = _focusable(open);
+  if (!targets.length) return;
+  const first = targets[0], last = targets[targets.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
 function showPanel(name){['mSignup','mLogin','mForgot','mSuccess'].forEach(p=>{const el=document.getElementById(p);if(el)el.style.display=p===name?'block':'none';});}
-function openModal(type){document.getElementById('overlay').classList.add('open');document.body.style.overflow='hidden';if(type==='login')showPanel('mLogin');else if(type==='forgot')showPanel('mForgot');else showPanel('mSignup');}
-function closeModal(){document.getElementById('overlay').classList.remove('open');document.body.style.overflow='';['signupAlert','loginAlert','forgotAlert'].forEach(id=>{const el=document.getElementById(id);if(el)el.className='alert';});}
+function openModal(type){if(type==='login')showPanel('mLogin');else if(type==='forgot')showPanel('mForgot');else showPanel('mSignup');_openDialog(document.getElementById('overlay'),'input:not([type=hidden])');}
+function closeModal(){_closeDialog(document.getElementById('overlay'));['signupAlert','loginAlert','forgotAlert'].forEach(id=>{const el=document.getElementById(id);if(el)el.className='alert';});}
 function closeOuter(e){if(e.target===document.getElementById('overlay'))closeModal();}
 
 async function doSignup(){
