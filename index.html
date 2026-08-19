@@ -802,6 +802,21 @@ updateDateHeader();
 
 let cachedStats = {}, isProUser = false;
 
+// The published record is bets, not everything the engine settled.
+//
+// applyStrictRules publishes short-price selections with stake 0 and tier
+// 'insight' — informational, never advised as a bet — and settlement writes
+// them into results_history like any other row. They cannot enter ROI, because
+// there is no return on a stake of zero, so counting them towards win rate
+// reports the two headline figures over different populations. Insight picks
+// are short-priced and therefore win more often than average, so including
+// them pulls the win rate up specifically in the flattering direction.
+//
+// updateStatsCache in the engine applies exactly this filter. Every figure the
+// site publishes has to use the same one, or two numbers on the same page
+// describe two different sets of tips.
+const isBet = (r) => r.tier !== 'insight' && parseFloat(r.stake ?? 1) > 0;
+
 // PostgREST caps every response at 1000 rows. Any query over results_history
 // that can exceed that has to paginate or it truncates silently — which is how
 // the headline figures below stopped counting once the ledger passed 1000
@@ -843,9 +858,8 @@ async function loadLiveBar() {
   } else {
     const allRows = await selectAllRows('results_history', 'result, profit_loss, stake, tier',
       q => q.in('result', ['WON', 'LOST']));
-  // Staked bets only, so win rate and ROI describe the same population.
-  // Short-price "insight" picks carry stake 0 and were never advised as bets.
-    const data = allRows.filter(r => r.tier !== 'insight' && parseFloat(r.stake ?? 1) > 0);
+    // Staked bets only, so win rate and ROI describe the same population.
+    const data = allRows.filter(isBet);
     if (!data.length) return;
     const won   = data.filter(r => r.result === 'WON').length;
     const lost  = data.filter(r => r.result === 'LOST').length;
@@ -969,7 +983,10 @@ function filterByPeriod(rows, period) {
 
 function renderDashboard(period) {
   activePeriod = period;
-  const rows    = filterByPeriod(allHistory, period);
+  // isBet, not the raw history: insight picks are settled and stored like
+  // bets, and counting them here reported a different win rate and bet count
+  // from the headline figures further up the same page.
+  const rows    = filterByPeriod(allHistory, period).filter(isBet);
   const won     = rows.filter(r=>r.result==='WON').length;
   const lost    = rows.filter(r=>r.result==='LOST').length;
   const total   = won+lost;
@@ -1380,7 +1397,9 @@ function renderHistoryTable(){
   updatePLSummary(rows);
 }
 
-function updatePLSummary(data){
+function updatePLSummary(rawData){
+  // Same population as every other published figure — see isBet.
+  const data=rawData.filter(isBet);
   const won=data.filter(r=>r.result==='WON').length,lost=data.filter(r=>r.result==='LOST').length;
   const total=won+lost,pl=data.reduce((s,r)=>s+parseFloat(r.profit_loss||0),0);
   document.getElementById('ps-settled').textContent=total;
@@ -1680,7 +1699,13 @@ async function loadConversionBlock(){
   }
   const day=new Date().getDay();
   if(day===5||day===6){
-    const {data:accaOverride}=await db.from('email_overrides').select('acca_combined_odds,acca_selections').eq('type','saturday').gte('date',new Date().toISOString().split('T')[0]).single();
+    // Two fixes. The date was the UTC day, which during BST is yesterday
+    // between 00:00 and 01:00 UK — the same drift already corrected in the
+    // admin panel and the engine. And .single() errors unless the result is
+    // exactly one row, so as soon as two future Saturday overrides existed
+    // this teaser silently vanished; take the nearest one instead.
+    const ukToday=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'});
+    const {data:accaOverride}=await db.from('email_overrides').select('acca_combined_odds,acca_selections').eq('type','saturday').gte('date',ukToday).order('date',{ascending:true}).limit(1).maybeSingle();
     if(accaOverride&&accaOverride.acca_selections){
       const teaserEl=document.getElementById('accaTeaser'),oddsEl=document.getElementById('accaTeaserOdds'),legsEl=document.getElementById('accaTeaserLegs');
       if(teaserEl)teaserEl.style.display='block';if(oddsEl)oddsEl.textContent=parseFloat(accaOverride.acca_combined_odds||0).toFixed(2);if(legsEl)legsEl.textContent=accaOverride.acca_selections.length+' selections';

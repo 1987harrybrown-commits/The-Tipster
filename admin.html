@@ -756,7 +756,10 @@ async function loadBankrollSimulator() {
 async function loadAllTimeStats() {
   let data;
   try {
-    data = await selectAllRows('results_history', 'result, profit_loss, stake, odds');
+    // tier is needed to tell a bet from an informational pick — see the filter
+    // below. It was not being selected at all, so the admin all-time figures
+    // could not have excluded insight picks even in principle.
+    data = await selectAllRows('results_history', 'result, profit_loss, stake, odds, tier');
   } catch (err) {
     // Leaving the previous numbers on screen would be read as current. Blank
     // them and say why, rather than showing an all-time figure that is not.
@@ -768,6 +771,19 @@ async function loadAllTimeStats() {
     return;
   }
   if (!data.length) return;
+
+  // The betting record, not everything that was settled. applyStrictRules
+  // publishes short-price selections with stake 0 and tier 'insight', and
+  // settlement stores them like any other row. They cannot enter ROI — there
+  // is no return on a stake of zero — so counting them towards win rate would
+  // report the two figures over different populations, and because they are
+  // short-priced they win more often than average. updateStatsCache in the
+  // engine and every figure on the public site apply this same filter; the
+  // admin panel was the last reader that did not, and so was the one place
+  // showing a different all-time win rate from the site it administers.
+  const bets  = data.filter(r => r.tier !== 'insight' && parseFloat(r.stake ?? 1) > 0);
+  if (!bets.length) return;
+  data = bets;
 
   const won   = data.filter(r => r.result === 'WON').length;
   const lost  = data.filter(r => r.result === 'LOST').length;
