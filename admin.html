@@ -476,9 +476,26 @@ async function loadAll() {
 }
 
 async function loadAccaHistory() {
-  const { data, error } = await db.from('daily_accas').select('*').order('date', { ascending: false });
   const tbody = document.getElementById('accaHistory');
-  if (error || !data || !data.length) {
+
+  // Paginated: this was an unbounded select, and PostgREST caps responses at
+  // 1000 rows. At one acca a day that truncates silently inside three years,
+  // and updateAccaSummary computes the all-time acca record from it.
+  // selectAllRows pages by id, so re-sort by date afterwards.
+  let data;
+  try {
+    data = (await selectAllRows('daily_accas', '*'))
+      .sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  } catch (err) {
+    // "No accas generated yet" is what an admin sees when everything is fine,
+    // so it cannot also be what they see when the read was rejected.
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--red);padding:24px">Could not load acca history: '
+      + esc(err.message) + '</td></tr>';
+    updateAccaSummary(null);
+    return;
+  }
+
+  if (!data.length) {
     tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">No accas generated yet.</td></tr>';
     updateAccaSummary([]);
     return;
@@ -495,15 +512,15 @@ async function loadAccaHistory() {
     const rplCol = runningPL >= 0 ? 'var(--green)' : 'var(--red)';
     const resCol = a.result === 'WON' ? 'var(--green)' : a.result === 'LOST' ? 'var(--red)' : 'var(--muted)';
     const sels = (a.selections || []).map(s =>
-      `<div style="font-size:11px;margin-bottom:2px;"><span style="color:var(--text)">${esc(s.match)}</span> — <span style="color:var(--gold)">${esc(s.selection)}</span> <span style="color:var(--muted);font-family:Space Mono,monospace">@ ${parseFloat(s.odds).toFixed(2)}</span> <span style="color:var(--muted);font-size:10px">(${s.confidence}%)</span></div>`
+      `<div style="font-size:11px;margin-bottom:2px;"><span style="color:var(--text)">${esc(s.match)}</span> — <span style="color:var(--gold)">${esc(s.selection)}</span> <span style="color:var(--muted);font-family:Space Mono,monospace">@ ${parseFloat(s.odds).toFixed(2)}</span> <span style="color:var(--muted);font-size:10px">(${esc(s.confidence)}%)</span></div>`
     ).join('');
     return `<tr>
       <td style="font-family:Space Mono,monospace;font-size:11px;color:var(--muted)">${esc(a.date)}</td>
       <td style="font-size:12px">${esc(a.sport)}</td>
-      <td style="font-family:Space Mono,monospace;font-weight:700">${a.legs}</td>
+      <td style="font-family:Space Mono,monospace;font-weight:700">${esc(a.legs)}</td>
       <td style="min-width:280px">${sels}</td>
       <td style="font-family:Space Mono,monospace;color:var(--gold);font-weight:700">${parseFloat(a.combined_odds).toFixed(2)}</td>
-      <td style="font-family:Space Mono,monospace">${a.stake}u</td>
+      <td style="font-family:Space Mono,monospace">${esc(a.stake)}u</td>
       <td style="font-family:Space Mono,monospace;font-weight:700;color:${resCol}">${esc(a.result)}</td>
       <td style="font-family:Space Mono,monospace;font-weight:700;color:${plCol}">${plStr}</td>
       <td style="font-family:Space Mono,monospace;font-size:11px;color:${rplCol}">${rplStr}</td>
@@ -513,6 +530,15 @@ async function loadAccaHistory() {
 }
 
 function updateAccaSummary(data) {
+  // null means the read failed. Zeros would be indistinguishable from a
+  // genuine record of no settled accas.
+  if (data === null) {
+    for (const id of ['acca-total','acca-won','acca-lost','acca-rate','acca-pl','acca-roi']) {
+      const el = document.getElementById(id);
+      if (el) { el.textContent = '—'; el.title = 'Could not load acca history'; }
+    }
+    return;
+  }
   const settled = data.filter(a => a.result === 'WON' || a.result === 'LOST');
   const won = settled.filter(a => a.result === 'WON').length;
   const lost = settled.filter(a => a.result === 'LOST').length;
