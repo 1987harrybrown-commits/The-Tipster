@@ -236,6 +236,13 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 .fg label{font-size:11px;font-weight:700;display:block;margin-bottom:4px;}
 .fg input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;padding:10px 11px;font-size:13px;color:var(--text);font-family:'Lato',sans-serif;outline:none;transition:border-color 0.2s;}
 .fg input:focus{border-color:var(--green);}
+/* These fields set outline:none, which left a 1px border-colour change
+   as the entire focus indicator. That is hard to see, and for anyone who
+   cannot separate those two colours it is no indicator at all — a
+   keyboard user then has no way to tell which field they are in.
+   focus-visible so a mouse click still looks the way it did; only
+   keyboard focus draws the ring. */
+.fg input:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
 .fg input.error{border-color:var(--red);}
 /* The signup, login and reset panels all render messages into a .alert div,
    and this page defined none of these rules — admin.html and account.html
@@ -313,6 +320,25 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
   .tips-grid{grid-template-columns:1fr;}
   footer{padding:32px 14px 20px;}
   .footer-top{flex-direction:column;}
+}
+
+/* Motion is a preference, and this page did not read it.
+   Three animations here run forever — the results ticker for 40s a loop, the
+   live dot, and the loading shimmer — and continuous motion is the kind that
+   causes trouble for vestibular disorders. The blanket rule below near-zeroes
+   durations rather than removing them, so anything whose end state matters
+   still lands there; the ticker is called out separately because snapping it
+   to the end of a translate would leave the track parked half off-screen. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+@media (prefers-reduced-motion: reduce){
+  .ticker-track{animation:none !important;}
 }
 </style>
 <!-- Google Analytics -->
@@ -680,11 +706,11 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       </div>
       <div class="alert" id="signupAlert"></div>
       <div class="fg">
-        <label>First Name <span style="color:var(--red);">*</span></label>
+        <label for="su-name">First Name <span style="color:var(--red);">*</span></label>
         <input type="text" id="su-name" placeholder="Your first name" autocomplete="given-name" maxlength="60">
       </div>
-      <div class="fg"><label>Email <span style="color:var(--red);">*</span></label><input type="email" id="su-email" placeholder="you@email.com" autocomplete="email"></div>
-      <div class="fg"><label>Password <span style="color:var(--red);">*</span></label><input type="password" id="su-pw" placeholder="Minimum 8 characters" autocomplete="new-password"></div>
+      <div class="fg"><label for="su-email">Email <span style="color:var(--red);">*</span></label><input type="email" id="su-email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="fg"><label for="su-pw">Password <span style="color:var(--red);">*</span></label><input type="password" id="su-pw" placeholder="Minimum 8 characters" autocomplete="new-password"></div>
       <button class="btn-msubmit" onclick="doSignup()" id="suBtn">Create Free Account &#x2192;</button>
       <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:9px;line-height:1.5;">By signing up you agree to receive daily tips by email. Unsubscribe any time. 18+ only.</div>
       <div class="mswitch" style="margin-top:11px;">Already a member? <a onclick="openModal('login')">Log in</a></div>
@@ -693,8 +719,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Welcome back</h2>
       <p style="font-size:12px;color:var(--muted);margin-bottom:20px;">Log in to access your tips and preferences.</p>
       <div class="alert" id="loginAlert"></div>
-      <div class="fg"><label>Email</label><input type="email" id="li-email" placeholder="you@email.com" autocomplete="email"></div>
-      <div class="fg"><label>Password</label><input type="password" id="li-pw" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
+      <div class="fg"><label for="li-email">Email</label><input type="email" id="li-email" placeholder="you@email.com" autocomplete="email"></div>
+      <div class="fg"><label for="li-pw">Password</label><input type="password" id="li-pw" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <button class="btn-msubmit" onclick="doLogin()" id="liBtn">Log In &#x2192;</button>
       <div class="mswitch" style="margin-top:9px;"><a onclick="openModal('forgot')" style="color:var(--muted);">Forgot password?</a></div>
       <div class="mswitch" style="margin-top:7px;">No account? <a onclick="openModal('signup')">Join free</a></div>
@@ -703,7 +729,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Reset password</h2>
       <p style="font-size:12px;color:var(--muted);margin-bottom:20px;">Enter your email and we will send you a reset link.</p>
       <div class="alert" id="forgotAlert"></div>
-      <div class="fg"><label>Email</label><input type="email" id="fo-email" placeholder="you@email.com"></div>
+      <div class="fg"><label for="fo-email">Email</label><input type="email" id="fo-email" placeholder="you@email.com"></div>
       <button class="btn-msubmit" onclick="doForgot()" id="foBtn">Send Reset Link &#x2192;</button>
       <div class="mswitch" style="margin-top:9px;"><a onclick="openModal('login')">&#x2190; Back to login</a></div>
     </div>

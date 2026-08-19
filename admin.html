@@ -22,9 +22,9 @@ nav{height:56px;display:flex;align-items:center;justify-content:space-between;pa
 .logo em{color:var(--gold);}
 .admin-badge{background:rgba(240,180,41,0.12);color:var(--gold);font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;padding:3px 8px;border-radius:3px;margin-left:10px;}
 .page{padding:72px 24px 60px;max-width:1000px;margin:0 auto;}
-.page-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin-bottom:4px;}
+.page-title{font-family:'Syne',sans-serif;font-size:26px;font-weight:800;margin:0 0 4px;}
 .page-sub{font-size:12px;color:var(--muted);margin-bottom:28px;}
-.section-title{font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--green);margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.section-title{font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--green);margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:24px;}
 .card{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:20px 22px;}
 .card.full{grid-column:1/-1;}
@@ -32,6 +32,13 @@ nav{height:56px;display:flex;align-items:center;justify-content:space-between;pa
 .fg label{font-size:11px;font-weight:700;display:block;margin-bottom:4px;color:var(--muted);}
 .fg input,.fg textarea,.fg select{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;padding:9px 11px;font-size:13px;color:var(--text);font-family:'Lato',sans-serif;outline:none;transition:border-color 0.2s;}
 .fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--green);}
+/* These fields set outline:none, which left a 1px border-colour change
+   as the entire focus indicator. That is hard to see, and for anyone who
+   cannot separate those two colours it is no indicator at all — a
+   keyboard user then has no way to tell which field they are in.
+   focus-visible so a mouse click still looks the way it did; only
+   keyboard focus draws the ring. */
+.fg input:focus-visible,.fg textarea:focus-visible,.fg select:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
 .fg textarea{min-height:80px;resize:vertical;}
 .btn{font-family:'Lato',sans-serif;cursor:pointer;border-radius:4px;font-size:13px;font-weight:700;transition:all 0.2s;padding:9px 18px;border:none;}
 .btn-green{background:var(--green);color:#07090d;}
@@ -68,6 +75,22 @@ td{padding:9px 11px;}
 /* Login screen */
 .login-screen{max-width:380px;margin:120px auto;padding:0 20px;}
 @media(max-width:640px){.grid{grid-template-columns:1fr;}.stats-row{grid-template-columns:repeat(2,1fr);}nav{padding:0 14px;}.page{padding:66px 14px 40px;}}
+
+/* Motion is a preference, and this page did not read it.
+   Three animations here run forever — the results ticker for 40s a loop, the
+   live dot, and the loading shimmer — and continuous motion is the kind that
+   causes trouble for vestibular disorders. The blanket rule below near-zeroes
+   durations rather than removing them, so anything whose end state matters
+   still lands there; the ticker is called out separately because snapping it
+   to the end of a translate would leave the track parked half off-screen. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
 </style>
 </head>
 <body>
@@ -76,8 +99,8 @@ td{padding:9px 11px;}
 <div id="loginScreen" class="login-screen">
   <div style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">The <span style="color:var(--gold)">Tipster</span> <span style="font-size:13px;color:var(--muted)">Admin</span></div>
   <p style="font-size:12px;color:var(--muted);margin-bottom:24px;">Sign in with your admin account to continue.</p>
-  <div class="fg"><label>Email</label><input type="email" id="adminEmail" placeholder="admin@email.com"></div>
-  <div class="fg"><label>Password</label><input type="password" id="adminPw" placeholder="Password" onkeydown="if(event.key==='Enter')adminLogin()"></div>
+  <div class="fg"><label for="adminEmail">Email</label><input type="email" id="adminEmail" placeholder="admin@email.com"></div>
+  <div class="fg"><label for="adminPw">Password</label><input type="password" id="adminPw" placeholder="Password" onkeydown="if(event.key==='Enter')adminLogin()"></div>
   <button class="btn btn-gold" onclick="adminLogin()" id="loginBtn" style="width:100%;margin-top:4px;">Sign In</button>
   <div class="alert" id="loginAlert"></div>
 </div>
@@ -97,7 +120,7 @@ td{padding:9px 11px;}
 </nav>
 
 <div class="page">
-  <div class="page-title">Dashboard</div>
+  <h1 class="page-title">Dashboard</h1>
   <div class="page-sub">Manage emails, overrides and subscribers.</div>
 
   <!-- STATS -->
@@ -109,7 +132,7 @@ td{padding:9px 11px;}
   </div>
 
   <!-- ALL TIME PERFORMANCE -->
-  <div class="section-title">All Time Performance</div>
+  <h2 class="section-title">All Time Performance</h2>
   <div class="grid" style="margin-bottom:24px;">
     <div class="card">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
@@ -154,12 +177,12 @@ td{padding:9px 11px;}
   </div>
 
   <!-- TEST EMAIL -->
-  <div class="section-title">Test Email</div>
+  <h2 class="section-title">Test Email</h2>
   <div class="grid">
     <div class="card">
-      <div class="fg"><label>Send test to</label><input type="email" id="testEmailTo" placeholder="your@email.com"></div>
+      <div class="fg"><label for="testEmailTo">Send test to</label><input type="email" id="testEmailTo" placeholder="your@email.com"></div>
       <div class="fg">
-        <label>Type</label>
+        <label for="testEmailType">Type</label>
         <select id="testEmailType">
           <option value="daily">Free — Bet of the Day (08:30)</option>
           <option value="pro_daily">Pro — Full Card (07:00)</option>
@@ -184,20 +207,20 @@ td{padding:9px 11px;}
   </div>
 
   <!-- DAILY OVERRIDE -->
-  <div class="section-title">Bet of the Day Override</div>
+  <h2 class="section-title">Bet of the Day Override</h2>
   <div class="card full" style="margin-bottom:24px;">
     <p style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5;">
       Override tomorrow's automatic pick. If no override is set, the engine selects the highest-confidence tip automatically.
       Set date to tomorrow to take effect at 08:30.
     </p>
     <div class="grid">
-      <div class="fg"><label>Date</label><input type="date" id="ov-date"></div>
-      <div class="fg"><label>Match (Home vs Away)</label><input type="text" id="ov-match" placeholder="Arsenal vs Everton"></div>
-      <div class="fg"><label>Selection</label><input type="text" id="ov-selection" placeholder="Arsenal Win"></div>
-      <div class="fg"><label>Odds</label><input type="number" id="ov-odds" placeholder="1.85" step="0.01" min="1.01"></div>
-      <div class="fg"><label>Confidence %</label><input type="number" id="ov-conf" placeholder="82" min="1" max="99"></div>
+      <div class="fg"><label for="ov-date">Date</label><input type="date" id="ov-date"></div>
+      <div class="fg"><label for="ov-match">Match (Home vs Away)</label><input type="text" id="ov-match" placeholder="Arsenal vs Everton"></div>
+      <div class="fg"><label for="ov-selection">Selection</label><input type="text" id="ov-selection" placeholder="Arsenal Win"></div>
+      <div class="fg"><label for="ov-odds">Odds</label><input type="number" id="ov-odds" placeholder="1.85" step="0.01" min="1.01"></div>
+      <div class="fg"><label for="ov-conf">Confidence %</label><input type="number" id="ov-conf" placeholder="82" min="1" max="99"></div>
       <div></div>
-      <div class="fg" style="grid-column:1/-1"><label>Reasoning (shown in email)</label><textarea id="ov-reasoning" placeholder="Arsenal are strong at home against mid-table opposition. The 1.85 represents value given their recent form — three wins in four and a clean sheet in the last two home matches."></textarea></div>
+      <div class="fg" style="grid-column:1/-1"><label for="ov-reasoning">Reasoning (shown in email)</label><textarea id="ov-reasoning" placeholder="Arsenal are strong at home against mid-table opposition. The 1.85 represents value given their recent form — three wins in four and a clean sheet in the last two home matches."></textarea></div>
     </div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-gold" onclick="saveDailyOverride()" id="ovDailyBtn">Save Daily Override</button>
@@ -207,7 +230,7 @@ td{padding:9px 11px;}
   </div>
 
   <!-- SATURDAY OVERRIDE -->
-  <div class="section-title">Saturday Accumulator Override</div>
+  <h2 class="section-title">Saturday Accumulator Override</h2>
   <div class="card full" style="margin-bottom:24px;">
     <p style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.5;">
       Add 3-5 selections for Saturday's accumulator. Combined odds calculated automatically.
@@ -224,7 +247,7 @@ td{padding:9px 11px;}
       </div>
     </div>
     <button class="btn btn-ghost" onclick="addAccaRow()" style="margin-bottom:16px;font-size:12px;">+ Add selection</button>
-    <div class="fg"><label>Accumulator reasoning</label><textarea id="acca-reasoning" placeholder="Four consistent home favourites across the Premier League and La Liga. All carry model confidence above 75% with stable odds — no significant drift since Friday."></textarea></div>
+    <div class="fg"><label for="acca-reasoning">Accumulator reasoning</label><textarea id="acca-reasoning" placeholder="Four consistent home favourites across the Premier League and La Liga. All carry model confidence above 75% with stable odds — no significant drift since Friday."></textarea></div>
     <div style="display:flex;gap:10px;">
       <button class="btn btn-gold" onclick="saveSaturdayOverride()" id="ovSatBtn">Save Saturday Override</button>
       <button class="btn btn-ghost" onclick="clearOverride('saturday')">Clear Override</button>
@@ -233,7 +256,7 @@ td{padding:9px 11px;}
   </div>
 
   <!-- RECENT EMAILS -->
-  <div class="section-title">Email Log</div>
+  <h2 class="section-title">Email Log</h2>
   <div class="card full" style="margin-bottom:24px;">
     <div class="tbl-wrap">
       <table>
@@ -246,18 +269,18 @@ td{padding:9px 11px;}
   </div>
 
   <!-- SUBSCRIBERS -->
-  <div class="section-title">Subscribers</div>
+  <h2 class="section-title">Subscribers</h2>
 
   <!-- Quick edit panel -->
   <div class="card full" style="margin-bottom:14px;">
     <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:12px;">Quick Account Edit</div>
     <div class="grid">
       <div class="fg">
-        <label>Email address</label>
+        <label for="editEmail">Email address</label>
         <input type="email" id="editEmail" placeholder="user@email.com">
       </div>
       <div class="fg">
-        <label>Subscription status</label>
+        <label for="editPlan">Subscription status</label>
         <select id="editPlan">
           <option value="free">Free</option>
           <option value="pro">Pro</option>
@@ -285,7 +308,7 @@ td{padding:9px 11px;}
   </div>
 
   <!-- DAILY ACCA HISTORY -->
-  <div class="section-title" style="margin-top:32px;">Daily Accumulator — Admin Only</div>
+  <h2 class="section-title" style="margin-top:32px;">Daily Accumulator — Admin Only</h2>
   <div class="card full" style="margin-bottom:14px;">
     <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
       <div>
@@ -315,7 +338,7 @@ td{padding:9px 11px;}
     </div>
   </div>
   <!-- COMPOUNDING BANKROLL CALCULATOR -->
-  <div class="section-title" style="margin-top:32px;">£100 Compounding Bankroll Simulator</div>
+  <h2 class="section-title" style="margin-top:32px;">£100 Compounding Bankroll Simulator</h2>
   <div class="card full" style="margin-bottom:14px;">
     <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:16px;">How it works: Start with £100. Each day, divide your bankroll by the number of tips that day to get 1u. Bet every tip using the engine's stake recommendation. Your return becomes the next day's bankroll.</div>
     <div style="display:flex;gap:24px;flex-wrap:wrap;" id="bankrollSummary">

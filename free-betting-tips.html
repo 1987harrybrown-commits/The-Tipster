@@ -70,6 +70,22 @@ strong{color:var(--text);}
 .breadcrumb a{color:var(--muted);text-decoration:none;}
 footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px;text-align:center;font-size:12px;color:var(--muted);}
 footer a{color:var(--muted);text-decoration:none;margin:0 8px;}
+
+/* Motion is a preference, and this page did not read it.
+   Three animations here run forever — the results ticker for 40s a loop, the
+   live dot, and the loading shimmer — and continuous motion is the kind that
+   causes trouble for vestibular disorders. The blanket rule below near-zeroes
+   durations rather than removing them, so anything whose end state matters
+   still lands there; the ticker is called out separately because snapping it
+   to the end of a translate would leave the track parked half off-screen. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
 </style>
 </head>
 <body>

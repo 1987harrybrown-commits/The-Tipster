@@ -46,7 +46,7 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
 
 /* LAYOUT */
 .page{padding:88px 24px 60px;max-width:900px;margin:0 auto;}
-.page-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin-bottom:4px;}
+.page-title{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;margin:0 0 4px;}
 .page-sub{font-size:13px;color:var(--muted);margin-bottom:36px;}
 
 /* LOADING */
@@ -61,7 +61,7 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
 /* CARD */
 .acard{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:22px 24px;}
 .acard-label{font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:14px;}
-.acard h3{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin-bottom:12px;}
+.acard h2{font-family:'Syne',sans-serif;font-size:16px;font-weight:700;margin:0 0 12px;}
 
 /* STATUS BADGE */
 .status-badge{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:4px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;}
@@ -96,6 +96,13 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
 .form-group label{font-size:11px;font-weight:700;display:block;margin-bottom:5px;color:var(--muted);}
 .form-group input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;padding:10px 12px;font-size:13px;color:var(--text);font-family:'Lato',sans-serif;outline:none;transition:border-color 0.2s;}
 .form-group input:focus{border-color:var(--green);}
+/* These fields set outline:none, which left a 1px border-colour change
+   as the entire focus indicator. That is hard to see, and for anyone who
+   cannot separate those two colours it is no indicator at all — a
+   keyboard user then has no way to tell which field they are in.
+   focus-visible so a mouse click still looks the way it did; only
+   keyboard focus draws the ring. */
+.form-group input:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
 .btn-save{background:var(--green);border:none;color:#07090d;padding:10px 22px;border-radius:5px;font-size:13px;font-weight:700;font-family:'Lato',sans-serif;cursor:pointer;transition:all 0.2s;}
 .btn-save:hover{background:#2fffa0;}
 .btn-save:disabled{opacity:0.5;cursor:not-allowed;}
@@ -104,7 +111,7 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
 
 /* UPGRADE BANNER */
 .upgrade-banner{background:linear-gradient(135deg,rgba(240,180,41,0.06) 0%,rgba(240,180,41,0.02) 100%);border:1px solid rgba(240,180,41,0.25);border-radius:8px;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
-.upgrade-text h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--gold);margin-bottom:4px;}
+.upgrade-text h2{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--gold);margin:0 0 4px;}
 .upgrade-text p{font-size:12px;color:var(--muted);line-height:1.5;}
 
 /* ALERT */
@@ -127,6 +134,22 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
   .account-grid{grid-template-columns:1fr;}
   nav{padding:0 14px;}
   .upgrade-banner{flex-direction:column;align-items:flex-start;}
+}
+
+/* Motion is a preference, and this page did not read it.
+   Three animations here run forever — the results ticker for 40s a loop, the
+   live dot, and the loading shimmer — and continuous motion is the kind that
+   causes trouble for vestibular disorders. The blanket rule below near-zeroes
+   durations rather than removing them, so anything whose end state matters
+   still lands there; the ticker is called out separately because snapping it
+   to the end of a translate would leave the track parked half off-screen. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+    scroll-behavior:auto !important;
+  }
 }
 </style>
 </head>
@@ -203,9 +226,9 @@ function esc(v) {
 // the page anyway would state a subscription status we do not actually know.
 function renderProfileError() {
   document.getElementById('pageContent').innerHTML = `
-    <div class="page-title">My Account</div>
+    <h1 class="page-title">My Account</h1>
     <div class="acard" style="margin-top:18px">
-      <h3 style="margin:0 0 8px;font-size:16px">We could not load your account</h3>
+      <h2 style="margin:0 0 8px;font-size:16px">We could not load your account</h2>
       <p style="color:var(--muted);font-size:13px;margin:0 0 14px">
         Your details could not be read just now, so nothing about your subscription is
         shown rather than showing something that might be wrong. Please try again.
@@ -268,13 +291,13 @@ async function renderPage() {
     : 'First session';
 
   document.getElementById('pageContent').innerHTML = `
-    <div class="page-title">My Account</div>
+    <h1 class="page-title">My Account</h1>
     <div class="page-sub">Manage your tips, preferences and subscription.</div>
 
     ${!isPro ? `
     <div class="upgrade-banner">
       <div class="upgrade-text">
-        <h3>Upgrade to Pro</h3>
+        <h2>Upgrade to Pro</h2>
         <p>Unlock the full daily card, stake recommendations, value edge data and the Saturday accumulator — all for £9.99/mo.</p>
       </div>
       <a href="/#pricing" class="btn btn-pro" style="text-decoration:none;white-space:nowrap;">Upgrade Now</a>
@@ -331,7 +354,7 @@ async function renderPage() {
         <div class="acard-label">Profile</div>
         <div class="alert" id="profileAlert"></div>
         <div class="form-group">
-          <label>First Name</label>
+          <label for="firstName">First Name</label>
           <input type="text" id="firstName" value="${esc(userProfile.first_name || '')}" placeholder="Your first name">
         </div>
         <div class="form-group">
@@ -419,15 +442,15 @@ async function renderPage() {
       <div class="alert" id="pwAlert"></div>
       <div class="account-grid">
         <div class="form-group">
-          <label>Current Password</label>
+          <label for="currentPw">Current Password</label>
           <input type="password" id="currentPw" placeholder="Your current password" autocomplete="current-password">
         </div>
         <div class="form-group">
-          <label>New Password</label>
+          <label for="newPw">New Password</label>
           <input type="password" id="newPw" placeholder="Minimum 8 characters" autocomplete="new-password">
         </div>
         <div class="form-group">
-          <label>Confirm Password</label>
+          <label for="confirmPw">Confirm Password</label>
           <input type="password" id="confirmPw" placeholder="Repeat new password" autocomplete="new-password">
         </div>
       </div>
