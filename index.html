@@ -1593,7 +1593,9 @@ async function startCheckout(plan){
   const btn=document.getElementById('pro-cta-btn');
   if(btn){btn.disabled=true;btn.textContent='Loading...';}
   try{
-    const res=await fetch(ENGINE_URL+'/stripe/checkout',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({userId:session.user.id,email:session.user.email,plan})});
+    // The engine resolves the account from this token now rather than from
+    // the body, so the id and email no longer travel as parameters.
+    const res=await fetch(ENGINE_URL+'/stripe/checkout',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({plan})});
     let data={};
     try{data=await res.json();}catch(_){}
 
