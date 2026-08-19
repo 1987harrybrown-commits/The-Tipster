@@ -14,7 +14,10 @@ async function selectAllRows(table, columns, applyFilters) {
     let q = db.from(table).select(columns).order('id', { ascending: true }).range(from, from + PAGE - 1);
     if (applyFilters) q = applyFilters(q);
     const { data, error } = await q;
-    if (error) { console.error('selectAllRows(' + table + '):', error.message); break; }
+    // Partial pages are worse than no answer: every published figure is
+    // derived from this, so a truncated ledger silently understates the
+    // record. Fail loudly and let the handler return 503.
+    if (error) throw new Error('selectAllRows(' + table + ') failed at offset ' + from + ': ' + error.message);
     if (!data || !data.length) break;
     out = out.concat(data);
     if (data.length < PAGE) break;
@@ -35,11 +38,43 @@ function esc(v) {
 
 function fmt(n,d=2){return(n>=0?'+':'')+parseFloat(n).toFixed(d);}
 
+// A failed read must never be dressed up as real data. Returning 200 with
+// zeros publishes a 0% win rate, and the s-maxage header then lets the CDN
+// serve that for the next 15-30 minutes. A 503 with no-store is retried
+// instead, and is noindex so a transient failure cannot be indexed.
+function sendUnavailable(res, err) {
+  console.error('handler failed:', (err && err.message) || err);
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.setHeader('Cache-Control', 'no-store, max-age=0');
+  res.setHeader('Retry-After', '60');
+  res.status(503).send('<!DOCTYPE html><html lang="en-GB"><head><meta charset="UTF-8">'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+    + '<meta name="robots" content="noindex">'
+    + '<title>Temporarily unavailable | The Tipster</title></head>'
+    + '<body style="background:#07090d;color:#dde6f0;font-family:system-ui,-apple-system,sans-serif;'
+    + 'display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;text-align:center">'
+    + '<div style="padding:24px"><h1 style="font-size:20px;font-weight:800;margin:0 0 8px">Temporarily unavailable</h1>'
+    + '<p style="color:#6c83a3;font-size:14px;margin:0 0 16px">We could not load the latest data. Please try again shortly.</p>'
+    + '<a href="/" style="color:#18e07a;font-size:14px;text-decoration:none">Back to The Tipster</a>'
+    + '</div></body></html>');
+}
+
 module.exports = async (req, res) => {
-  const [{ data: history }, { data: stats }] = await Promise.all([
+  // Body intentionally not re-indented: these handlers are mostly one large
+  // HTML template literal, and re-indenting would rewrite its contents.
+  try {
+  const [r_history, r_stats] = await Promise.all([
     selectAllRows('results_history','sport,result,profit_loss,stake,odds,tier'),
     db.from('stats_cache').select('*').eq('id',1).single()
   ]);
+  // Both reads are fatal. selectAllRows throws on failure; the direct
+  // queries report theirs on the result object, and stats_cache uses
+  // .single(), which errors when the row is missing. Publishing a page
+  // that quietly drops either one means publishing numbers that do not
+  // describe the record — a 0% win rate reads as a real result.
+  if (r_history.error) throw new Error('history read failed: ' + r_history.error.message);
+  if (r_stats.error) throw new Error('stats read failed: ' + r_stats.error.message);
+  const history = r_history.data, stats = r_stats.data;
 
   // Same population for win rate and ROI. Short-price "insight" picks carry
   // stake 0 and were never advised as bets: they counted towards win rate but
@@ -165,4 +200,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   res.setHeader('Content-Type','text/html; charset=utf-8');
   res.setHeader('Cache-Control','s-maxage=1800, stale-while-revalidate=3600');
   res.status(200).send(html);
+  } catch (err) {
+    sendUnavailable(res, err);
+  }
 };
