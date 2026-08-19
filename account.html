@@ -157,6 +157,17 @@ const db = createClient(SUPABASE_URL, SUPABASE_ANON);
 
 let currentUser = null;
 let userProfile = null;
+let profileError = null;
+
+// Escape anything interpolated into the innerHTML below. This page had none at
+// all — the other surfaces were done and this one was missed. first_name is the
+// signup field, which has no validation, and it lands in an attribute value
+// here: a name containing a double quote breaks out of value="...".
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
 
 // ── INIT ──────────────────────────────────────────────────
 (async () => {
@@ -173,8 +184,7 @@ let userProfile = null;
     db.auth.onAuthStateChange(async (event, newSession) => {
       if (newSession) {
         currentUser = newSession.user;
-        await loadProfile();
-        renderPage();
+        if (await loadProfile()) renderPage(); else renderProfileError();
       } else {
         window.location.href = '/?auth=login';
       }
@@ -186,28 +196,64 @@ let userProfile = null;
     return;
   }
   currentUser = session.user;
-  await loadProfile();
-  renderPage();
+  if (await loadProfile()) renderPage(); else renderProfileError();
 })();
 
+// Shown instead of the account when the profile could not be read. Rendering
+// the page anyway would state a subscription status we do not actually know.
+function renderProfileError() {
+  document.getElementById('pageContent').innerHTML = `
+    <div class="page-title">My Account</div>
+    <div class="card" style="margin-top:18px">
+      <h3 style="margin:0 0 8px;font-size:16px">We could not load your account</h3>
+      <p style="color:var(--muted);font-size:13px;margin:0 0 14px">
+        Your details could not be read just now, so nothing about your subscription is
+        shown rather than showing something that might be wrong. Please try again.
+      </p>
+      <p style="color:var(--muted);font-size:11px;font-family:'Space Mono',monospace;margin:0 0 14px">
+        ${esc(profileError || 'unknown error')}
+      </p>
+      <button class="btn btn-green" onclick="location.reload()">Try again</button>
+      <a class="btn btn-ghost" href="/" style="margin-left:8px">Back to Tips</a>
+    </div>`;
+}
+
 // ── LOAD PROFILE ──────────────────────────────────────────
+// Returns false when the profile could not be read.
+//
+// This used to fall back to {}, which renderPage reads as
+// subscription_status !== 'pro' — so a failed query showed a paying
+// subscriber their account as Free, complete with an Upgrade to Pro banner.
+// A read that did not happen is not the same as an account with no
+// subscription, and RLS makes the first case far more likely.
 async function loadProfile() {
-  const { data } = await db
+  const { data, error } = await db
     .from('users')
     .select('*')
     .eq('id', currentUser.id)
     .single();
+  // PGRST116 is "no row", which is a real state — the profile row has not been
+  // created yet. Anything else means the read failed.
+  if (error && error.code !== 'PGRST116') {
+    console.error('loadProfile:', error.message);
+    profileError = error.message;
+    return false;
+  }
   userProfile = data || {};
+  profileError = null;
+  return true;
 }
 
 // ── LOAD RECENT EMAILS ────────────────────────────────────
+// null means the log could not be read, [] means nothing has been sent yet.
 async function loadRecentEmails() {
-  const { data } = await db
+  const { data, error } = await db
     .from('email_log')
     .select('*')
     .eq('recipient', currentUser.email)
     .order('sent_at', { ascending: false })
     .limit(5);
+  if (error) { console.error('loadRecentEmails:', error.message); return null; }
   return data || [];
 }
 
@@ -249,7 +295,7 @@ async function renderPage() {
         <div class="acard-label">Account</div>
         <div class="info-row">
           <span class="info-key">Email</span>
-          <span class="info-val mono">${currentUser.email}</span>
+          <span class="info-val mono">${esc(currentUser.email)}</span>
         </div>
         <div class="info-row">
           <span class="info-key">Status</span>
@@ -265,11 +311,11 @@ async function renderPage() {
         </div>
         <div class="info-row">
           <span class="info-key">Member since</span>
-          <span class="info-val">${joined}</span>
+          <span class="info-val">${esc(joined)}</span>
         </div>
         <div class="info-row">
           <span class="info-key">Last login</span>
-          <span class="info-val">${lastLogin}</span>
+          <span class="info-val">${esc(lastLogin)}</span>
         </div>
         ${!isVerified ? `
         <div style="margin-top:14px;">
@@ -286,11 +332,11 @@ async function renderPage() {
         <div class="alert" id="profileAlert"></div>
         <div class="form-group">
           <label>First Name</label>
-          <input type="text" id="firstName" value="${userProfile.first_name || ''}" placeholder="Your first name">
+          <input type="text" id="firstName" value="${esc(userProfile.first_name || '')}" placeholder="Your first name">
         </div>
         <div class="form-group">
           <label>Email Address</label>
-          <input type="email" aria-label="Your account email address" value="${currentUser.email}" disabled style="opacity:0.5;cursor:not-allowed;">
+          <input type="email" aria-label="Your account email address" value="${esc(currentUser.email)}" disabled style="opacity:0.5;cursor:not-allowed;">
         </div>
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
           <button class="btn-save" onclick="saveProfile()" id="saveProfileBtn">Save changes</button>
@@ -354,15 +400,15 @@ async function renderPage() {
     <!-- RECENT EMAILS -->
     <div class="acard" style="margin-bottom:16px;">
       <div class="acard-label">Recent Emails</div>
-      ${recentEmails.length ? recentEmails.map(e => {
+      ${recentEmails === null ? '<p style="font-size:12px;color:var(--red);padding:8px 0;">Your email history could not be loaded just now.</p>' : recentEmails.length ? recentEmails.map(e => {
         const d = new Date(e.sent_at).toLocaleDateString('en-GB', { day:'numeric', month:'short' });
         const t = new Date(e.sent_at).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
         return `<div class="email-item">
           <div>
-            <div class="email-item-subject">${e.subject}</div>
-            <div class="email-item-meta">${d} at ${t} &bull; ${e.type}</div>
+            <div class="email-item-subject">${esc(e.subject)}</div>
+            <div class="email-item-meta">${esc(d)} at ${esc(t)} &bull; ${esc(e.type)}</div>
           </div>
-          <span class="email-status ${e.status}">${e.status}</span>
+          <span class="email-status ${esc(e.status)}">${esc(e.status)}</span>
         </div>`;
       }).join('') : '<p style="font-size:12px;color:var(--muted);padding:8px 0;">No emails sent yet. Your first Bet of the Day arrives tomorrow at 08:30.</p>'}
     </div>
