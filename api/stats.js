@@ -120,9 +120,24 @@ module.exports = async (req, res) => {
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Betting Tips Statistics — Win Rate, ROI & P&L by Sport | The Tipster</title>
-<meta name="description" content="Detailed betting tips statistics by sport. Overall ${winRate}% win rate. Full breakdown of football tips, NHL tips and NBA tips performance with ROI, P&L and average odds.">
+<meta name="description" content="Detailed betting tips statistics by sport. Overall ${winRate}% win rate. Full breakdown of football tips, NHL tips and NBA tips performance with ROI, P&amp;L and average odds.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.thetipsteredge.com/betting-stats">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Betting Tips Statistics — Win Rate, ROI &amp; P&amp;L by Sport | The Tipster">
+<meta property="og:description" content="Detailed betting tips statistics by sport. Overall ${winRate}% win rate. Full breakdown of football tips, NHL tips and NBA tips performance with ROI, P&amp;L and average odds.">
+<meta property="og:url" content="https://www.thetipsteredge.com/betting-stats">
+<meta property="og:site_name" content="The Tipster Edge">
+<meta property="og:locale" content="en_GB">
+<meta property="og:image" content="https://www.thetipsteredge.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Tipster Edge — data-driven sports betting tips">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Betting Tips Statistics — Win Rate, ROI &amp; P&amp;L by Sport | The Tipster">
+<meta name="twitter:description" content="Detailed betting tips statistics by sport. Overall ${winRate}% win rate. Full breakdown of football tips, NHL tips and NBA tips performance with ROI, P&amp;L and average odds.">
+<meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
+<meta name="twitter:site" content="@TheTipsterApp">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}

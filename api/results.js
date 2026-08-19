@@ -159,6 +159,21 @@ module.exports = async (req, res) => {
 <meta name="description" content="Fully transparent verified betting tips track record. ${totalWon} winners from ${totalWon+totalLost} settled tips. ${winRate}% win rate. ${fmt(pl)}u profit. Every result published — nothing excluded.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.thetipsteredge.com/results">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Verified Betting Tips Track Record — ${winRate}% Win Rate | The Tipster">
+<meta property="og:description" content="Fully transparent verified betting tips track record. ${totalWon} winners from ${totalWon+totalLost} settled tips. ${winRate}% win rate. ${fmt(pl)}u profit. Every result published — nothing excluded.">
+<meta property="og:url" content="https://www.thetipsteredge.com/results">
+<meta property="og:site_name" content="The Tipster Edge">
+<meta property="og:locale" content="en_GB">
+<meta property="og:image" content="https://www.thetipsteredge.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Tipster Edge — data-driven sports betting tips">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Verified Betting Tips Track Record — ${winRate}% Win Rate | The Tipster">
+<meta name="twitter:description" content="Fully transparent verified betting tips track record. ${totalWon} winners from ${totalWon+totalLost} settled tips. ${winRate}% win rate. ${fmt(pl)}u profit. Every result published — nothing excluded.">
+<meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
+<meta name="twitter:site" content="@TheTipsterApp">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script type="application/ld+json">${JSON.stringify({
   "@context":"https://schema.org",

@@ -146,6 +146,18 @@ module.exports = async (req, res) => {
 <meta property="og:title" content="Free Betting Tips Today — ${todayStr}">
 <meta property="og:description" content="Today's free sports betting tips. ${winRate}% verified win rate. Football, NHL, NBA.">
 <meta property="og:url" content="https://www.thetipsteredge.com/tips">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Tipster Edge">
+<meta property="og:locale" content="en_GB">
+<meta property="og:image" content="https://www.thetipsteredge.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Tipster Edge — data-driven sports betting tips">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Free Betting Tips Today — ${todayStr} | The Tipster">
+<meta name="twitter:description" content="Free football tips, NHL tips and NBA tips for ${todayStr}. Data-driven predictions with ${winRate}% win rate. Updated every 15 minutes from 40+ bookmakers.">
+<meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
+<meta name="twitter:site" content="@TheTipsterApp">
 <script type="application/ld+json">${JSON.stringify({
   "@context":"https://schema.org",
   "@type":"ItemList",

@@ -156,6 +156,21 @@ module.exports = async (req, res) => {
 <meta name="description" content="Free NBA basketball betting tips for ${todayStr}. Data-driven predictions with ${winRate}% win rate on basketball. Efficiency ratings, pace metrics and live odds analysis. Updated every 15 minutes.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.thetipsteredge.com/nba-tips-today">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Free NBA Basketball Tips Today — ${todayStr} | The Tipster">
+<meta property="og:description" content="Free NBA basketball betting tips for ${todayStr}. Data-driven predictions with ${winRate}% win rate on basketball. Efficiency ratings, pace metrics and live odds analysis. Updated every 15 minutes.">
+<meta property="og:url" content="https://www.thetipsteredge.com/nba-tips-today">
+<meta property="og:site_name" content="The Tipster Edge">
+<meta property="og:locale" content="en_GB">
+<meta property="og:image" content="https://www.thetipsteredge.com/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="The Tipster Edge — data-driven sports betting tips">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Free NBA Basketball Tips Today — ${todayStr} | The Tipster">
+<meta name="twitter:description" content="Free NBA basketball betting tips for ${todayStr}. Data-driven predictions with ${winRate}% win rate on basketball. Efficiency ratings, pace metrics and live odds analysis. Updated every 15 minutes.">
+<meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
+<meta name="twitter:site" content="@TheTipsterApp">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
