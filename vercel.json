@@ -33,6 +33,7 @@
     { "source": "/nba-tips-today", "destination": "/api/nba-tips" },
     { "source": "/betting-stats", "destination": "/api/stats" },
     { "source": "/admin", "destination": "/admin.html" },
-    { "source": "/account", "destination": "/account.html" }
+    { "source": "/account", "destination": "/account.html" },
+    { "source": "/unsubscribe", "destination": "https://tipster-engine-1.onrender.com/unsubscribe" }
   ]
 }
