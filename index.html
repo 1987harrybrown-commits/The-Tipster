@@ -237,6 +237,15 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 .fg input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;padding:10px 11px;font-size:13px;color:var(--text);font-family:'Lato',sans-serif;outline:none;transition:border-color 0.2s;}
 .fg input:focus{border-color:var(--green);}
 .fg input.error{border-color:var(--red);}
+/* The signup, login and reset panels all render messages into a .alert div,
+   and this page defined none of these rules — admin.html and account.html
+   both do. So every message on the primary conversion flow came out as plain
+   unstyled body text: no padding, no background, no colour to say whether it
+   was a success or a failure. Matched to the other two pages. */
+.alert{padding:10px 14px;border-radius:5px;font-size:12px;margin-bottom:14px;display:none;}
+.alert.success{background:rgba(24,224,122,0.1);border:1px solid rgba(24,224,122,0.3);color:var(--green);}
+.alert.error{background:rgba(255,61,90,0.1);border:1px solid rgba(255,61,90,0.3);color:var(--red);}
+.alert.show{display:block;}
 .btn-msubmit{width:100%;padding:11px;background:var(--green);border:none;border-radius:5px;color:#07090d;font-size:13px;font-weight:700;font-family:'Lato',sans-serif;cursor:pointer;margin-top:5px;}
 .btn-msubmit:hover{background:#2fffa0;}
 .mswitch{font-size:11px;color:var(--muted);text-align:center;margin-top:11px;}

@@ -204,7 +204,7 @@ function esc(v) {
 function renderProfileError() {
   document.getElementById('pageContent').innerHTML = `
     <div class="page-title">My Account</div>
-    <div class="card" style="margin-top:18px">
+    <div class="acard" style="margin-top:18px">
       <h3 style="margin:0 0 8px;font-size:16px">We could not load your account</h3>
       <p style="color:var(--muted);font-size:13px;margin:0 0 14px">
         Your details could not be read just now, so nothing about your subscription is
@@ -213,7 +213,7 @@ function renderProfileError() {
       <p style="color:var(--muted);font-size:11px;font-family:'Space Mono',monospace;margin:0 0 14px">
         ${esc(profileError || 'unknown error')}
       </p>
-      <button class="btn btn-green" onclick="location.reload()">Try again</button>
+      <button class="btn-save" onclick="location.reload()">Try again</button>
       <a class="btn btn-ghost" href="/" style="margin-left:8px">Back to Tips</a>
     </div>`;
 }
