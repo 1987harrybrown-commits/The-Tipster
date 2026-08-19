@@ -955,7 +955,10 @@ async function loadTips() {
     .gte('event_time',today.toISOString()).lte('event_time',tom.toISOString())
     .eq('status','pending')
     .order('confidence',{ascending:false}).limit(50);
-  if(error){grid.innerHTML='<div class="empty-state"><div class="ei">⚠️</div><h3>Could not load tips</h3><p>'+error.message+'</p></div>';return;}
+  // Escaped like every other value that reaches innerHTML. A PostgREST error
+  // string is server-generated, but it can quote identifiers and fragments of
+  // the request, and it is the one sink that was still interpolating raw.
+  if(error){grid.innerHTML='<div class="empty-state"><div class="ei">⚠️</div><h3>Could not load tips</h3><p>'+esc(error.message||'Please try again shortly.')+'</p></div>';return;}
   allTips=data||[];
   // Set today's best bet ref immediately from loaded tips
   if (allTips.length) {
