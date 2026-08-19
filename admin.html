@@ -584,17 +584,40 @@ async function triggerResettle() {
 }
 
 async function triggerAccaGenerate() {
+  // This had no failure path a user could see. A rejected admin key returns
+  // plain text, so res.json() threw, the catch logged to the console, and the
+  // button quietly reset — the admin pressed Generate and nothing happened,
+  // with no indication why. Mirrors triggerResettle, and reports into the same
+  // log panel that sits under both buttons.
   const btn = document.getElementById('accaGenBtn');
+  const logEl = document.getElementById('resettleLog');
+  const reset = () => { btn.disabled = false; btn.textContent = "Generate Today's Acca"; };
+  const say = (msg) => { logEl.style.display = 'block'; logEl.textContent = msg; };
+
   btn.disabled = true; btn.textContent = 'Generating...';
+  say('Requesting acca generation...');
   try {
     const ADMIN_KEY = localStorage.getItem('tipster_admin_key') || '';
     const res = await fetch(`${ENGINE_URL}/admin/generate-acca`, { headers: { 'Authorization': `Bearer ${ADMIN_KEY}` } });
-    const data = await res.json();
-    if (data.started) {
-      btn.textContent = 'Triggered!';
-      setTimeout(() => { btn.disabled=false; btn.textContent="Generate Today's Acca"; loadAccaHistory(); }, 3000);
-    } else { btn.disabled=false; btn.textContent="Generate Today's Acca"; }
-  } catch(e) { console.error(e); btn.disabled=false; btn.textContent="Generate Today's Acca"; }
+
+    let data = {};
+    try { data = await res.json(); } catch (_) {}
+
+    if (res.status === 403) {
+      say('Rejected: the engine did not accept this admin key.\nCheck the key saved in this browser.');
+      reset(); return;
+    }
+    if (!res.ok || !data.started) {
+      say('Error: ' + (data.error || `HTTP ${res.status}`));
+      reset(); return;
+    }
+    say('Acca generation started. The history below refreshes in a few seconds.');
+    btn.textContent = 'Triggered!';
+    setTimeout(() => { reset(); loadAccaHistory(); }, 3000);
+  } catch (e) {
+    say('Request failed: ' + e.message);
+    reset();
+  }
 }
 
 async function loadBankrollSimulator() {
@@ -844,14 +867,20 @@ async function toggleUserEmail() {
 // ── JOB QUEUE ────────────────────────────────────────────
 // Admin writes a job to Supabase. Engine picks it up within 1 minute.
 // This avoids direct browser->engine calls which Render blocks.
+// Returns the reason on failure. This used to collapse to a boolean, so the
+// callers could only guess at the cause — sendTest told the admin to "check
+// the Supabase connection" for what is far more often a rejected insert.
+// .select() so a write that is refused without raising an error is caught too.
 async function queueJob(job_type, payload = {}) {
-  const { error } = await db.from('admin_jobs').insert({
+  const { data, error } = await db.from('admin_jobs').insert({
     job_type,
     payload: JSON.stringify(payload),
     status: 'pending',
     created_at: new Date().toISOString()
-  });
-  return !error;
+  }).select();
+  if (error) return { ok: false, error: error.message };
+  if (!data || !data.length) return { ok: false, error: 'the write was rejected — no job was queued' };
+  return { ok: true, error: null };
 }
 
 // ── TEST EMAIL ────────────────────────────────────────────
@@ -861,13 +890,18 @@ async function sendTest() {
   const to    = document.getElementById('testEmailTo').value.trim();
   const type  = document.getElementById('testEmailType').value;
   if (!to) { showAlert(alert, 'Enter an email address.', 'error'); return; }
+  // Only a shape check — the point is to catch a typo before queuing a job
+  // that can only fail at the provider a minute later, with no feedback here.
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(to)) {
+    showAlert(alert, 'That does not look like an email address.', 'error'); return;
+  }
   btn.disabled = true; btn.textContent = 'Queuing...';
-  const ok = await queueJob('test_email', { to, type });
+  const { ok, error } = await queueJob('test_email', { to, type });
   btn.disabled = false; btn.textContent = 'Send Test Email';
   if (ok) {
     showAlert(alert, 'Job queued. Email will arrive within 1 minute.', 'success');
   } else {
-    showAlert(alert, 'Failed to queue job. Check Supabase connection.', 'error');
+    showAlert(alert, 'Could not queue the job: ' + error, 'error');
   }
 }
 
@@ -875,8 +909,9 @@ async function sendTest() {
 async function triggerSend(type) {
   const alert = document.getElementById('triggerAlert');
   if (!confirm('Send ' + type + ' email to all subscribers now?')) return;
-  const ok = await queueJob('send_' + type);
-  showAlert(alert, ok ? 'Dispatch queued. Will send within 1 minute.' : 'Failed to queue.', ok ? 'success' : 'error');
+  const { ok, error } = await queueJob('send_' + type);
+  showAlert(alert, ok ? 'Dispatch queued. Will send within 1 minute.' : 'Could not queue the dispatch: ' + error,
+            ok ? 'success' : 'error');
 }
 
 // ── DAILY OVERRIDE ────────────────────────────────────────
