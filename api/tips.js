@@ -117,10 +117,10 @@ nav{background:#0c0f15;border-bottom:1px solid #1c2535;padding:14px 24px;display
 .wrap{max-width:900px;margin:0 auto;padding:48px 24px 80px;}
 .page-label{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#18e07a;margin-bottom:10px;}
 h1{font-size:clamp(24px,5vw,40px);font-weight:800;line-height:1.15;margin-bottom:8px;}
-.page-sub{font-size:15px;color:#4a5a70;margin-bottom:32px;}
+.page-sub{font-size:15px;color:#6c83a3;margin-bottom:32px;}
 .stats-bar{display:flex;gap:24px;flex-wrap:wrap;background:#0f141c;border:1px solid #1c2535;border-radius:8px;padding:16px 20px;margin-bottom:32px;}
 .stat{text-align:center;}
-.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#4a5a70;margin-bottom:4px;}
+.stat-label{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#6c83a3;margin-bottom:4px;}
 .stat-val{font-size:22px;font-weight:800;font-family:monospace;}
 .stat-val.green{color:#18e07a;}
 .stat-val.gold{color:#f0b429;}
@@ -128,29 +128,29 @@ h1{font-size:clamp(24px,5vw,40px);font-weight:800;line-height:1.15;margin-bottom
 h2{font-size:22px;font-weight:800;margin-bottom:20px;}
 .tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:40px;}
 .tip-card{background:#0f141c;border:1px solid #1c2535;border-radius:8px;padding:18px;border-top:3px solid #18e07a;}
-.tip-sport{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#4a5a70;margin-bottom:8px;}
+.tip-sport{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#6c83a3;margin-bottom:8px;}
 .tip-card h3{font-size:15px;font-weight:800;margin-bottom:12px;}
 .tip-meta{display:flex;flex-direction:column;gap:6px;margin-bottom:12px;}
 .tip-pick{font-size:13px;color:#dde6f0;}
-.tip-odds{font-size:13px;color:#4a5a70;}
+.tip-odds{font-size:13px;color:#6c83a3;}
 .tip-odds strong{color:#f0b429;font-family:monospace;}
-.tip-time{font-size:12px;color:#4a5a70;}
-.tip-conf{font-size:12px;color:#4a5a70;margin-top:8px;}
+.tip-time{font-size:12px;color:#6c83a3;}
+.tip-conf{font-size:12px;color:#6c83a3;margin-top:8px;}
 .conf-bar{height:3px;background:#1c2535;border-radius:2px;margin-top:5px;}
 .conf-locked{width:100%;background:repeating-linear-gradient(90deg,#2a3444 0 6px,transparent 6px 12px);}
 .conf-fill{height:100%;background:#18e07a;border-radius:2px;}
 .locked-card{background:#0f141c;border:1px solid rgba(240,180,41,0.2);border-radius:8px;padding:18px;border-top:3px solid #f0b429;text-align:center;}
-.locked-card h3{font-size:14px;color:#4a5a70;margin-bottom:10px;}
+.locked-card h3{font-size:14px;color:#6c83a3;margin-bottom:10px;}
 .locked-card a{display:inline-block;background:#f0b429;color:#07090d;padding:8px 20px;border-radius:5px;text-decoration:none;font-weight:700;font-size:13px;}
 .content-block{background:#0f141c;border:1px solid #1c2535;border-radius:8px;padding:24px;margin-bottom:20px;}
 .content-block h2{font-size:18px;font-weight:800;margin-bottom:12px;}
-.content-block p{font-size:14px;color:#4a5a70;line-height:1.8;margin-bottom:10px;}
+.content-block p{font-size:14px;color:#6c83a3;line-height:1.8;margin-bottom:10px;}
 .content-block p:last-child{margin-bottom:0;}
-.breadcrumb{font-size:12px;color:#4a5a70;margin-bottom:24px;}
-.breadcrumb a{color:#4a5a70;text-decoration:none;}
+.breadcrumb{font-size:12px;color:#6c83a3;margin-bottom:24px;}
+.breadcrumb a{color:#6c83a3;text-decoration:none;}
 .breadcrumb a:hover{color:#18e07a;}
-footer{background:#0c0f15;border-top:1px solid #1c2535;padding:24px;text-align:center;font-size:12px;color:#4a5a70;}
-footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
+footer{background:#0c0f15;border-top:1px solid #1c2535;padding:24px;text-align:center;font-size:12px;color:#6c83a3;}
+footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
 @media(max-width:600px){.stats-bar{gap:14px;}.stat-val{font-size:18px;}}
 </style>
 </head>
@@ -177,7 +177,7 @@ footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
   <div class="section-label">Today's Free Tips</div>
   <h2>Top Selections — ${todayStr}</h2>
   <div class="tips-grid">
-    ${tipCards || '<p style="color:#4a5a70">Tips loading — check back shortly.</p>'}
+    ${tipCards || '<p style="color:#6c83a3">Tips loading — check back shortly.</p>'}
     <div class="locked-card">
       <h3>🔒 Pro members get 15+ tips daily across all sports</h3>
       <a href="/">Unlock Full Card →</a>

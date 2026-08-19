@@ -99,8 +99,8 @@ module.exports = async (req, res) => {
         <span style="color:#f0b429;font-family:monospace;font-weight:700">${parseFloat(t.odds).toFixed(2)}</span>
       </div>
       <div class="tip-row">
-        <span style="color:#4a5a70">🕐 ${fmtTime(t.event_time)} UK</span>
-        <span style="color:#4a5a70">Conf: <strong>Pro 🔒</strong></span>
+        <span style="color:#6c83a3">🕐 ${fmtTime(t.event_time)} UK</span>
+        <span style="color:#6c83a3">Conf: <strong>Pro 🔒</strong></span>
       </div>
     </article>`).join('');
 
@@ -135,28 +135,28 @@ nav{background:#0c0f15;border-bottom:1px solid #1c2535;padding:14px 24px;display
 .wrap{max-width:900px;margin:0 auto;padding:48px 24px 80px;}
 .label{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#18e07a;margin-bottom:10px;}
 h1{font-size:clamp(22px,5vw,38px);font-weight:800;margin-bottom:8px;}
-.sub{font-size:15px;color:#4a5a70;margin-bottom:32px;}
+.sub{font-size:15px;color:#6c83a3;margin-bottom:32px;}
 .stats{display:flex;gap:20px;flex-wrap:wrap;background:#0f141c;border:1px solid #1c2535;border-radius:8px;padding:16px 20px;margin-bottom:32px;}
-.stat .sl{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#4a5a70;} .stat .sv{font-size:22px;font-weight:800;font-family:monospace;}
+.stat .sl{font-size:10px;text-transform:uppercase;letter-spacing:2px;color:#6c83a3;} .stat .sv{font-size:22px;font-weight:800;font-family:monospace;}
 .tips-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;margin-bottom:32px;}
 .tip-card{background:#0f141c;border:1px solid #1c2535;border-radius:8px;padding:16px;border-top:3px solid #18e07a;}
-.tip-league{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#4a5a70;margin-bottom:6px;}
+.tip-league{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#6c83a3;margin-bottom:6px;}
 .tip-card h3{font-size:14px;font-weight:800;margin-bottom:10px;}
 .tip-row{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px;}
 .locked{background:#0f141c;border:1px solid rgba(240,180,41,0.2);border-radius:8px;padding:20px;text-align:center;border-top:3px solid #f0b429;}
-.locked p{font-size:13px;color:#4a5a70;margin-bottom:12px;}
+.locked p{font-size:13px;color:#6c83a3;margin-bottom:12px;}
 .locked a{display:inline-block;background:#f0b429;color:#07090d;padding:8px 20px;border-radius:5px;text-decoration:none;font-weight:700;font-size:13px;}
 .block{background:#0f141c;border:1px solid #1c2535;border-radius:8px;padding:24px;margin-bottom:16px;}
 .block h2{font-size:18px;font-weight:800;margin-bottom:12px;}
-.block p{font-size:14px;color:#4a5a70;line-height:1.8;margin-bottom:10px;}
+.block p{font-size:14px;color:#6c83a3;line-height:1.8;margin-bottom:10px;}
 .block p:last-child{margin-bottom:0;}
 .leagues{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px;}
-.league-pill{background:#0f141c;border:1px solid #1c2535;border-radius:20px;padding:6px 14px;font-size:12px;color:#4a5a70;}
-.breadcrumb{font-size:12px;color:#4a5a70;margin-bottom:24px;}
-.breadcrumb a{color:#4a5a70;text-decoration:none;}
+.league-pill{background:#0f141c;border:1px solid #1c2535;border-radius:20px;padding:6px 14px;font-size:12px;color:#6c83a3;}
+.breadcrumb{font-size:12px;color:#6c83a3;margin-bottom:24px;}
+.breadcrumb a{color:#6c83a3;text-decoration:none;}
 h2{font-size:20px;font-weight:800;margin:32px 0 16px;}
-footer{background:#0c0f15;border-top:1px solid #1c2535;padding:24px;text-align:center;font-size:12px;color:#4a5a70;}
-footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
+footer{background:#0c0f15;border-top:1px solid #1c2535;padding:24px;text-align:center;font-size:12px;color:#6c83a3;}
+footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
 </style>
 </head>
 <body>
@@ -182,7 +182,7 @@ footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
   <div class="label">Today's Picks</div>
   <h2>Free Football Tips — ${todayStr}</h2>
   <div class="tips-grid">
-    ${tipCards||'<p style="color:#4a5a70;grid-column:1/-1">No football tips available right now — check back shortly.</p>'}
+    ${tipCards||'<p style="color:#6c83a3;grid-column:1/-1">No football tips available right now — check back shortly.</p>'}
     <div class="locked">
       <p>🔒 Pro members get the full football card — all leagues, all confidence levels, with value edge % on every tip</p>
       <a href="/">Unlock Pro Tips →</a>

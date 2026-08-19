@@ -99,22 +99,22 @@ nav{background:#0c0f15;border-bottom:1px solid #1c2535;padding:14px 24px;display
 .label{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#18e07a;margin-bottom:10px;}
 h1{font-size:clamp(22px,5vw,38px);font-weight:800;margin-bottom:8px;}
 h2{font-size:20px;font-weight:800;margin:32px 0 16px;}
-.sub{font-size:15px;color:#4a5a70;margin-bottom:32px;}
+.sub{font-size:15px;color:#6c83a3;margin-bottom:32px;}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:1px;background:#1c2535;border-radius:8px;overflow:hidden;margin-bottom:32px;}
 .kpi{background:#0f141c;padding:18px 16px;}
-.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#4a5a70;margin-bottom:8px;font-family:monospace;}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#6c83a3;margin-bottom:8px;font-family:monospace;}
 .kpi-val{font-size:24px;font-weight:800;font-family:monospace;}
 .tbl-wrap{overflow-x:auto;margin-bottom:32px;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
-th{text-align:left;padding:10px 12px;background:#0c0f15;color:#4a5a70;border-bottom:1px solid #1c2535;font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;}
+th{text-align:left;padding:10px 12px;background:#0c0f15;color:#6c83a3;border-bottom:1px solid #1c2535;font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;}
 td{padding:10px 12px;border-bottom:1px solid #1c2535;color:#8a9bb0;}
 .block{background:#0f141c;border:1px solid #1c2535;border-radius:8px;padding:24px;margin-bottom:16px;}
 .block h2{font-size:18px;font-weight:800;margin-bottom:12px;margin-top:0;}
-.block p{font-size:14px;color:#4a5a70;line-height:1.8;margin-bottom:10px;}
-.breadcrumb{font-size:12px;color:#4a5a70;margin-bottom:24px;}
-.breadcrumb a{color:#4a5a70;text-decoration:none;}
-footer{background:#0c0f15;border-top:1px solid #1c2535;padding:24px;text-align:center;font-size:12px;color:#4a5a70;}
-footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
+.block p{font-size:14px;color:#6c83a3;line-height:1.8;margin-bottom:10px;}
+.breadcrumb{font-size:12px;color:#6c83a3;margin-bottom:24px;}
+.breadcrumb a{color:#6c83a3;text-decoration:none;}
+footer{background:#0c0f15;border-top:1px solid #1c2535;padding:24px;text-align:center;font-size:12px;color:#6c83a3;}
+footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
 </style>
 </head>
 <body>
@@ -137,7 +137,7 @@ footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
   <div class="tbl-wrap">
     <table>
       <thead><tr><th>Sport</th><th>Total Tips</th><th>Won</th><th>Lost</th><th>Win Rate</th><th>P&L</th><th>ROI</th><th>Avg Odds</th></tr></thead>
-      <tbody>${sportRows||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#4a5a70">Loading...</td></tr>'}</tbody>
+      <tbody>${sportRows||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#6c83a3">Loading...</td></tr>'}</tbody>
     </table>
   </div>
 

@@ -98,25 +98,25 @@ nav{background:#0c0f15;border-bottom:1px solid #1c2535;padding:14px 24px;display
 .wrap{max-width:1000px;margin:0 auto;padding:48px 24px 80px;}
 .page-label{font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#18e07a;margin-bottom:10px;}
 h1{font-size:clamp(22px,5vw,38px);font-weight:800;line-height:1.15;margin-bottom:8px;}
-.page-sub{font-size:15px;color:#4a5a70;margin-bottom:32px;}
+.page-sub{font-size:15px;color:#6c83a3;margin-bottom:32px;}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;background:#1c2535;border-radius:8px;overflow:hidden;margin-bottom:32px;}
 .kpi{background:#0f141c;padding:18px 16px;}
-.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#4a5a70;margin-bottom:8px;font-family:monospace;}
+.kpi-label{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#6c83a3;margin-bottom:8px;font-family:monospace;}
 .kpi-val{font-size:26px;font-weight:800;font-family:monospace;line-height:1;}
 .green{color:#18e07a;} .red{color:#ff3d5a;} .gold{color:#f0b429;} .white{color:#dde6f0;}
 h2{font-size:20px;font-weight:800;margin:36px 0 16px;}
 .tbl-wrap{overflow-x:auto;margin-bottom:32px;}
 table{width:100%;border-collapse:collapse;font-size:13px;}
-th{text-align:left;padding:10px 12px;background:#0c0f15;color:#4a5a70;border-bottom:1px solid #1c2535;font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;}
+th{text-align:left;padding:10px 12px;background:#0c0f15;color:#6c83a3;border-bottom:1px solid #1c2535;font-family:monospace;font-size:10px;text-transform:uppercase;letter-spacing:1px;}
 td{padding:10px 12px;border-bottom:1px solid #1c2535;color:#8a9bb0;}
 tr:hover td{background:#0f141c;}
 .content-block{background:#0f141c;border:1px solid #1c2535;border-radius:8px;padding:24px;margin-bottom:20px;}
 .content-block h2{font-size:18px;margin-top:0;}
-.content-block p{font-size:14px;color:#4a5a70;line-height:1.8;margin-bottom:10px;}
-.breadcrumb{font-size:12px;color:#4a5a70;margin-bottom:24px;}
-.breadcrumb a{color:#4a5a70;text-decoration:none;}
-footer{background:#0c0f15;border-top:1px solid #1c2535;padding:24px;text-align:center;font-size:12px;color:#4a5a70;}
-footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
+.content-block p{font-size:14px;color:#6c83a3;line-height:1.8;margin-bottom:10px;}
+.breadcrumb{font-size:12px;color:#6c83a3;margin-bottom:24px;}
+.breadcrumb a{color:#6c83a3;text-decoration:none;}
+footer{background:#0c0f15;border-top:1px solid #1c2535;padding:24px;text-align:center;font-size:12px;color:#6c83a3;}
+footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
 </style>
 </head>
 <body>
@@ -143,7 +143,7 @@ footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
   <div class="tbl-wrap">
     <table>
       <thead><tr><th>Date</th><th>Tips</th><th>Won</th><th>Lost</th><th>Win Rate</th><th>P&amp;L</th></tr></thead>
-      <tbody>${dayRows || '<tr><td colspan="6" style="text-align:center;padding:24px;color:#4a5a70">Loading...</td></tr>'}</tbody>
+      <tbody>${dayRows || '<tr><td colspan="6" style="text-align:center;padding:24px;color:#6c83a3">Loading...</td></tr>'}</tbody>
     </table>
   </div>
 
@@ -151,7 +151,7 @@ footer a{color:#4a5a70;text-decoration:none;margin:0 8px;}
   <div class="tbl-wrap">
     <table>
       <thead><tr><th>Date</th><th>Sport</th><th>Match</th><th>Selection</th><th>Odds</th><th>Result</th><th>P&amp;L</th></tr></thead>
-      <tbody>${recentRows || '<tr><td colspan="7" style="text-align:center;padding:24px;color:#4a5a70">No results yet</td></tr>'}</tbody>
+      <tbody>${recentRows || '<tr><td colspan="7" style="text-align:center;padding:24px;color:#6c83a3">No results yet</td></tr>'}</tbody>
     </table>
   </div>
 
