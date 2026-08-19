@@ -66,6 +66,27 @@ function esc(v) {
 function fmtDate(d){return new Date(d).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric',timeZone:'Europe/London'});}
 function fmtTime(d){return new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/London'});}
 
+// The price we advised at publication — the same number the ledger settles at.
+// Mirrors advisedPrice() in the engine. Showing t.odds here meant these pages
+// quoted the current live price while results were settled at the advised one,
+// so the public price and the published ROI described different bets. Legacy
+// rows predating advised_odds fall back to odds.
+function advisedPrice(t) { return parseFloat(t && t.advised_odds != null ? t.advised_odds : t && t.odds); }
+
+// These pages query today AND tomorrow, but their title and H1 say "Today".
+// A bare clock time therefore presented a tomorrow fixture as one of today's,
+// so anything outside the current UK day is labelled.
+function fmtKickoff(eventTime, dayStart) {
+  const t = fmtTime(eventTime);
+  const ms = new Date(eventTime).getTime() - dayStart.getTime();
+  if (ms < 0) return t;
+  if (ms < 24 * 3600000) return t;
+  if (ms < 48 * 3600000) return 'Tomorrow ' + t;
+  return new Date(eventTime).toLocaleDateString('en-GB',
+    { weekday: 'short', timeZone: 'Europe/London' }) + ' ' + t;
+}
+
+
 // A failed read must never be dressed up as real data. Returning 200 with
 // zeros publishes a 0% win rate, and the s-maxage header then lets the CDN
 // serve that for the next 15-30 minutes. A 503 with no-store is retried
@@ -131,10 +152,10 @@ module.exports = async (req, res) => {
       <h3>${esc(t.home_team)} vs ${esc(t.away_team)}</h3>
       <div class="tip-row">
         <span>📌 ${esc(t.selection)}</span>
-        <span style="color:#f0b429;font-family:monospace;font-weight:700">${parseFloat(t.odds).toFixed(2)}</span>
+        <span style="color:#f0b429;font-family:monospace;font-weight:700">${advisedPrice(t).toFixed(2)}</span>
       </div>
       <div class="tip-row">
-        <span style="color:#6c83a3">🕐 ${fmtTime(t.event_time)} UK</span>
+        <span style="color:#6c83a3">🕐 ${fmtKickoff(t.event_time, today)} UK</span>
         <span style="color:#6c83a3">Conf: <strong>Pro 🔒</strong></span>
       </div>
     </article>`).join('');
@@ -158,7 +179,7 @@ module.exports = async (req, res) => {
   "itemListElement": freeTips.map((t,i)=>({
     "@type":"ListItem","position":i+1,
     "name":`${esc(t.home_team)} vs ${esc(t.away_team)} — ${esc(t.selection)}`,
-    "description":`${esc(t.league)} tip at ${parseFloat(t.odds).toFixed(2)} odds`
+    "description":`${esc(t.league)} tip at ${advisedPrice(t).toFixed(2)} odds`
   }))
 })}</script>
 <style>
