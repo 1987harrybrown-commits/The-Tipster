@@ -1733,9 +1733,11 @@ async function startCheckout(plan){
     // The engine is the authority: this client's isProUser can be stale if the
     // subscription was created in another tab or on another device.
     if(res.status===409&&data.alreadySubscribed){
-      isProUser=true;
-      syncProCta();
-      alert('You already have an active subscription. You can manage it from your account page.');
+      // Use what the engine said rather than assuming. A past_due subscription
+      // also lands here, and that subscriber is NOT Pro — telling them they are
+      // would contradict the account page they are about to be sent to.
+      if(!data.needsPayment){isProUser=true;syncProCta();}
+      alert(data.error||'You already have an active subscription. You can manage it from your account page.');
       window.location.href='/account.html';
       return;
     }
