@@ -719,8 +719,15 @@ async function loadStats() {
 }
 
 async function loadEmailLog() {
-  const { data } = await db.from('email_log').select('*').order('sent_at',{ascending:false}).limit(20);
+  const { data, error } = await db.from('email_log').select('*').order('sent_at',{ascending:false}).limit(20);
   const tbody = document.getElementById('emailLog');
+  // "No emails sent yet" and "the read failed" are very different things to an
+  // admin checking whether this morning's dispatch went out.
+  if (error) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--red);padding:20px">Could not load the email log: '
+      + esc(error.message) + '</td></tr>';
+    return;
+  }
   if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">No emails sent yet</td></tr>'; return; }
   tbody.innerHTML = data.map(e => {
     const d = new Date(e.sent_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
@@ -734,8 +741,16 @@ async function loadEmailLog() {
 }
 
 async function loadSubscribers() {
-  const { data } = await db.from('users').select('*').order('created_at',{ascending:false}).limit(100);
+  const { data, error } = await db.from('users').select('*').order('created_at',{ascending:false}).limit(100);
   const tbody = document.getElementById('subTable');
+  // A failed read used to render "No subscribers yet", which is the same thing
+  // an empty table says. An admin cannot act on a user list that silently
+  // reports zero because the query was rejected.
+  if (error) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--red);padding:20px">Could not load subscribers: '
+      + esc(error.message) + '</td></tr>';
+    return;
+  }
   if (!data || !data.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:20px">No subscribers yet</td></tr>'; return; }
   tbody.innerHTML = data.map(u => {
     const joined = new Date(u.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'2-digit'});
@@ -785,7 +800,11 @@ async function toggleUserEmail() {
   const email = document.getElementById('editEmail').value.trim();
   if (!email) { showAlert(alert, 'Enter an email address first.', 'error'); return; }
   // Get current state
-  const { data } = await db.from('users').select('email_opt_in').eq('email', email).single();
+  // .single() errors both when the row is missing and when the read is
+  // rejected. Reporting "User not found" for the second is misleading — the
+  // admin would go looking for a user that is there.
+  const { data, error: readErr } = await db.from('users').select('email_opt_in').eq('email', email).single();
+  if (readErr && readErr.code !== 'PGRST116') { showAlert(alert, 'Could not read that user: ' + readErr.message, 'error'); return; }
   if (!data) { showAlert(alert, 'User not found.', 'error'); return; }
   const newState = !data.email_opt_in;
   btn.disabled = true;
@@ -837,6 +856,37 @@ async function triggerSend(type) {
 }
 
 // ── DAILY OVERRIDE ────────────────────────────────────────
+// Write an override without depending on which unique constraint the table
+// happens to carry.
+//
+// Both saves used upsert(payload, { onConflict: 'date' }), keyed on the date
+// alone. The engine reads overrides by (date, type) and clearOverride deletes
+// by (date, type), so the date on its own does not identify a row. If the
+// table is unique on date only, saving a daily override replaces the Saturday
+// acca for that date and vice versa; if it is unique on (date, type), the
+// named conflict target matches no constraint and the save fails outright.
+//
+// Update-then-insert is correct under either schema, touches only the row for
+// this (date, type), and reports whether anything actually landed.
+async function saveOverride(payload) {
+  const { date, type } = payload;
+  const fields = Object.assign({}, payload);
+  delete fields.date; delete fields.type;
+
+  const { data: updated, error: updErr } = await db.from('email_overrides')
+    .update(fields).eq('date', date).eq('type', type).select('date');
+  if (updErr) return { error: updErr };
+  if (updated && updated.length) return { error: null };
+
+  const { data: inserted, error: insErr } = await db.from('email_overrides')
+    .insert(payload).select('date');
+  if (insErr) return { error: insErr };
+  if (!inserted || !inserted.length) {
+    return { error: { message: 'The write was rejected — nothing was saved.' } };
+  }
+  return { error: null };
+}
+
 async function saveDailyOverride() {
   const btn = document.getElementById('ovDailyBtn');
   const alert = document.getElementById('ovDailyAlert');
@@ -845,13 +895,23 @@ async function saveDailyOverride() {
     type:           'daily',
     bet_match:      document.getElementById('ov-match').value,
     bet_selection:  document.getElementById('ov-selection').value,
-    bet_odds:       parseFloat(document.getElementById('ov-odds').value) || null,
-    bet_confidence: parseInt(document.getElementById('ov-conf').value) || null,
+    // Number.isFinite rather than `|| null`: a confidence of 0 is a real value
+    // and was being turned into null.
+    bet_odds:       (v => Number.isFinite(v) ? v : null)(parseFloat(document.getElementById('ov-odds').value)),
+    bet_confidence: (v => Number.isFinite(v) ? v : null)(parseInt(document.getElementById('ov-conf').value, 10)),
     bet_reasoning:  document.getElementById('ov-reasoning').value
   };
   if (!payload.date || !payload.bet_selection) { showAlert(alert, 'Date and selection are required.', 'error'); return; }
+  // These go straight into a published email, so reject values that cannot be
+  // real rather than sending them out.
+  if (payload.bet_odds !== null && (payload.bet_odds <= 1 || payload.bet_odds > 1000)) {
+    showAlert(alert, 'Odds must be greater than 1 and below 1000.', 'error'); return;
+  }
+  if (payload.bet_confidence !== null && (payload.bet_confidence < 0 || payload.bet_confidence > 100)) {
+    showAlert(alert, 'Confidence must be between 0 and 100.', 'error'); return;
+  }
   btn.disabled=true; btn.textContent='Saving...';
-  const { error } = await db.from('email_overrides').upsert(payload, { onConflict: 'date' });
+  const { error } = await saveOverride(payload);
   btn.disabled=false; btn.textContent='Save Daily Override';
   showAlert(alert, error ? error.message : 'Override saved for ' + payload.date, error?'error':'success');
 }
@@ -884,16 +944,23 @@ async function saveSaturdayOverride() {
     }
   });
   if (selections.length < 3) { showAlert(alert, 'Add at least 3 complete selections.', 'error'); return; }
-  const tom = new Date(); tom.setDate(tom.getDate() + ((6 - tom.getDay() + 7) % 7 || 7));
+  // Next Saturday in the UK calendar. getDay()/setDate() work in the browser's
+  // local day and toISOString() then formats in UTC, so the two could disagree
+  // by a day — the same drift already fixed in clearOverride. Anchor to the UK
+  // calendar date and do the arithmetic in UTC so neither can shift it.
+  const ukToday = new Date().toLocaleDateString('en-CA', { timeZone: 'Europe/London' });
+  const [uy, um, ud] = ukToday.split('-').map(Number);
+  const sat = new Date(Date.UTC(uy, um - 1, ud));
+  sat.setUTCDate(sat.getUTCDate() + ((6 - sat.getUTCDay() + 7) % 7 || 7));
   const payload = {
-    date:              tom.toISOString().split('T')[0],
+    date:              sat.toISOString().split('T')[0],
     type:              'saturday',
     acca_selections:   selections,
     acca_combined_odds:parseFloat(combined.toFixed(2)),
     acca_reasoning:    document.getElementById('acca-reasoning').value
   };
   btn.disabled=true; btn.textContent='Saving...';
-  const { error } = await db.from('email_overrides').upsert(payload, { onConflict: 'date' });
+  const { error } = await saveOverride(payload);
   btn.disabled=false; btn.textContent='Save Saturday Override';
   showAlert(alert, error ? error.message : 'Saturday override saved for ' + payload.date + ' — combined odds: ' + payload.acca_combined_odds, error?'error':'success');
 }
