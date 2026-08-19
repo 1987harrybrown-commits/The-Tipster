@@ -175,6 +175,7 @@ td{padding:9px 11px;}
       <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:12px;">Manual Dispatch</div>
       <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">Trigger a send to all active subscribers immediately. Use with caution — this sends to everyone.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <button class="btn btn-ghost" onclick="triggerSend('pro')">Send Pro Now</button>
         <button class="btn btn-ghost" onclick="triggerSend('daily')">Send Daily Now</button>
         <button class="btn btn-ghost" onclick="triggerSend('saturday')">Send Saturday Now</button>
       </div>
