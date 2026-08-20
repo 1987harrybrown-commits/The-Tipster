@@ -666,25 +666,71 @@ async function renderPage() {
 async function saveProfile() {
   const btn = document.getElementById('saveProfileBtn');
   const alert = document.getElementById('profileAlert');
-  btn.disabled = true; btn.textContent = 'Saving...';
   const firstName = document.getElementById('firstName').value.trim();
-  const { error } = await db.from('users').update({ first_name: firstName }).eq('id', currentUser.id);
+
+  // The same rules signup applies. It enforces a name and a 60-character
+  // ceiling because first_name is rendered in every email, on this page and in
+  // the admin table — and then this page let you set it to anything at all,
+  // including nothing. One field, two rules, and the looser one was the one you
+  // could reach after signing up.
+  if (!firstName) { showAlert(alert, 'Enter your first name.', 'error'); return; }
+  if (firstName.length > 60) {
+    showAlert(alert, 'Please use 60 characters or fewer.', 'error'); return;
+  }
+
+  btn.disabled = true; btn.textContent = 'Saving...';
+  // .select() so a write that is REFUSED rather than failed is caught. An RLS
+  // policy that denies the update returns no error and no rows, and without
+  // this the page said "Profile updated." over a database that had not
+  // changed — the same failure the unsubscribe route was fixed for.
+  const { data, error } = await db.from('users')
+    .update({ first_name: firstName }).eq('id', currentUser.id).select('id');
   btn.disabled = false; btn.textContent = 'Save changes';
-  showAlert(alert, error ? 'Could not save: ' + error.message : 'Profile updated.', error ? 'error' : 'success');
+
+  if (error) { showAlert(alert, 'Could not save: ' + error.message, 'error'); return; }
+  if (!data || !data.length) {
+    showAlert(alert, 'That did not save. Please sign out and back in, then try again.', 'error');
+    return;
+  }
+  userProfile.first_name = firstName;
+  showAlert(alert, 'Profile updated.', 'success');
 }
 
 // ── SAVE PREFERENCE TOGGLE ────────────────────────────────
 async function savePref(field, value) {
   const alert = document.getElementById('prefAlert');
-  const update = { [field]: value };
-  // If opt-in toggled off, disable child toggles
-  if (field === 'email_opt_in') {
-    document.getElementById('pref-daily').disabled    = !value;
-    document.getElementById('pref-saturday').disabled = !value;
+
+  // .select() for the same reason as above, and it matters more here: a
+  // subscriber who turns the daily email off, is told "Preference saved" and
+  // keeps receiving it has been told the opposite of what happened, about the
+  // one setting they are most likely to check.
+  const { data, error } = await db.from('users')
+    .update({ [field]: value }).eq('id', currentUser.id).select('id');
+  const saved = !error && data && data.length;
+
+  if (!saved) {
+    // Put the switch back. Leaving it showing the new state means the page and
+    // the database disagree until the next reload, which is when it silently
+    // flips back.
+    const box = document.getElementById(
+      field === 'email_opt_in' ? 'pref-opt-in'
+      : field === 'email_daily' ? 'pref-daily' : 'pref-saturday');
+    if (box) box.checked = !value;
+    showAlert(alert, 'Could not save preference.', 'error');
+    return;
   }
-  const { error } = await db.from('users').update(update).eq('id', currentUser.id);
-  showAlert(alert, error ? 'Could not save preference.' : 'Preference saved.', error ? 'error' : 'success');
-  if (!error) userProfile[field] = value;
+
+  userProfile[field] = value;
+
+  // Only after the write. The child toggles used to be disabled first, so a
+  // refused write left them greyed out while the master switch was still on.
+  if (field === 'email_opt_in') {
+    const daily = document.getElementById('pref-daily');
+    const sat   = document.getElementById('pref-saturday');
+    if (daily) daily.disabled = !value;
+    if (sat)   sat.disabled   = !value;
+  }
+  showAlert(alert, 'Preference saved.', 'success');
 }
 
 // ── CHANGE PASSWORD ───────────────────────────────────────

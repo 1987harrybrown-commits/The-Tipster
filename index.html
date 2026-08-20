@@ -1712,8 +1712,20 @@ document.addEventListener('keydown', (e) => {
   else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 });
 
+// One overlay hosts four panels, and its aria-label was the fixed word
+// "Account" — so a screen reader announced the same thing whichever of them
+// was on screen. The label follows the panel now.
+const PANEL_LABELS = {
+  mSignup:  'Create a free account',
+  mLogin:   'Log in',
+  mForgot:  'Reset your password',
+  mSuccess: 'Check your inbox',
+};
+
 function showPanel(name){
   ['mSignup','mLogin','mForgot','mSuccess'].forEach(p=>{const el=document.getElementById(p);if(el)el.style.display=p===name?'block':'none';});
+  const ov=document.getElementById('overlay');
+  if(ov&&PANEL_LABELS[name])ov.setAttribute('aria-label',PANEL_LABELS[name]);
   // The resend offer belongs to one failed attempt, not to the modal.
   const r=document.getElementById('liResend');if(r)r.style.display='none';
 }
