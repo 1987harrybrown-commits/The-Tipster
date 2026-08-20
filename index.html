@@ -663,7 +663,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
     </div>
     <div class="tm-selection">
       <div class="tm-sel-left"><div class="tm-sel-label">Selection</div><div class="tm-sel-val" id="tm-selection"></div></div>
-      <div class="tm-sel-right"><div class="tm-odds-big" id="tm-odds"></div><div class="tm-odds-label">Odds</div></div>
+      <div class="tm-sel-right"><div class="tm-odds-big" id="tm-odds"></div><div class="tm-odds-label">Advised Odds</div><div class="tm-odds-label" id="tm-odds-move" style="display:none;color:var(--muted);letter-spacing:0;text-transform:none;"></div></div>
     </div>
     <div class="tm-edge">
       <div class="tm-edge-cell"><div class="tm-edge-label">Model Prob</div><div class="tm-edge-val neu" id="tm-model-prob"></div></div>
@@ -781,6 +781,28 @@ function decimalToFractional(decimal) {
     if (diff < bestDiff) { bestDiff = diff; best = [n,d]; }
   }
   return best[0] + '/' + best[1];
+}
+
+// The price we advised at publication — the same number the ledger settles at,
+// the emails quote, and the four sport pages show.
+//
+// This page quoted tip.odds, the CURRENT price. Every other surface was moved
+// to advised_odds and this one, the busiest of them, was missed: a subscriber
+// read one price in their email, a different one on the site they clicked
+// through to, and their result was settled at the first. Legacy rows predating
+// advised_odds fall back to odds.
+function advisedPrice(tip) {
+  return parseFloat(tip && tip.advised_odds != null ? tip.advised_odds : tip && tip.odds);
+}
+
+// How far the market has moved since. The Pro email shows this as "now 2.05";
+// the site showed the moved price as though it were the advice.
+function livePriceMove(tip) {
+  const advised = advisedPrice(tip);
+  const live = parseFloat(tip && tip.odds);
+  if (!Number.isFinite(advised) || !Number.isFinite(live)) return null;
+  if (Math.abs(live - advised) <= 0.01) return null;
+  return live;
 }
 
 function fmtOdds(decimal) {
@@ -1112,7 +1134,10 @@ function deriveEdge(tip) {
   // lower one on the site.
   //
   // The fallback is only for legacy rows predating these columns.
-  const odds = parseFloat(tip.odds || 0);
+  // The advised price, not the live one: the edge was computed against the
+  // price we advised, so recomputing it from a price that has since moved
+  // describes a bet nobody was offered.
+  const odds = advisedPrice(tip) || 0;
   const rawImplied = odds > 0 ? (1 / odds) * 100 : 0;
   const modelProb   = tip.model_prob   != null ? parseFloat(tip.model_prob)   : parseFloat(tip.confidence || 0);
   const impliedProb = tip.implied_prob != null ? parseFloat(tip.implied_prob) : rawImplied;
@@ -1167,7 +1192,8 @@ function renderTips() {
     const stake=parseFloat(tip.stake??1);
     const {edge}=deriveEdge(tip);
     const eStr=(edge>=0?'+':'')+edge.toFixed(1)+'%';
-    const oddsDisplay=fmtOdds(tip.odds);
+    const oddsDisplay=fmtOdds(advisedPrice(tip));
+    const moved=livePriceMove(tip);
     const d=document.createElement('div');
     d.className='tcard '+(locked?'pro-card':'');
     if(!locked){d.style.cursor='pointer';d.addEventListener('click',()=>openTipModal(tip));}
@@ -1181,6 +1207,7 @@ function renderTips() {
           '<div class="tcard-pick-l"><div class="label">Selection</div><div class="value">'+esc(tip.selection||'')+'</div></div>'+
           '<div style="text-align:right">'+
             '<div class="tcard-odds">'+oddsDisplay+'</div>'+
+            (moved?'<div style="font-size:9px;color:var(--muted);font-family:Space Mono,monospace;margin-top:2px;">now '+fmtOdds(moved)+'</div>':'')+
             (tip.bookmaker?'<div style="font-size:9px;color:#4a9eff;font-family:Space Mono,monospace;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">'+esc(tip.bookmaker.replace(/_/g,' '))+'</div>':'')+
           '</div>'+
         '</div>'+
@@ -1216,7 +1243,15 @@ function renderTicker(){
   const track=document.getElementById('tickerTrack');
   if(!allTips.length)return;
   const items=[...allTips.slice(0,10),...allTips.slice(0,10)];
-  track.innerHTML=items.map(t=>'<div class="tick"><span>'+sportIcon(t.sport)+'</span><span class="ev">'+(t.home_team||'')+' vs '+(t.away_team||'')+'</span><span>→</span><span class="pick">'+(t.selection||'')+'</span><span class="odds">@ '+fmtOdds(t.odds)+'</span><span class="res p">PENDING</span></div>').join('');
+  // esc on every feed value. Team names, leagues and selections come from
+  // Sofascore, and this line dropped them straight into innerHTML — a name
+  // containing markup rendered as markup, on the home page. renderTips escapes;
+  // this renderer and the results list below were the two that did not.
+  track.innerHTML=items.map(t=>'<div class="tick"><span>'+sportIcon(t.sport)
+    +'</span><span class="ev">'+esc(t.home_team||'')+' vs '+esc(t.away_team||'')
+    +'</span><span>→</span><span class="pick">'+esc(t.selection||'')
+    +'</span><span class="odds">@ '+fmtOdds(advisedPrice(t))
+    +'</span><span class="res p">PENDING</span></div>').join('');
 }
 
 function renderSportsGrid(){
@@ -1413,11 +1448,11 @@ function renderHistoryTable(){
     const plCol=pl>=0?'var(--green)':'var(--red)',rplCol=rpl>=0?'var(--green)':'var(--red)';
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);gap:10px;">'+
       '<div style="flex:1;min-width:0;">'+
-        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;"><span style="font-family:Space Mono,monospace;font-size:10px;color:var(--muted);">'+date+'</span><span class="tcard-badge '+tier+'" style="font-size:8px;padding:2px 5px;">'+tier.toUpperCase()+'</span><span style="font-size:10px;color:var(--muted);">'+(r.sport||'')+'</span></div>'+
-        '<div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">'+(r.event||'')+'</div>'+
-        '<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+(r.selection||'')+' <span style="color:var(--gold);font-family:Space Mono,monospace;">@ '+fmtOdds(r.odds)+'</span></div>'+
+        '<div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap;"><span style="font-family:Space Mono,monospace;font-size:10px;color:var(--muted);">'+date+'</span><span class="tcard-badge '+esc(tier)+'" style="font-size:8px;padding:2px 5px;">'+esc(tier.toUpperCase())+'</span><span style="font-size:10px;color:var(--muted);">'+esc(r.sport||'')+'</span></div>'+
+        '<div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:200px;">'+esc(r.event||'')+'</div>'+
+        '<div style="font-size:11px;color:var(--muted);margin-top:2px;">'+esc(r.selection||'')+' <span style="color:var(--gold);font-family:Space Mono,monospace;">@ '+fmtOdds(r.odds)+'</span></div>'+
       '</div>'+
-      '<div style="text-align:right;flex-shrink:0;"><span class="res-pill '+(won?'w':isVoid?'v':'l')+'" style="display:inline-block;margin-bottom:5px;">'+r.result+'</span><div style="font-family:Space Mono,monospace;font-size:12px;font-weight:700;color:'+plCol+';">'+fmtU(pl)+'</div><div style="font-family:Space Mono,monospace;font-size:10px;color:'+rplCol+';">'+fmtU(rpl)+'</div></div>'+
+      '<div style="text-align:right;flex-shrink:0;"><span class="res-pill '+(won?'w':isVoid?'v':'l')+'" style="display:inline-block;margin-bottom:5px;">'+esc(r.result||'')+'</span><div style="font-family:Space Mono,monospace;font-size:12px;font-weight:700;color:'+plCol+';">'+fmtU(pl)+'</div><div style="font-family:Space Mono,monospace;font-size:10px;color:'+rplCol+';">'+fmtU(rpl)+'</div></div>'+
     '</div>';
   }).join('');
   updatePLSummary(rows);
@@ -1455,7 +1490,7 @@ async function loadHistory(){
 
 function writeTipAnalysis(tip){
   const home=tip.home_team||'Home', away=tip.away_team||'Away';
-  const odds=parseFloat(tip.odds||0), conf=parseFloat(tip.confidence||0);
+  const odds=advisedPrice(tip)||0, conf=parseFloat(tip.confidence||0);
   const sel=(tip.selection||'').toLowerCase(), league=tip.league||'', sport=tip.sport||'';
   const {modelProb,impliedProb:implied,edge}=deriveEdge(tip);
   const edgeNum=parseFloat(edge.toFixed(1));
@@ -1515,7 +1550,7 @@ function writeTipAnalysis(tip){
 }
 
 function openTipModal(tip){
-  const odds=parseFloat(tip.odds||0),conf=parseFloat(tip.confidence||0);
+  const odds=advisedPrice(tip)||0,conf=parseFloat(tip.confidence||0);
   const {modelProb,impliedProb:implied,edge}=deriveEdge(tip);
   const eCls=edge>=5?'pos':edge>=0?'neu':'neg',eStr=(edge>=0?'+':'')+edge.toFixed(1)+'%';
   const stake=parseFloat(tip.stake??1),confCls=conf>=85?'var(--green)':conf>=72?'var(--gold)':'var(--red)';
@@ -1524,12 +1559,17 @@ function openTipModal(tip){
   document.getElementById('tm-league').textContent   =tip.league||'';
   document.getElementById('tm-selection').textContent=tip.selection||'';
   document.getElementById('tm-odds').textContent     =fmtOdds(odds);
+  const tmMoved=document.getElementById('tm-odds-move'), moved=livePriceMove(tip);
+  if(tmMoved){tmMoved.textContent=moved?'now '+fmtOdds(moved):'';tmMoved.style.display=moved?'block':'none';}
   document.getElementById('tm-model-prob').textContent =modelProb.toFixed(0)+'%';
   document.getElementById('tm-implied-prob').textContent=implied.toFixed(0)+'%';
   const edgeEl=document.getElementById('tm-edge');edgeEl.textContent=eStr;edgeEl.className='tm-edge-val '+eCls;
   document.getElementById('tm-analysis').textContent=writeTipAnalysis(tip);
   document.getElementById('tm-conf').textContent    = isProUser ? conf+'%' : 'Pro only 🔒';
-  document.getElementById('tm-stake').textContent   =stake>=3?stake+'u — High Confidence':stake>=2?stake+'u — Medium':stake+'u';
+  // stakeLabel, not a second copy of it. This one had no branch for stake 0, so
+  // an informational pick was presented here as a "0u" bet while the card
+  // beside it said "No stake — insight only".
+  document.getElementById('tm-stake').textContent   =stakeLabel(stake);
   const stakeCell=document.getElementById('tm-stake-cell');
   if(stakeCell){if(isProUser){stakeCell.style.display='block';}else{stakeCell.innerHTML='<div class="tm-meta-label">Recommended Stake</div><div style="font-size:11px;color:var(--gold);font-weight:700;">Pro Members Only 🔒</div>';}}
   const bkEl=document.getElementById('tm-bookmaker'),mkEl=document.getElementById('tm-market');
