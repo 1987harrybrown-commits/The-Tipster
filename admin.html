@@ -653,15 +653,40 @@ function updateAccaSummary(data) {
   roiEl.style.color = roi >= 0 ? 'var(--green)' : 'var(--red)';
 }
 
+// The two operations buttons write into one log panel, which is fine as a
+// console and not fine as a race: the settle runs in the background for
+// minutes, and pressing Generate Acca while it does wipes the only record of
+// what the settle said. Neither is reversible from here, and losing sight of a
+// long one is the expensive half.
+//
+// One lock. Whichever runs, the other is unavailable until it finishes, and the
+// log says which operation each line came from.
+let opsBusy = false;
+
+function lockOps(running) {
+  opsBusy = running;
+  ['resettleBtn', 'accaGenBtn'].forEach(id => {
+    const b = document.getElementById(id);
+    if (b) b.disabled = running;
+  });
+}
+
+function opsLog(who, msg) {
+  const el = document.getElementById('resettleLog');
+  if (!el) return;
+  el.style.display = 'block';
+  el.textContent = who + ': ' + msg;
+}
+
 async function triggerResettle() {
   // The engine grades pending tips whose events have finished and restores
   // results_history rows for tips missing one. It does NOT re-grade or
   // overwrite results that already exist.
   if (!confirm('Run the settler now?\n\nIt grades any pending tips whose events have finished, and restores results_history rows for tips that are missing one. Existing results are not re-graded or overwritten.')) return;
+  if (opsBusy) return;
   const btn = document.getElementById('resettleBtn');
-  const logEl = document.getElementById('resettleLog');
-  btn.disabled = true; btn.textContent = 'Starting...';
-  logEl.style.display = 'block'; logEl.textContent = 'Requesting resettlement...\n';
+  lockOps(true); btn.textContent = 'Starting...';
+  opsLog('Re-settle', 'Requesting resettlement...');
   try {
     const res = await fetch(`${ENGINE_URL}/admin/resettle`, {
       method: 'POST',
@@ -674,30 +699,30 @@ async function triggerResettle() {
     try { data = await res.json(); } catch(_) {}
 
     if (res.status === 403) {
-      logEl.textContent = 'Rejected: the engine did not accept this admin key.\nCheck the key saved in this browser.';
-      btn.disabled=false; btn.textContent='Re-settle All History';
+      opsLog('Re-settle', 'Rejected: the engine did not accept this admin key.\nCheck the key saved in this browser.');
+      lockOps(false); btn.textContent='Re-settle All History';
       return;
     }
     if (res.status === 409) {
-      logEl.textContent = 'A settle is already running.\nThe engine also settles automatically every hour — try again in a few minutes.';
-      btn.disabled=false; btn.textContent='Re-settle All History';
+      opsLog('Re-settle', 'A settle is already running.\nThe engine also settles automatically every hour — try again in a few minutes.');
+      lockOps(false); btn.textContent='Re-settle All History';
       return;
     }
     if (!res.ok || !data.started) {
-      logEl.textContent = 'Error: ' + (data.error || `HTTP ${res.status}`);
-      btn.disabled=false; btn.textContent='Re-settle All History';
+      opsLog('Re-settle', 'Error: ' + (data.error || `HTTP ${res.status}`));
+      lockOps(false); btn.textContent='Re-settle All History';
       return;
     }
 
     // The engine dispatches the settle in the background — a full run outlives
     // the request timeout, so there are no counts to report here. Per-tip detail
     // goes to the Render logs; stats are refreshed once it has had time to run.
-    logEl.textContent = 'Resettlement started.\n\nThe engine runs it in the background, so there is no live progress here — see the Render logs for per-tip detail.\n\nStats refresh automatically in 30s.';
+    opsLog('Re-settle', 'Resettlement started.\n\nThe engine runs it in the background, so there is no live progress here — see the Render logs for per-tip detail.\n\nStats refresh automatically in 30s.');
     btn.textContent = 'Started';
-    setTimeout(() => { btn.disabled=false; btn.textContent='Re-settle All History'; loadStats(); }, 30000);
+    setTimeout(() => { lockOps(false); btn.textContent='Re-settle All History'; loadStats(); }, 30000);
   } catch(e) {
-    logEl.textContent = 'Request failed: ' + e.message;
-    btn.disabled=false; btn.textContent='Re-settle All History';
+    opsLog('Re-settle', 'Request failed: ' + e.message);
+    lockOps(false); btn.textContent='Re-settle All History';
   }
 }
 
@@ -707,12 +732,12 @@ async function triggerAccaGenerate() {
   // button quietly reset — the admin pressed Generate and nothing happened,
   // with no indication why. Mirrors triggerResettle, and reports into the same
   // log panel that sits under both buttons.
+  if (opsBusy) return;
   const btn = document.getElementById('accaGenBtn');
-  const logEl = document.getElementById('resettleLog');
-  const reset = () => { btn.disabled = false; btn.textContent = "Generate Today's Acca"; };
-  const say = (msg) => { logEl.style.display = 'block'; logEl.textContent = msg; };
+  const reset = () => { lockOps(false); btn.textContent = "Generate Today's Acca"; };
+  const say = (msg) => opsLog('Acca', msg);
 
-  btn.disabled = true; btn.textContent = 'Generating...';
+  lockOps(true); btn.textContent = 'Generating...';
   say('Requesting acca generation...');
   try {
     const res = await fetch(`${ENGINE_URL}/admin/generate-acca`, { headers: { 'Authorization': `Bearer ${adminKey()}` } });
