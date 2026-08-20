@@ -465,6 +465,10 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
             <button class="tab" onclick="filterTips('Basketball',this)">🏀 Basketball</button>
             <button class="tab" onclick="filterTips('Ice Hockey',this)">🏒 Hockey</button>
           </div>
+          <div class="tabs" id="oddsTabs" aria-label="Odds format">
+            <button class="tab on" id="oddsFmtDec" onclick="setOddsFormat('decimal',this)">Decimal</button>
+            <button class="tab" id="oddsFmtFrac" onclick="setOddsFormat('fractional',this)">Fractional</button>
+          </div>
           <div class="update-tag"><div class="live-dot"></div>Updates every 15 mins</div>
         </div>
       </div>
@@ -764,22 +768,63 @@ const sportIcon = s => SPORT_ICONS[s] || '🏅';
 const fmt  = (n,d=2) => (n>=0?'+':'')+parseFloat(n).toFixed(d);
 const fmtU = n => fmt(n,2)+'u';
 
+// The odds format, and a way to set it.
+//
+// fmtOdds has always read localStorage.getItem('oddsFormat') and nothing ever
+// wrote it — no toggle, no setting, nothing. So decimalToFractional below was
+// unreachable except by editing storage by hand, and the preference was a
+// feature that had been started and left. Fractional is what most UK readers
+// use, and the conversion was already written.
+function setOddsFormat(fmt, btn) {
+  localStorage.setItem('oddsFormat', fmt === 'fractional' ? 'fractional' : 'decimal');
+  document.querySelectorAll('#oddsTabs .tab').forEach(t => t.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  // Everything that quotes a price, redrawn.
+  renderTips(); renderTicker(); renderHistoryTable();
+}
+
+function applyStoredOddsFormat() {
+  const frac = localStorage.getItem('oddsFormat') === 'fractional';
+  const dec = document.getElementById('oddsFmtDec');
+  const fr  = document.getElementById('oddsFmtFrac');
+  if (dec) dec.classList.toggle('on', !frac);
+  if (fr)  fr.classList.toggle('on', frac);
+}
+
 function decimalToFractional(decimal) {
   const FRACS = [
+    // The short end was missing entirely: nothing below 1/10, while the engine
+    // publishes short-price selections from 1.05. Everything under 1.10 rounded
+    // up to 1/10, so a 1.05 shot displayed as a price five points longer than
+    // it is — on a betting site, in the format most UK readers prefer.
+    [1,100],[1,66],[1,50],[1,40],[1,33],[1,25],[1,20],[1,16],[1,14],[1,12],
     [1,10],[1,8],[1,7],[1,6],[1,5],[2,9],[1,4],[2,7],[3,10],[1,3],
     [4,11],[2,5],[4,9],[1,2],[8,15],[4,7],[8,13],[4,6],[8,11],[4,5],
     [5,6],[10,11],[1,1],[11,10],[6,5],[5,4],[11,8],[6,4],[13,8],[7,4],
-    [15,8],[2,1],[9,4],[5,2],[11,4],[3,1],[10,3],[7,2],[4,1],[9,2],
-    [5,1],[11,2],[6,1],[13,2],[7,1],[15,2],[8,1],[9,1],[10,1],[11,1],
+    [15,8],[2,1],[9,4],[5,2],[11,4],[3,1],[10,3],[7,2],[15,4],[4,1],[9,2],
+    [5,1],[11,2],[6,1],[13,2],[7,1],[15,2],[8,1],[17,2],[9,1],[10,1],[11,1],
     [12,1],[14,1],[16,1],[20,1],[25,1],[33,1],[40,1],[50,1],[66,1],[100,1]
   ];
-  const target = parseFloat(decimal) - 1;
-  if (target <= 0) return parseFloat(decimal).toFixed(2);
+  const dec = parseFloat(decimal);
+  const target = dec - 1;
+  if (!Number.isFinite(target) || target <= 0) return parseFloat(decimal).toFixed(2);
   let best = FRACS[0], bestDiff = Infinity;
   for (const [n,d] of FRACS) {
     const diff = Math.abs((n/d) - target);
     if (diff < bestDiff) { bestDiff = diff; best = [n,d]; }
   }
+
+  // Fractional is a coarser grid than decimal, and these prices come from a
+  // decimal feed rather than from a board — so the nearest fraction is not
+  // always the price. 4.75 has no standard fraction near it: the neighbours are
+  // 7/2 and 4/1, and showing either misstates an advised price by 5%.
+  //
+  // A bookmaker never has this problem, because it sets prices on the
+  // fractional grid in the first place. Here the honest thing is to show the
+  // fraction when it IS the price and the decimal when it is not. A mixed board
+  // is a smaller cost than a number that is wrong, on a page where the figure
+  // beside it is what the bet settles at.
+  if (bestDiff / dec > 0.01) return dec.toFixed(2);
   return best[0] + '/' + best[1];
 }
 
@@ -1919,6 +1964,7 @@ function setPricingToggle(plan){
     // Belt and braces: if the exchange lands after the wait, redraw then.
     db.auth.onAuthStateChange((_e,session)=>{if(session)updateNavAuth();});
   }
+  applyStoredOddsFormat();
   await updateNavAuth();
   await loadLiveBar();
   await loadHistory();
