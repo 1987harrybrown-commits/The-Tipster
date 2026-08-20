@@ -1684,7 +1684,20 @@ async function doSignup(){
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){showMAlert(alert,'That does not look like an email address.','error');return;}
   if(pw.length<8){showMAlert(alert,'Password must be at least 8 characters.','error');return;}
   btn.disabled=true;btn.textContent='Creating account...';
-  const {data,error}=await db.auth.signUp({email,password:pw,options:{data:{first_name:name}}});
+  // emailRedirectTo, like the reset link already does.
+  //
+  // Without it the confirmation link goes wherever the Supabase dashboard's
+  // Site URL points — a setting that lives outside this repository and that
+  // nothing here can check. That is the same shape as the /unsubscribe rewrite:
+  // a link in an email whose destination is configured somewhere else, and
+  // which fails silently and completely when the two disagree.
+  //
+  // /account.html because that page already handles a token arriving in the
+  // hash, and because it is where a new subscriber has something to look at.
+  const {data,error}=await db.auth.signUp({email,password:pw,options:{
+    data:{first_name:name},
+    emailRedirectTo:window.location.origin+'/account.html',
+  }});
   btn.disabled=false;btn.textContent='Create Free Account \u2192';
   if(error){showMAlert(alert,error.message,'error');return;}
   // Create the profile row now rather than waiting for the next page load.
@@ -1892,6 +1905,20 @@ function setPricingToggle(plan){
 }
 
 (async()=>{
+  // A confirmation link can land here rather than on /account.html: Supabase
+  // falls back to the dashboard's Site URL when the redirect it was given is
+  // not on the allow-list, and that setting is not visible from this
+  // repository.
+  //
+  // supabase-js exchanges the token in the hash asynchronously, so getSession()
+  // at this moment can still answer null — and updateNavAuth would then render
+  // a signed-out nav to someone who has just clicked "activate your account".
+  // account.html has waited for this since it was written; this page never did.
+  if(window.location.hash&&window.location.hash.includes('access_token')){
+    await new Promise(r=>setTimeout(r,1200));
+    // Belt and braces: if the exchange lands after the wait, redraw then.
+    db.auth.onAuthStateChange((_e,session)=>{if(session)updateNavAuth();});
+  }
   await updateNavAuth();
   await loadLiveBar();
   await loadHistory();
