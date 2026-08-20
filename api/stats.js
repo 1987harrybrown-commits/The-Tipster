@@ -209,14 +209,19 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   </div>
 </div>
 <footer>
-  <p style="margin-bottom:10px">© 2026 The Tipster · Verified betting statistics · 18+ only · Please gamble responsibly</p>
+  <p style="margin-bottom:10px">© 2026 The Tipster · Verified betting statistics · 18+ only · Please gamble responsibly &bull; <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer">BeGambleAware.org</a> &bull; National Gambling Helpline <a href="tel:08088020133">0808 8020 133</a></p>
   <div><a href="/">Home</a><a href="/tips">Today's Tips</a><a href="/results">Full Results</a><a href="/football-tips-today">Football</a><a href="/nhl-tips-today">NHL</a><a href="/nba-tips-today">NBA</a><a href="/responsible-gambling.html">Responsible Gambling</a></div>
 </footer>
 </body>
 </html>`;
 
   res.setHeader('Content-Type','text/html; charset=utf-8');
-  res.setHeader('Cache-Control','s-maxage=1800, stale-while-revalidate=3600');
+  // 900s, matching every other handler. This was 1800. Both this page and
+  // /results render their headline figures from the same stats_cache row, so a
+  // longer TTL here meant the two could show the published record up to fifteen
+  // minutes apart — two pages, one number, disagreeing. Neither value is wrong
+  // on its own; only the difference between them is.
+  res.setHeader('Cache-Control','s-maxage=900, stale-while-revalidate=1800');
   res.status(200).send(html);
   } catch (err) {
     sendUnavailable(res, err);

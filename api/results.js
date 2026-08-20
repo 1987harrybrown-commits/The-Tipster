@@ -266,7 +266,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   </div>
 </div>
 <footer>
-  <p style="margin-bottom:10px">© 2026 The Tipster · Verified betting tips track record · 18+ only · Please gamble responsibly</p>
+  <p style="margin-bottom:10px">© 2026 The Tipster · Verified betting tips track record · 18+ only · Please gamble responsibly &bull; <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer">BeGambleAware.org</a> &bull; National Gambling Helpline <a href="tel:08088020133">0808 8020 133</a></p>
   <div>
     <a href="/">Home</a><a href="/tips">Today's Tips</a><a href="/football-tips-today">Football</a>
     <a href="/nhl-tips-today">NHL</a><a href="/nba-tips-today">NBA</a>
