@@ -1569,7 +1569,10 @@ async function loadHistory(){
 function writeTipAnalysis(tip){
   const home=tip.home_team||'Home', away=tip.away_team||'Away';
   const odds=advisedPrice(tip)||0, conf=parseFloat(tip.confidence||0);
-  const sel=(tip.selection||'').toLowerCase(), league=tip.league||'', sport=tip.sport||'';
+  const sel=(tip.selection||'').toLowerCase(), sport=tip.sport||'';
+  // An empty league left "this  fixture" with two spaces in it. Legacy rows
+  // can have a null league, and the sentence has to read either way.
+  const league=(tip.league||sport||'').trim()||'this competition';
   const {modelProb,impliedProb:implied,edge}=deriveEdge(tip);
   const edgeNum=parseFloat(edge.toFixed(1));
   const teamName=(tip.selection||'').replace(/ win$/i,'').trim();
@@ -1580,7 +1583,7 @@ function writeTipAnalysis(tip){
   if(sel.includes('win') && sport==='Football'){
     if(odds<1.55){
       const gap=edgeNum.toFixed(0);
-      return teamName+' enter this '+league+' fixture as clear market leaders, priced at '+odds.toFixed(2)+' by the books. That implies a '+implied.toFixed(0)+'% chance — our model has it '+gap+'% higher at '+conf+'%. '+opponent+' arrive '+(isHome?'at this ground':'here')+' without the firepower to trouble a side of this quality over 90 minutes. The favourite tag is deserved and the price holds value.';
+      return teamName+' enter this '+league+' fixture as clear market leaders, priced at '+odds.toFixed(2)+' by the books. That implies a '+implied.toFixed(0)+'% chance — our model has it '+gap+'% higher at '+conf+'%. '+opponent+' arrive '+(isHome?'at this ground':'here')+' with attack and defence rates the model reads as materially weaker. The favourite tag is deserved and the price holds value.';
     }
     if(odds<=1.80){
       const mktGap=(modelProb-implied).toFixed(0);
@@ -1590,7 +1593,7 @@ function writeTipAnalysis(tip){
     if(odds<=2.20){
       return 'At '+odds.toFixed(2)+', the market is underestimating '+teamName+' in this '+league+' clash. The implied probability of '+implied.toFixed(0)+'% sits well below our model\'s '+conf+'% assessment — a '+fmtEdge+' gap that is significant. '+opponent+' will present a challenge '+(isHome?'at home':'on the road')+', but the data points to '+teamName+' as the sharper side. This is the type of priced inefficiency the model targets.';
     }
-    return teamName+' are available at '+odds.toFixed(2)+' in this '+league+' fixture — a price the model believes is too generous. With a '+conf+'% win probability against the market\'s '+implied.toFixed(0)+'%, the '+fmtEdge+' edge clears the elite threshold required for selection at this odds range. '+opponent+' are not without danger, but the value at this price is the primary reason this tip has been flagged.';
+    return teamName+' are available at '+odds.toFixed(2)+' in this '+league+' fixture — a price the model believes is too generous. With a '+conf+'% win probability against the market\'s '+implied.toFixed(0)+'%, the '+fmtEdge+' edge is what puts it on the card, and quarter-Kelly sizes the stake from that edge and this price. '+opponent+' are not without danger, but the value at this price is the primary reason this tip has been flagged.';
   }
 
   if(sel.includes('win') && sport==='Basketball'){
@@ -1598,9 +1601,9 @@ function writeTipAnalysis(tip){
       return teamName+' are heavy favourites in this '+league+' contest at '+odds.toFixed(2)+'. The model assigns them a '+conf+'% win probability — '+edgeNum.toFixed(0)+'% above what the market implies. '+(isHome?'Home court gives them a structural advantage that is baked into the model.':'Even on the road, the talent gap between these rosters is meaningful.')+' '+opponent+' will compete, but the efficiency metrics favour '+teamName+' clearly.';
     }
     if(odds<=2.00){
-      return 'Pace, efficiency and recent roster form all point in the same direction in this '+league+' matchup. '+teamName+' are priced at '+odds.toFixed(2)+' — implying '+implied.toFixed(0)+'% — while our model has them at '+conf+'%. The '+fmtEdge+' edge reflects a genuine mismatch '+(isHome?'that home advantage amplifies.':'that travel and fatigue factors do not offset.')+' '+opponent+' are competitive but the numbers do not support fading '+teamName+' at this price.';
+      return 'Scoring rate, points allowed and recent form all point in the same direction in this '+league+' matchup. '+teamName+' are priced at '+odds.toFixed(2)+' — implying '+implied.toFixed(0)+'% — while our model has them at '+conf+'%. The '+fmtEdge+' edge reflects a genuine mismatch '+(isHome?'that home advantage amplifies.':'that travel and fatigue factors do not offset.')+' '+opponent+' are competitive but the numbers do not support fading '+teamName+' at this price.';
     }
-    return 'This is a higher-variance pick at '+odds.toFixed(2)+', but the model edge of '+fmtEdge+' clears the threshold for selection. '+teamName+' at '+conf+'% versus a market-implied '+implied.toFixed(0)+'% in this '+league+' game. The value is in the mis-pricing, not the comfort of the selection. '+(isHome?'Home court is an added factor.':'The road assignment makes this stronger value, not weaker — the market has overcorrected.')+' Stake is sized for the odds range.';
+    return 'This is a higher-variance pick at '+odds.toFixed(2)+', but the model edge of '+fmtEdge+' is what puts it on the card. '+teamName+' at '+conf+'% versus a market-implied '+implied.toFixed(0)+'% in this '+league+' game. The value is in the mis-pricing, not the comfort of the selection. '+(isHome?'Home court is an added factor.':'The road assignment is already in the model\'s numbers rather than layered on afterwards.')+' Stake is sized for the odds range.';
   }
 
   if(sel.includes('win') && sport==='Ice Hockey'){
@@ -1608,18 +1611,18 @@ function writeTipAnalysis(tip){
       return teamName+' are expected to control this '+league+' matchup and the model agrees. At '+odds.toFixed(2)+', the implied probability is '+implied.toFixed(0)+'% — our Poisson goals model has them at '+conf+'%, reflecting '+(isHome?'home ice advantage and superior line depth.':'strong road form and a meaningful talent edge over '+opponent+'.')+' The price is fair but the model edge is sufficient for selection.';
     }
     if(odds<=2.10){
-      return 'Line matchup analysis and recent 5-on-5 form give '+teamName+' the edge in this '+league+' clash. The market prices them at '+implied.toFixed(0)+'% — our model sits '+edgeNum.toFixed(0)+'% higher at '+conf+'%. '+opponent+' are a capable side '+(isHome?'but surrender the home ice advantage here.':'and will have crowd support, but the underlying numbers support '+teamName+'.')+' At '+odds.toFixed(2)+' the '+fmtEdge+' edge is above the minimum required for selection.';
+      return 'Goals-for and goals-against rates, adjusted for the goaltending matchup, give '+teamName+' the edge in this '+league+' clash. The market prices them at '+implied.toFixed(0)+'% — our model sits '+edgeNum.toFixed(0)+'% higher at '+conf+'%. '+opponent+' are a capable side '+(isHome?'but surrender the home ice advantage here.':'and will have crowd support, but the underlying numbers support '+teamName+'.')+' At '+odds.toFixed(2)+' the '+fmtEdge+' edge is what puts it on the card.';
     }
-    return 'The '+league+' market has '+teamName+' as underdogs at '+odds.toFixed(2)+', but our model disagrees materially — '+conf+'% versus '+implied.toFixed(0)+'% implied. A '+fmtEdge+' edge in hockey at this odds range is significant. '+opponent+' have home support '+(isHome?'but this is '+teamName+'\'s building.':'but '+teamName+'\'s numbers on the road this season do not reflect the underdog tag the market has assigned.')+' The edge clears the elite threshold for this odds band.';
+    return 'The '+league+' market has '+teamName+' as underdogs at '+odds.toFixed(2)+', but our model disagrees materially — '+conf+'% versus '+implied.toFixed(0)+'% implied. A '+fmtEdge+' edge in hockey at this odds range is significant. '+opponent+' have home support '+(isHome?'but this is '+teamName+'\'s building.':'but '+teamName+'\'s numbers on the road this season do not reflect the underdog tag the market has assigned.')+' The edge is what puts it on the card; the stake is sized from it by quarter-Kelly.';
   }
 
   if(sel.startsWith('over')){
     const line=sel.replace(/over /i,'').trim();
     if(sport==='Basketball'){
-      return 'The total is set at '+line+' in this '+league+' game between '+home+' and '+away+'. Both rosters have been running at a pace that makes the over a logical position — the model assigns '+conf+'% probability to clearing this line against a market-implied '+implied.toFixed(0)+'%. The '+fmtEdge+' edge reflects genuine over-expectation in scoring output, not a marginal lean. Defensive intensity is the key risk, but the pace data supports this selection.';
+      return 'The total is set at '+line+' in this '+league+' game between '+home+' and '+away+'. Both teams\' scoring and points-allowed rates make the over a logical position — the model assigns '+conf+'% probability to clearing this line against a market-implied '+implied.toFixed(0)+'%. The '+fmtEdge+' edge reflects genuine over-expectation in scoring output, not a marginal lean. Defensive intensity is the key risk, but the scoring rates support this selection.';
     }
     if(sport==='Ice Hockey'){
-      return home+' vs '+away+' in '+league+'. The over '+line+' at '+odds.toFixed(2)+' is flagged by the model at '+conf+'% — '+edgeNum.toFixed(0)+'% above implied. Both teams have shown a tendency toward open play in recent outings, and the goaltending matchup does not strongly favour a low-scoring game. The Poisson model expects goals at a rate that makes this line beatable.';
+      return home+' vs '+away+' in '+league+'. The over '+line+' at '+odds.toFixed(2)+' is flagged by the model at '+conf+'% — '+edgeNum.toFixed(0)+'% above implied. Both sides\' recent goals-for and goals-against rates support it, and the goaltending matchup does not strongly favour a low-scoring game. The Poisson model expects goals at a rate that makes this line beatable.';
     }
     return home+' and '+away+' meet in '+league+' with the model backing over '+line+' goals at '+conf+'% confidence. The market implies '+implied.toFixed(0)+'% — the '+fmtEdge+' gap is the reason for selection. Neither side has been defensively solid enough to make the under a credible position at current odds.';
   }
