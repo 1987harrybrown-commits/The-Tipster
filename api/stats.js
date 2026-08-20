@@ -176,7 +176,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <nav class="breadcrumb"><a href="/">Home</a> › Betting Statistics</nav>
   <div class="label">Fully Verified — Every Advised Bet</div>
   <h1>Betting Tips Statistics — Win Rate, ROI & P&L</h1>
-  <p class="sub">Complete performance breakdown across all sports. Every advised bet included, win or lose. Updated automatically after each settlement.</p>
+  <p class="sub">Complete performance breakdown across all sports. Every advised single included, win or lose — accumulators are emailed rather than recorded and are not counted here. Updated automatically after each settlement.</p>
 
   <div class="kpi-grid">
     <div class="kpi"><div class="kpi-label">Overall Win Rate</div><div class="kpi-val" style="color:#18e07a">${winRate}%</div></div>

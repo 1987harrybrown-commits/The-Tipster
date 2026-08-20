@@ -313,7 +313,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <div class="content-block">
     <h2>What Is Value Betting?</h2>
     <p>Value betting means placing bets only when the true probability of an outcome is higher than what the bookmaker's odds imply. For example, if our model calculates a 60% chance of a team winning, but the bookmaker's odds imply only a 50% chance, there is a +10% value edge on that selection.</p>
-    <p>Consistently backing value selections is how professional bettors build a long-term record. Every advised bet is published on the <a href="/results" style="color:#18e07a;">track record</a>, win or lose: ${totalWon + totalLost} settled so far, at a ${winRate}% strike rate. Value betting is a long-term approach and individual results vary.</p>
+    <p>Consistently backing value selections is how professional bettors build a long-term record. Every advised single is published on the <a href="/results" style="color:#18e07a;">track record</a>, win or lose: ${totalWon + totalLost} settled so far, at a ${winRate}% strike rate. Accumulators are emailed rather than recorded, so they are not counted there. Value betting is a long-term approach and individual results vary.</p>
   </div>
 </div>
 
