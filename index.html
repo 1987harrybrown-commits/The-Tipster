@@ -813,6 +813,33 @@ function fmtOdds(decimal) {
 
 let activeDayFilter = 'today';
 
+// Whether the reader picked that tab themselves.
+//
+// loadTips moves to Tomorrow when nothing is left today, which is the right
+// thing to do on a first load in the evening. It was doing it on EVERY load,
+// one way only, and the realtime subscription calls loadTips on every change
+// to the tips table — so two things went wrong with it:
+//
+//   the morning card lands, loadTips fires, and the reader is still pinned to
+//   Tomorrow with today's freshly published tips hidden behind a tab they
+//   never chose;
+//
+//   and a reader who taps Today deliberately has that undone by the next
+//   background event.
+//
+// Once someone has chosen, the choice stands. Until then the page picks the
+// tab that has something on it, in both directions.
+let dayFilterChosen = false;
+
+function setDayTab(day) {
+  activeDayFilter = day;
+  const order = { today: 0, tomorrow: 1, all: 2 };
+  document.querySelectorAll('#dayTabs .tab').forEach((t, i) => {
+    t.classList.toggle('on', i === order[day]);
+  });
+  updateDateHeader();
+}
+
 // The UK calendar day, wherever the visitor is.
 //
 // Everything the engine publishes is anchored to the UK day: the scheduler
@@ -1103,12 +1130,9 @@ async function loadTips() {
     const tipDay = ukDateString(new Date(t.event_time));
     return tipDay === ukToday2 && new Date(t.event_time) > now;
   });
-  if (!todayRemaining.length && activeDayFilter === 'today') {
-    activeDayFilter = 'tomorrow';
-    document.querySelectorAll('#dayTabs .tab').forEach((t,i) => {
-      t.classList.toggle('on', i === 1);
-    });
-    updateDateHeader();
+  // Both directions, and only while the reader has not chosen for themselves.
+  if (!dayFilterChosen && activeDayFilter !== 'all') {
+    setDayTab(todayRemaining.length ? 'today' : 'tomorrow');
   }
   renderTips(); renderTicker(); renderSportsGrid();
 }
@@ -1216,7 +1240,14 @@ function renderTips() {
           '<span style="font-family:Space Mono,monospace;font-size:9px;color:var(--muted)">'+(isProUser?'Tap for analysis':'')+'</span>'+
         '</div>'+
         '<div class="tcard-footer">'+
-          (isProUser||locked?'<div class="conf-wrap"><div class="conf-row"><span>Confidence</span><span>'+conf+'%</span></div><div class="conf-bar"><div class="conf-fill '+cls+'" style="width:'+conf+'%"></div></div></div>':'<div class="conf-wrap"><div style="font-size:11px;color:var(--muted);font-family:Space Mono,monospace;">Confidence · <span style="color:var(--gold);">Pro only 🔒</span></div></div>')+
+          // isProUser alone, not `isProUser||locked`.
+          //
+          // A locked card carries a lock OVERLAY, which covers the number
+          // visually and leaves it in the HTML. So the one card a visitor is
+          // not entitled to see was the one printing the confidence figure
+          // into the page source, while the free cards beside it correctly
+          // withheld it. Covered by a div is not withheld.
+          (isProUser?'<div class="conf-wrap"><div class="conf-row"><span>Confidence</span><span>'+conf+'%</span></div><div class="conf-bar"><div class="conf-fill '+cls+'" style="width:'+conf+'%"></div></div></div>':'<div class="conf-wrap"><div style="font-size:11px;color:var(--muted);font-family:Space Mono,monospace;">Confidence · <span style="color:var(--gold);">Pro only 🔒</span></div></div>')+
           '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px">'+
             '<div class="tcard-time">'+ts+'</div>'+
             (isProUser?'<div class="tcard-stake '+stakeClass(stake)+'">'+stakeLabel(stake)+'</div>':'')+
@@ -1236,6 +1267,8 @@ function filterTips(sport,btn){
 
 function filterByDay(day,btn){
   document.querySelectorAll('#dayTabs .tab').forEach(t=>t.classList.remove('on'));btn.classList.add('on');
+  // From here the page stops choosing for them.
+  dayFilterChosen=true;
   activeDayFilter=day;updateDateHeader();renderTips();
 }
 
