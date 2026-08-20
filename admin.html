@@ -198,9 +198,9 @@ td{padding:9px 11px;}
       <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:12px;">Manual Dispatch</div>
       <p style="font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6;">Trigger a send to all active subscribers immediately. Use with caution — this sends to everyone.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;">
-        <button class="btn btn-ghost" onclick="triggerSend('pro')">Send Pro Now</button>
-        <button class="btn btn-ghost" onclick="triggerSend('daily')">Send Daily Now</button>
-        <button class="btn btn-ghost" onclick="triggerSend('saturday')">Send Saturday Now</button>
+        <button class="btn btn-ghost" data-trigger onclick="triggerSend('pro')">Send Pro Now</button>
+        <button class="btn btn-ghost" data-trigger onclick="triggerSend('daily')">Send Daily Now</button>
+        <button class="btn btn-ghost" data-trigger onclick="triggerSend('saturday')">Send Saturday Now</button>
       </div>
       <div class="alert" id="triggerAlert"></div>
     </div>
@@ -964,7 +964,60 @@ async function queueJob(job_type, payload = {}) {
   }).select();
   if (error) return { ok: false, error: error.message };
   if (!data || !data.length) return { ok: false, error: 'the write was rejected — no job was queued' };
-  return { ok: true, error: null };
+  return { ok: true, error: null, id: data[0].id };
+}
+
+// Watch a queued job until the engine finishes it.
+//
+// The engine writes a status and a result onto the row, and nothing here ever
+// read them back. So "Dispatch queued. Will send within 1 minute." was the last
+// thing the admin was told, whether the send reached four hundred people or
+// nobody — and there was no other way to find out.
+//
+// The engine polls its queue every 30s and a dispatch to a large list takes a
+// while, so this waits generously and then says it is still running rather than
+// claiming a failure it has not seen.
+const JOB_STATUS_TEXT = {
+  done:          ['success', 'Sent.'],
+  partial:       ['error',   'Sent, but some messages failed — see the result below.'],
+  failed:        ['error',   'The dispatch failed.'],
+  skipped:       ['error',   'Nothing was sent — the engine had nothing to send.'],
+  no_recipients: ['error',   'Nothing was sent — no subscriber matched.'],
+  unknown_type:  ['error',   'The engine did not recognise that job type.'],
+};
+
+async function watchJob(id, el, waitingText) {
+  const deadline = Date.now() + 4 * 60 * 1000;
+  while (Date.now() < deadline) {
+    await new Promise(r => setTimeout(r, 3000));
+    const { data, error } = await db.from('admin_jobs')
+      .select('status, result').eq('id', id).maybeSingle();
+    // A read that failed is not a job that failed. Keep waiting.
+    if (error || !data) continue;
+    if (data.status === 'pending' || data.status === 'processing') {
+      showAlert(el, waitingText + ' (' + data.status + ')', 'success');
+      continue;
+    }
+    const [kind, text] = JOB_STATUS_TEXT[data.status] || ['error', 'Finished as: ' + data.status];
+    showAlert(el, text + (data.result ? ' ' + summariseJobResult(data.result) : ''), kind);
+    return data.status;
+  }
+  showAlert(el, 'Still running after four minutes — check the engine log.', 'error');
+  return null;
+}
+
+// The engine stores the dispatcher's own return value. Show the numbers in it
+// rather than the JSON, and fall back to the JSON when the shape is unfamiliar.
+function summariseJobResult(json) {
+  let r;
+  try { r = JSON.parse(json); } catch (e) { return String(json).slice(0, 160); }
+  if (!r || typeof r !== 'object') return String(json).slice(0, 160);
+  if (typeof r.skipped === 'string' && !r.sent) return '(' + r.skipped + ')';
+  const bits = [];
+  if (r.sent != null) bits.push(r.sent + ' sent');
+  if (r.failed) bits.push(r.failed + ' failed');
+  if (r.resumedPast) bits.push(r.resumedPast + ' already had it');
+  return bits.length ? '(' + bits.join(', ') + ')' : JSON.stringify(r).slice(0, 160);
 }
 
 // ── TEST EMAIL ────────────────────────────────────────────
@@ -980,22 +1033,33 @@ async function sendTest() {
     showAlert(alert, 'That does not look like an email address.', 'error'); return;
   }
   btn.disabled = true; btn.textContent = 'Queuing...';
-  const { ok, error } = await queueJob('test_email', { to, type });
+  const { ok, error, id } = await queueJob('test_email', { to, type });
   btn.disabled = false; btn.textContent = 'Send Test Email';
-  if (ok) {
-    showAlert(alert, 'Job queued. Email will arrive within 1 minute.', 'success');
-  } else {
-    showAlert(alert, 'Could not queue the job: ' + error, 'error');
-  }
+  if (!ok) { showAlert(alert, 'Could not queue the job: ' + error, 'error'); return; }
+  showAlert(alert, 'Job queued — waiting for the engine...', 'success');
+  await watchJob(id, alert, 'Job queued — waiting for the engine...');
 }
 
 // ── TRIGGER SEND ──────────────────────────────────────────
 async function triggerSend(type) {
   const alert = document.getElementById('triggerAlert');
   if (!confirm('Send ' + type + ' email to all subscribers now?')) return;
-  const { ok, error } = await queueJob('send_' + type);
-  showAlert(alert, ok ? 'Dispatch queued. Will send within 1 minute.' : 'Could not queue the dispatch: ' + error,
-            ok ? 'success' : 'error');
+
+  // Disable every trigger while one is in flight. Queuing a second dispatch
+  // while the first is still running is not caught anywhere — the engine takes
+  // both jobs, and the second finds most recipients already logged as sent, so
+  // it reports almost nothing sent and looks like a failure.
+  const buttons = document.querySelectorAll('[data-trigger]');
+  buttons.forEach(b => { b.disabled = true; });
+  try {
+    const { ok, error, id } = await queueJob('send_' + type);
+    if (!ok) { showAlert(alert, 'Could not queue the dispatch: ' + error, 'error'); return; }
+    const waiting = 'Dispatch queued — waiting for the engine...';
+    showAlert(alert, waiting, 'success');
+    await watchJob(id, alert, waiting);
+  } finally {
+    buttons.forEach(b => { b.disabled = false; });
+  }
 }
 
 // ── DAILY OVERRIDE ────────────────────────────────────────
@@ -1132,11 +1196,16 @@ async function clearOverride(type) {
 }
 
 // ── ALERT ─────────────────────────────────────────────────
+// One timer per element. Without this, a message shown while a job is being
+// watched was cleared five seconds after the FIRST message, not the last — the
+// outcome appeared and then vanished under the earlier timer.
+const alertTimers = new WeakMap();
 function showAlert(el, msg, type) {
   if (!el) return;
   el.textContent = msg;
   el.className = 'alert ' + type + ' show';
-  setTimeout(() => { el.className = 'alert'; }, 5000);
+  clearTimeout(alertTimers.get(el));
+  alertTimers.set(el, setTimeout(() => { el.className = 'alert'; }, 8000));
 }
 </script>
 </body>
