@@ -726,6 +726,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <div class="fg"><label for="li-email">Email</label><input type="email" id="li-email" placeholder="you@email.com" autocomplete="email"></div>
       <div class="fg"><label for="li-pw">Password</label><input type="password" id="li-pw" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <button class="btn-msubmit" onclick="doLogin()" id="liBtn">Log In &#x2192;</button>
+      <div class="mswitch" id="liResend" style="margin-top:9px;display:none;"><a onclick="resendConfirmation()" id="liResendLink">Resend the confirmation email</a></div>
       <div class="mswitch" style="margin-top:9px;"><a onclick="openModal('forgot')" style="color:var(--muted);">Forgot password?</a></div>
       <div class="mswitch" style="margin-top:7px;">No account? <a onclick="openModal('signup')">Join free</a></div>
     </div>
@@ -1711,7 +1712,11 @@ document.addEventListener('keydown', (e) => {
   else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
 });
 
-function showPanel(name){['mSignup','mLogin','mForgot','mSuccess'].forEach(p=>{const el=document.getElementById(p);if(el)el.style.display=p===name?'block':'none';});}
+function showPanel(name){
+  ['mSignup','mLogin','mForgot','mSuccess'].forEach(p=>{const el=document.getElementById(p);if(el)el.style.display=p===name?'block':'none';});
+  // The resend offer belongs to one failed attempt, not to the modal.
+  const r=document.getElementById('liResend');if(r)r.style.display='none';
+}
 function openModal(type){if(type==='login')showPanel('mLogin');else if(type==='forgot')showPanel('mForgot');else showPanel('mSignup');_openDialog(document.getElementById('overlay'),'input:not([type=hidden])');}
 function closeModal(){_closeDialog(document.getElementById('overlay'));['signupAlert','loginAlert','forgotAlert'].forEach(id=>{const el=document.getElementById(id);if(el)el.className='alert';});}
 function closeOuter(e){if(e.target===document.getElementById('overlay'))closeModal();}
@@ -1758,12 +1763,39 @@ async function doSignup(){
 async function doLogin(){
   const btn=document.getElementById('liBtn'),alert=document.getElementById('loginAlert');
   const email=document.getElementById('li-email').value.trim(),pw=document.getElementById('li-pw').value;
+  const resendRow=document.getElementById('liResend');
+  if(resendRow)resendRow.style.display='none';
   if(!email||!pw){showMAlert(alert,'Enter your email and password.','error');return;}
   btn.disabled=true;btn.textContent='Logging in...';
   const {error}=await db.auth.signInWithPassword({email,password:pw});
   btn.disabled=false;btn.textContent='Log In \u2192';
-  if(error){showMAlert(alert,error.message,'error');return;}
+  if(error){
+    // "Email not confirmed" is a state the reader can get out of, and this
+    // screen offered nothing — the only resend control lived on the account
+    // page, behind the login it was needed to unblock. Circular, and the end of
+    // the funnel for anyone who signed up and did not click the link.
+    if(/not confirmed|not verified/i.test(error.message||'')){
+      showMAlert(alert,'That account has not been confirmed yet. Check your inbox for the link.','error');
+      if(resendRow)resendRow.style.display='block';
+    } else showMAlert(alert,error.message,'error');
+    return;
+  }
   closeModal();updateNavAuth();
+}
+
+// Resending needs the address, not a session — which is the point, since the
+// reader cannot have one until they confirm.
+async function resendConfirmation(){
+  const alert=document.getElementById('loginAlert');
+  const link=document.getElementById('liResendLink');
+  const email=document.getElementById('li-email').value.trim();
+  if(!email){showMAlert(alert,'Enter your email address first.','error');return;}
+  if(link){link.textContent='Sending...';}
+  const {error}=await db.auth.resend({type:'signup',email,
+    options:{emailRedirectTo:window.location.origin+'/account.html'}});
+  if(link){link.textContent='Resend the confirmation email';}
+  showMAlert(alert,error?error.message:'Confirmation email sent. Check your inbox.',
+             error?'error':'success');
 }
 
 async function doForgot(){
