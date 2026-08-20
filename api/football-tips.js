@@ -73,6 +73,28 @@ function fmtTime(d){return new Date(d).toLocaleTimeString('en-GB',{hour:'2-digit
 // rows predating advised_odds fall back to odds.
 function advisedPrice(t) { return parseFloat(t && t.advised_odds != null ? t.advised_odds : t && t.odds); }
 
+// A tip we cannot price is not a tip. advisedPrice returns NaN for a row with
+// neither advised_odds nor odds, and `.toFixed(2)` on that renders the string
+// "NaN" — as the price, on a public page. The engine guards this on write now,
+// but these pages also read rows written before it did.
+function priced(t) { return Number.isFinite(advisedPrice(t)) && advisedPrice(t) > 1; }
+
+// Structured data, serialised for a <script> block.
+//
+// The values used to be run through esc() first, which is the wrong escaping
+// twice over. Script content is raw text: an HTML entity is not decoded there,
+// so a team name containing & reached Google as "&amp;". And esc() was doing a
+// security job by accident — what actually breaks out of a <script> block is
+// the literal "</script>" in a string value, which JSON.stringify does not
+// escape. Escaping "<" as \u003c is the standard answer: it cannot appear in
+// the output, and JSON.parse restores the original character.
+function jsonLd(obj) {
+  return JSON.stringify(obj)
+    .replace(/</g, '\\u003c')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
 // These pages query today AND tomorrow, but their title and H1 say "Today".
 // A bare clock time therefore presented a tomorrow fixture as one of today's,
 // so anything outside the current UK day is labelled.
@@ -160,7 +182,10 @@ module.exports = async (req, res) => {
       ? list.filter(t => t.is_free === true).slice(0, n)
       : list.slice(0, n);
   };
-  const freeTips = freeOf(tips, 3);
+  // Unpriceable rows are dropped before the count is taken, so the cards and
+  // the structured data below agree with each other rather than one of them
+  // showing NaN.
+  const freeTips = freeOf((tips || []).filter(priced), 3);
   const leagues = [...new Set((tips||[]).map(t=>t.league))];
 
   const tipCards = freeTips.map(t=>`
@@ -202,18 +227,20 @@ module.exports = async (req, res) => {
 <meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
 <meta name="twitter:site" content="@TheTipsterApp">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<script type="application/ld+json">${JSON.stringify({
+${freeTips.length ? `<script type="application/ld+json">${jsonLd({
   "@context":"https://schema.org",
   "@type":"ItemList",
   "name":`Free Football Tips — ${todayStr}`,
   "description":"Data-driven football predictions across Premier League, La Liga, Bundesliga, Champions League",
   "url":"https://www.thetipsteredge.com/football-tips-today",
-  "itemListElement": freeTips.map((t,i)=>({
-    "@type":"ListItem","position":i+1,
-    "name":`${esc(t.home_team)} vs ${esc(t.away_team)} — ${esc(t.selection)}`,
-    "description":`${esc(t.league)} tip at ${advisedPrice(t).toFixed(2)} odds`
+  "numberOfItems": freeTips.length,
+  "itemListElement": freeTips.map((t,i) => ({
+    "@type":"ListItem",
+    "position": i+1,
+    "name":`${t.home_team} vs ${t.away_team} — ${t.selection}`,
+    "description":`${t.league} tip at ${advisedPrice(t).toFixed(2)} odds`
   }))
-})}</script>
+})}</script>` : ''}
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
 body{background:#07090d;color:#dde6f0;font-family:system-ui,-apple-system,sans-serif;line-height:1.6;}

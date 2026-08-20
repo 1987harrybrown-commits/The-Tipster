@@ -14,6 +14,19 @@ function esc(v) {
     .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
+// Structured data, serialised for a <script> block. Same helper as the four tip
+// pages: script content is raw text, so an HTML entity is not decoded there and
+// esc() would corrupt the values — while what actually breaks out of the block
+// is a literal "</script>" inside a string, which JSON.stringify does not
+// escape. Nothing interpolated below comes from the feed today, but the next
+// field added to it might.
+function jsonLd(obj) {
+  return JSON.stringify(obj)
+    .replace(/</g, '\\u003c')
+    .replace(/\u2028/g, '\\u2028')
+    .replace(/\u2029/g, '\\u2029');
+}
+
 
 function fmt(n,d=2){return(n>=0?'+':'')+parseFloat(n).toFixed(d);}
 function fmtDate(d){return new Date(d).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Europe/London'});}
@@ -175,7 +188,7 @@ module.exports = async (req, res) => {
 <meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
 <meta name="twitter:site" content="@TheTipsterApp">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-<script type="application/ld+json">${JSON.stringify({
+<script type="application/ld+json">${jsonLd({
   "@context":"https://schema.org",
   "@type":"Dataset",
   "name":"The Tipster — Verified Betting Tips Track Record",
