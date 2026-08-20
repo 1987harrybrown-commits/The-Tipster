@@ -151,6 +151,18 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
     scroll-behavior:auto !important;
   }
 }
+
+/* The confirmation after returning from Stripe. Fixed rather than inline so it
+   survives the re-render that reconcileSubscription triggers underneath it. */
+.upgrade-toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);
+  max-width:min(92vw,420px);background:var(--card,#0f141c);color:var(--text,#dde6f0);
+  border:1px solid var(--green,#18e07a);border-radius:8px;padding:14px 20px;
+  font-size:13px;line-height:1.6;text-align:center;z-index:999;
+  box-shadow:0 8px 28px rgba(0,0,0,.45);animation:toast-in .28s ease}
+.upgrade-toast strong{display:block;font-weight:800;margin-bottom:2px}
+@keyframes toast-in{from{opacity:0;transform:translate(-50%,10px)}
+  to{opacity:1;transform:translate(-50%,0)}}
+@media (prefers-reduced-motion: reduce){.upgrade-toast{animation:none}}
 </style>
 </head>
 <body>
@@ -207,7 +219,11 @@ function esc(v) {
     db.auth.onAuthStateChange(async (event, newSession) => {
       if (newSession) {
         currentUser = newSession.user;
-        if (await loadProfile()) renderPage(); else renderProfileError();
+        if (await loadProfile()) {
+          await renderPage();
+          handleReturnFromCheckout();
+          reconcileSubscription();
+        } else renderProfileError();
       } else {
         window.location.href = '/?auth=login';
       }
@@ -219,7 +235,13 @@ function esc(v) {
     return;
   }
   currentUser = session.user;
-  if (await loadProfile()) renderPage(); else renderProfileError();
+  if (await loadProfile()) {
+    await renderPage();
+    // Both run after the page is on screen. The status shown comes from the row
+    // first, and is corrected only if Stripe disagrees.
+    handleReturnFromCheckout();
+    reconcileSubscription();
+  } else renderProfileError();
 })();
 
 // Shown instead of the account when the profile could not be read. Rendering
@@ -278,6 +300,78 @@ async function loadRecentEmails() {
     .limit(5);
   if (error) { console.error('loadRecentEmails:', error.message); return null; }
   return data || [];
+}
+
+// ── RECONCILE WITH STRIPE ───────────────────────────
+// The row in `users` is written by the Stripe webhook, so it is right only if
+// every webhook arrived. A dropped or delayed event leaves this page confidently
+// showing the wrong thing — a subscriber who has just paid seeing Free, with an
+// Upgrade to Pro banner, is the version of that which loses the customer.
+//
+// /verify-pro asks Stripe directly and corrects the row. It answers
+// { isPro, verified }: verified false means Stripe could not be reached, and
+// then nothing on this page should change, because what is on record is still
+// the best answer available. The engine takes the account from the token, so
+// there is nothing to send.
+//
+// Never blocks the first render, and never shows an error: this is a correction
+// to something already displayed, and a failed correction leaves it as it was.
+async function reconcileSubscription() {
+  try {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) return null;
+    const res = await fetch(ENGINE_URL + '/verify-pro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data || data.verified !== true) return null;
+
+    const wasPro = userProfile.subscription_status === 'pro';
+    if (data.isPro !== wasPro) {
+      // The engine has already written this to the row; keep the copy this page
+      // renders from in step rather than re-reading it.
+      userProfile.subscription_status = data.isPro ? 'pro' : 'free';
+      await renderPage();
+    }
+    return data.isPro;
+  } catch (e) {
+    console.error('reconcileSubscription:', e.message);
+    return null;
+  }
+}
+
+// Shown when someone lands here from Stripe. The webhook usually beats the
+// redirect, but not always, so the message says what is true either way and the
+// status above it is reconciled independently.
+function showUpgradeConfirmed(settled) {
+  const el = document.createElement('div');
+  el.className = 'upgrade-toast';
+  el.setAttribute('role', 'status');
+  el.innerHTML = settled
+    ? '<strong>Welcome to Pro.</strong> Your full card arrives tomorrow at 07:00.'
+    : '<strong>Payment received.</strong> Your account will show as Pro within a few minutes.';
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 9000);
+}
+
+// Stripe sends the subscriber back here, and the redirect can beat the webhook
+// that makes them Pro. Check a few times over the first few seconds rather than
+// leaving them looking at an Upgrade banner they have just paid to remove.
+async function handleReturnFromCheckout() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('upgraded') !== '1') return;
+  window.history.replaceState({}, '', '/account.html');
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const isPro = await reconcileSubscription();
+    if (isPro === true) { showUpgradeConfirmed(true); return; }
+    await new Promise(r => setTimeout(r, 2000));
+  }
+  // Ten seconds is long enough that something is behind. Say so plainly rather
+  // than either claiming success or implying the payment failed.
+  showUpgradeConfirmed(false);
 }
 
 // ── RENDER ────────────────────────────────────────────────
