@@ -264,7 +264,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <nav class="breadcrumb"><a href="/">Home</a> › <a href="/tips">Betting Tips</a> › NBA Basketball Tips</nav>
   <div class="label">NBA Primary Market</div>
   <h1>Free NBA Basketball Tips — ${todayStr}</h1>
-  <p class="sub">Data-driven NBA predictions using efficiency ratings, pace analysis and live odds from 40+ bookmakers. Updated every 15 minutes throughout the season.</p>
+  <p class="sub">Data-driven NBA predictions using efficiency ratings, pace analysis and live odds. Updated every 15 minutes throughout the season.</p>
   <div class="stats">
     <div class="stat"><div class="sl">NBA Win Rate</div><div class="sv" style="color:#18e07a">${winRate}%</div></div>
     <div class="stat"><div class="sl">Tips Won</div><div class="sv" style="color:#18e07a">${won}</div></div>

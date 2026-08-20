@@ -174,9 +174,9 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
 <nav><a class="logo" href="/">The <em>Tipster</em></a><a class="nav-cta" href="/">View Today's Tips →</a></nav>
 <div class="wrap">
   <nav class="breadcrumb"><a href="/">Home</a> › Betting Statistics</nav>
-  <div class="label">Fully Verified — Nothing Excluded</div>
+  <div class="label">Fully Verified — Every Advised Bet</div>
   <h1>Betting Tips Statistics — Win Rate, ROI & P&L</h1>
-  <p class="sub">Complete performance breakdown across all sports. Every result included. Updated automatically after each settlement.</p>
+  <p class="sub">Complete performance breakdown across all sports. Every advised bet included, win or lose. Updated automatically after each settlement.</p>
 
   <div class="kpi-grid">
     <div class="kpi"><div class="kpi-label">Overall Win Rate</div><div class="kpi-val" style="color:#18e07a">${winRate}%</div></div>

@@ -323,7 +323,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
 
   <div class="block">
     <h2>How to Use Our Football Tips</h2>
-    <p>Each football tip comes with an odds figure (the best available price from 40+ bookmakers), a confidence percentage (our model's estimated probability of the selection winning), and a value edge percentage (the gap between our probability and what the odds imply).</p>
+    <p>Each football tip comes with an odds figure (the best price our odds feed had at publication, and the book offering it), a confidence percentage (our model's estimated probability of the selection winning), and a value edge percentage (the gap between our probability and what the odds imply).</p>
     <p>We recommend using stake recommendations — available to Pro members — to size each bet appropriately based on confidence. Never bet more than you can afford to lose, and treat all tips as analysis rather than guaranteed outcomes.</p>
   </div>
 </div>

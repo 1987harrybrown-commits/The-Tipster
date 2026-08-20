@@ -181,7 +181,7 @@ module.exports = async (req, res) => {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Free Betting Tips Today — ${todayStr} | The Tipster</title>
-<meta name="description" content="Free football tips, NHL tips and NBA tips for ${todayStr}. Data-driven predictions with ${winRate}% win rate. Updated every 15 minutes from 40+ bookmakers.">
+<meta name="description" content="Free football tips, NHL tips and NBA tips for ${todayStr}. Data-driven predictions with ${winRate}% win rate. Updated every 15 minutes.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.thetipsteredge.com/tips">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -197,7 +197,7 @@ module.exports = async (req, res) => {
 <meta property="og:image:alt" content="The Tipster Edge — data-driven sports betting tips">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Free Betting Tips Today — ${todayStr} | The Tipster">
-<meta name="twitter:description" content="Free football tips, NHL tips and NBA tips for ${todayStr}. Data-driven predictions with ${winRate}% win rate. Updated every 15 minutes from 40+ bookmakers.">
+<meta name="twitter:description" content="Free football tips, NHL tips and NBA tips for ${todayStr}. Data-driven predictions with ${winRate}% win rate. Updated every 15 minutes.">
 <meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
 <meta name="twitter:site" content="@TheTipsterApp">
 ${freeTips.length ? `<script type="application/ld+json">${jsonLd({
@@ -313,7 +313,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <div class="content-block">
     <h2>What Is Value Betting?</h2>
     <p>Value betting means placing bets only when the true probability of an outcome is higher than what the bookmaker's odds imply. For example, if our model calculates a 60% chance of a team winning, but the bookmaker's odds imply only a 50% chance, there is a +10% value edge on that selection.</p>
-    <p>Consistently backing value selections is how professional bettors build a long-term profitable record. Our verified track record — with every result published and nothing excluded — demonstrates the power of this approach across thousands of settled tips.</p>
+    <p>Consistently backing value selections is how professional bettors build a long-term record. Every advised bet is published on the <a href="/results" style="color:#18e07a;">track record</a>, win or lose: ${totalWon + totalLost} settled so far, at a ${winRate}% strike rate. Value betting is a long-term approach and individual results vary.</p>
   </div>
 </div>
 

@@ -113,7 +113,7 @@ module.exports = async (req, res) => {
 
   // The headline figures must describe the whole ledger, because the title,
   // the meta description and the structured data all assert them next to the
-  // claim that every result is published and nothing excluded. They used to
+  // claim that every advised bet is published win or lose. They used to
   // fall back to counting the rows fetched for the recent-results list, which
   // would have stated a win rate over 100 tips while making that claim.
   // stats_cache is the only source computed over the full ledger, so a missing
@@ -169,12 +169,12 @@ module.exports = async (req, res) => {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verified Betting Tips Track Record — ${winRate}% Win Rate | The Tipster</title>
-<meta name="description" content="Fully transparent verified betting tips track record. ${totalWon} winners from ${totalWon+totalLost} settled tips. ${winRate}% win rate. ${fmt(pl)}u profit. Every result published — nothing excluded.">
+<meta name="description" content="Fully transparent verified betting tips track record. ${totalWon} winners from ${totalWon+totalLost} settled tips. ${winRate}% win rate. ${fmt(pl)}u profit. Every advised bet published, win or lose.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.thetipsteredge.com/results">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Verified Betting Tips Track Record — ${winRate}% Win Rate | The Tipster">
-<meta property="og:description" content="Fully transparent verified betting tips track record. ${totalWon} winners from ${totalWon+totalLost} settled tips. ${winRate}% win rate. ${fmt(pl)}u profit. Every result published — nothing excluded.">
+<meta property="og:description" content="Fully transparent verified betting tips track record. ${totalWon} winners from ${totalWon+totalLost} settled tips. ${winRate}% win rate. ${fmt(pl)}u profit. Every advised bet published, win or lose.">
 <meta property="og:url" content="https://www.thetipsteredge.com/results">
 <meta property="og:site_name" content="The Tipster Edge">
 <meta property="og:locale" content="en_GB">
@@ -184,7 +184,7 @@ module.exports = async (req, res) => {
 <meta property="og:image:alt" content="The Tipster Edge — data-driven sports betting tips">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Verified Betting Tips Track Record — ${winRate}% Win Rate | The Tipster">
-<meta name="twitter:description" content="Fully transparent verified betting tips track record. ${totalWon} winners from ${totalWon+totalLost} settled tips. ${winRate}% win rate. ${fmt(pl)}u profit. Every result published — nothing excluded.">
+<meta name="twitter:description" content="Fully transparent verified betting tips track record. ${totalWon} winners from ${totalWon+totalLost} settled tips. ${winRate}% win rate. ${fmt(pl)}u profit. Every advised bet published, win or lose.">
 <meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
 <meta name="twitter:site" content="@TheTipsterApp">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -234,7 +234,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
 </nav>
 <div class="wrap">
   <nav class="breadcrumb"><a href="/">Home</a> › Verified Track Record</nav>
-  <div class="page-label">100% Transparent — Nothing Excluded</div>
+  <div class="page-label">Every Advised Bet, Win Or Lose</div>
   <h1>Verified Betting Tips Track Record</h1>
   <p class="page-sub">Every tip logged from the moment it's published. Results recorded automatically. Nothing deleted, edited or cherry-picked.</p>
 
@@ -266,7 +266,8 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <div class="content-block">
     <h2>How Results Are Tracked</h2>
     <p>Every tip published on The Tipster is assigned a unique reference and timestamped the moment it goes live. When the fixture completes, our engine automatically fetches the final score from the Odds API and records the result. No manual intervention — no opportunity to exclude losses.</p>
-    <p>The win rate, P&L and ROI figures you see are calculated directly from this database. Every settled tip is included regardless of outcome. This is the only honest way to present a betting tips track record.</p>
+    <p>The win rate, P&L and ROI figures on this page are calculated directly from this database. Every advised bet is included, win or lose — nothing is removed for looking bad.</p>
+    <p>Two things are deliberately not counted, and it is worth being precise about them. Short-price selections published for information carry no stake and are not bets, so they appear on the card marked as insight only and are excluded from both figures — there is no return to compute on a stake of zero, and counting them towards the win rate while leaving them out of the ROI would describe two different sets of tips. Voided bets are counted as placed and returned: they affect neither the win rate nor the P&L.</p>
     <p>Stake recommendations use fractional Kelly sizing (0.25 Kelly) based on the confidence and edge of each tip. This approach maximises long-term growth while managing risk — stakes range from 1u to 3u depending on model conviction.</p>
   </div>
 
