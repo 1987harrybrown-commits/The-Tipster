@@ -205,9 +205,40 @@ function esc(v) {
 }
 
 // ── INIT ──────────────────────────────────────────────────
+// Whether we arrived here from a password reset link.
+//
+// This was the whole of the password reset flow, and it did not work:
+//
+//   doForgot() sends a link to /account.html
+//   the link carries #access_token=...&type=recovery
+//   this page waited for Supabase to exchange it, then rendered the account
+//   nothing ever asked for a new password
+//
+// So the reader ended up signed in with the password they had forgotten, and
+// the only form on the page — changePassword — asks for the current password
+// and re-authenticates with it. Which is the thing they forgot. There was no
+// path from "I cannot get in" to a new password at all.
+//
+// The recovery session IS the proof of identity; that is what Supabase's
+// recovery link is for. So on this path the current-password field comes off
+// and updateUser is called directly.
+let isRecovery = false;
+
+function readHashParams() {
+  const h = (window.location.hash || '').replace(/^#/, '');
+  const out = {};
+  for (const part of h.split('&')) {
+    const i = part.indexOf('=');
+    if (i > 0) out[decodeURIComponent(part.slice(0, i))] = decodeURIComponent(part.slice(i + 1));
+  }
+  return out;
+}
+
 (async () => {
-  // Handle email verification token in URL hash
-  // Supabase puts #access_token= in the URL after email confirm
+  // A token in the hash is either an email confirmation or a password reset,
+  // and they need different things to happen next.
+  const hash = readHashParams();
+  isRecovery = hash.type === 'recovery';
   if (window.location.hash && window.location.hash.includes('access_token')) {
     // Let Supabase exchange the token automatically
     await new Promise(r => setTimeout(r, 1200));
@@ -221,6 +252,7 @@ function esc(v) {
         currentUser = newSession.user;
         if (await loadProfile()) {
           await renderPage();
+          applyRecoveryMode();
           handleReturnFromCheckout();
           reconcileSubscription();
         } else renderProfileError();
@@ -237,6 +269,7 @@ function esc(v) {
   currentUser = session.user;
   if (await loadProfile()) {
     await renderPage();
+    applyRecoveryMode();
     // Both run after the page is on screen. The status shown comes from the row
     // first, and is corrected only if Stripe disagrees.
     handleReturnFromCheckout();
@@ -345,6 +378,70 @@ async function reconcileSubscription() {
 // Shown when someone lands here from Stripe. The webhook usually beats the
 // redirect, but not always, so the message says what is true either way and the
 // status above it is reconciled independently.
+// Turn the Security card into "set a new password" when we came from a reset
+// link. Called after renderPage, because the card is part of what it renders.
+function applyRecoveryMode() {
+  if (!isRecovery) return;
+  const group = document.getElementById('currentPwGroup');
+  const label = document.getElementById('pwCardLabel');
+  const note  = document.getElementById('pwRecoveryNote');
+  const btn   = document.getElementById('pwSubmit');
+  if (group) group.style.display = 'none';
+  if (label) label.textContent = 'Set a new password';
+  if (note)  note.style.display = 'block';
+  if (btn)   { btn.textContent = 'Set password'; btn.setAttribute('onclick', 'setRecoveryPassword()'); }
+  const card = label && label.closest('.acard');
+  if (card && card.scrollIntoView) card.scrollIntoView({ block: 'center' });
+  const first = document.getElementById('newPw');
+  if (first && first.focus) first.focus();
+}
+
+// The reset path. No current password, because the recovery session is the
+// proof — demanding the old one here is what made the flow impossible.
+async function setRecoveryPassword() {
+  const pw      = document.getElementById('newPw').value;
+  const confirm = document.getElementById('confirmPw').value;
+  const alert   = document.getElementById('pwAlert');
+
+  if (pw.length < 8)  { showAlert(alert, 'New password must be at least 8 characters.', 'error'); return; }
+  if (pw !== confirm) { showAlert(alert, 'Passwords do not match.', 'error'); return; }
+
+  const { error } = await db.auth.updateUser({ password: pw });
+  if (error) {
+    // A recovery session is short-lived. Say which of the two things went
+    // wrong, because "try again" means different things for each.
+    showAlert(alert, /expired|invalid|jwt/i.test(error.message || '')
+      ? 'That reset link has expired. Request a new one from the sign-in page.'
+      : error.message, 'error');
+    return;
+  }
+
+  document.getElementById('newPw').value = '';
+  document.getElementById('confirmPw').value = '';
+
+  // Same eviction as a deliberate change: whoever prompted the reset should
+  // not still be signed in somewhere.
+  let evicted = true;
+  try { const { error: soErr } = await db.auth.signOut({ scope: 'others' }); if (soErr) evicted = false; }
+  catch (_) { evicted = false; }
+
+  // Out of recovery mode, so the card goes back to being the ordinary one.
+  isRecovery = false;
+  history.replaceState({}, '', '/account.html');
+  const group = document.getElementById('currentPwGroup');
+  const label = document.getElementById('pwCardLabel');
+  const note  = document.getElementById('pwRecoveryNote');
+  const btn   = document.getElementById('pwSubmit');
+  if (group) group.style.display = '';
+  if (label) label.textContent = 'Security';
+  if (note)  note.style.display = 'none';
+  if (btn)   { btn.textContent = 'Update password'; btn.setAttribute('onclick', 'changePassword()'); }
+
+  showAlert(alert, evicted
+    ? 'Password set. Other devices have been signed out.'
+    : 'Password set.', 'success');
+}
+
 function showUpgradeConfirmed(settled) {
   const el = document.createElement('div');
   el.className = 'upgrade-toast';
@@ -532,10 +629,13 @@ async function renderPage() {
 
     <!-- PASSWORD CHANGE -->
     <div class="acard" style="margin-bottom:16px;">
-      <div class="acard-label">Security</div>
+      <div class="acard-label" id="pwCardLabel">Security</div>
+      <p id="pwRecoveryNote" style="display:none;font-size:13px;color:var(--muted);margin:0 0 14px;line-height:1.6;">
+        You followed a reset link, so you do not need your old password. Choose a new one below.
+      </p>
       <div class="alert" id="pwAlert"></div>
       <div class="account-grid">
-        <div class="form-group">
+        <div class="form-group" id="currentPwGroup">
           <label for="currentPw">Current Password</label>
           <input type="password" id="currentPw" placeholder="Your current password" autocomplete="current-password">
         </div>
@@ -548,7 +648,7 @@ async function renderPage() {
           <input type="password" id="confirmPw" placeholder="Repeat new password" autocomplete="new-password">
         </div>
       </div>
-      <button class="btn-save" onclick="changePassword()">Update password</button>
+      <button class="btn-save" id="pwSubmit" onclick="changePassword()">Update password</button>
     </div>
 
     <!-- DANGER ZONE -->
