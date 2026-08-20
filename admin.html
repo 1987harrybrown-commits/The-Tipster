@@ -340,7 +340,7 @@ td{padding:9px 11px;}
   <!-- COMPOUNDING BANKROLL CALCULATOR -->
   <h2 class="section-title" style="margin-top:32px;">£100 Compounding Bankroll Simulator</h2>
   <div class="card full" style="margin-bottom:14px;">
-    <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:16px;">How it works: Start with £100. Each day, divide your bankroll by the number of tips that day to get 1u. Bet every tip using the engine's stake recommendation. Your return becomes the next day's bankroll.</div>
+    <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:16px;">How it works: start with £100 and stake the WHOLE bankroll every day, split across that day's bets in proportion to their unit stakes — so 1u is the bankroll divided by the day's total units, not by the number of tips. This is deliberately the most aggressive model there is, and it can reach zero and stay there; on the current ledger it does, in April. It is not what the tips advise, and it is not the basis used for the exposure figures in the deployment notes, which size 1u at 1% of bankroll.</div>
     <div style="display:flex;gap:24px;flex-wrap:wrap;" id="bankrollSummary">
       <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Starting Bankroll</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--text);">£100.00</div></div>
       <div><div style="font-size:10px;color:var(--muted);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;">Current Bankroll</div><div style="font-family:'Space Mono',monospace;font-size:24px;font-weight:700;color:var(--green);" id="br-current">—</div></div>
@@ -769,9 +769,12 @@ async function loadBankrollSimulator() {
   try {
     history = (await selectAllRows(
       'results_history',
-      'settled_at, stake, odds, result, event, sport',
+      'settled_at, stake, odds, result, event, sport, tier',
+      // Bets only. Short-price insight picks settle with stake 0 and are not
+      // bets; including them was how a day could end up with zero total units.
       q => q.in('result', ['WON', 'LOST'])
-    )).sort((a, b) => new Date(a.settled_at) - new Date(b.settled_at));
+    )).filter(r => r.tier !== 'insight' && parseFloat(r.stake ?? 1) > 0)
+       .sort((a, b) => new Date(a.settled_at) - new Date(b.settled_at));
   } catch (err) {
     document.getElementById('bankrollTable').innerHTML =
       '<tr><td colspan="8" style="text-align:center;color:var(--red);padding:24px">Could not load the ledger: '
@@ -803,6 +806,11 @@ async function loadBankrollSimulator() {
     // Sum all unit stakes first, then 1u = bankroll ÷ total units
     // This ensures total staked never exceeds the bankroll
     const totalUnits = tips.reduce((s, t) => s + parseFloat(t.stake ?? 1), 0);
+    // A day with no units staked divides by zero. unitValue became Infinity,
+    // totalStaked with it, and bankroll came out NaN — which then propagated
+    // through every later day and into the summary, so the panel displayed
+    // "£NaN". The filter above makes it rare; this makes it impossible.
+    if (!(totalUnits > 0)) return '';
     const unitValue = bankroll / totalUnits; // 1u = bankroll ÷ total units staked
 
     let totalStaked = 0;
@@ -813,7 +821,10 @@ async function loadBankrollSimulator() {
       const odds      = parseFloat(tip.odds  || 1);
       const betAmount = unitValue * stake;
       totalStaked += betAmount;
-      if (tip.result === 'WON') totalReturn += betAmount * odds;
+      // Upper case is canonical (schema-migration.sql normalises the column),
+      // and this compares case-insensitively so a stray row cannot silently
+      // become a loss.
+      if (String(tip.result).toUpperCase() === 'WON') totalReturn += betAmount * odds;
     }
 
     const dayPL      = totalReturn - totalStaked;
