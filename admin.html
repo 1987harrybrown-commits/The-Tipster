@@ -368,7 +368,13 @@ td{padding:9px 11px;}
 const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
 const ENGINE_URL    = 'https://tipster-engine-1.onrender.com';
-const ADMIN_KEY     = localStorage.getItem('tipster_admin_key') || '';
+
+// There is no module-level ADMIN_KEY. There was one, read at load and used by
+// nothing — both callers shadow it with their own read, which is the correct
+// thing to do, since the key can be set after the page has loaded. A constant
+// that looks like the source of truth and holds an empty string is worth more
+// as an absence than as a convenience.
+function adminKey() { return localStorage.getItem('tipster_admin_key') || ''; }
 
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON);
@@ -477,8 +483,50 @@ async function adminLogin() {
     btn.disabled = false; btn.textContent = 'Sign In';
     return;
   }
+
+  // Check the key before storing it. A wrong one used to be accepted here and
+  // only surface as a 403 the first time someone pressed Re-settle, which is a
+  // strange place to learn you are not signed in properly.
+  //
+  // /admin/cache-status is a plain GET behind the same guard, so a 403 means
+  // the key is wrong and a 200 means it is right. Anything else is not an
+  // answer about the key: the engine sleeps on Render's free tier and a cold
+  // start runs to the better part of a minute, so a timeout stores the key with
+  // a warning rather than refusing a sign-in over a slow server.
+  btn.textContent = 'Checking key...';
+  const verdict = await verifyAdminKey(key.trim());
+  if (verdict === 'rejected') {
+    await db.auth.signOut();
+    showAlert(alertEl, 'The engine rejected that admin key — signed out.', 'error');
+    btn.disabled = false; btn.textContent = 'Sign In';
+    return;
+  }
   localStorage.setItem('tipster_admin_key', key.trim());
+  if (verdict === 'unreachable') {
+    // Stored, but say so: the engine buttons may still fail.
+    sessionStorage.setItem('tipster_admin_key_unverified', '1');
+  }
   location.reload();
+}
+
+// 'ok', 'rejected', or 'unreachable'. Only 'rejected' is a statement about the
+// key — everything else is a statement about the network.
+async function verifyAdminKey(key) {
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 75000);
+    try {
+      const res = await fetch(ENGINE_URL + '/admin/cache-status', {
+        headers: { 'Authorization': 'Bearer ' + key },
+        signal: controller.signal,
+      });
+      if (res.status === 403 || res.status === 401) return 'rejected';
+      if (res.ok) return 'ok';
+      return 'unreachable';
+    } finally { clearTimeout(timer); }
+  } catch (e) {
+    return 'unreachable';
+  }
 }
 
 async function adminLogout() {
@@ -490,6 +538,14 @@ async function adminLogout() {
 function showDash() {
   document.getElementById('loginScreen').style.display = 'none';
   document.getElementById('adminDash').style.display   = 'block';
+  // Set when the key could not be checked at sign-in, because the engine did
+  // not answer. Said once, on the dashboard, where the buttons it affects are.
+  if (sessionStorage.getItem('tipster_admin_key_unverified')) {
+    sessionStorage.removeItem('tipster_admin_key_unverified');
+    const el = document.getElementById('triggerAlert');
+    if (el) showAlert(el, 'The engine did not answer when the admin key was '
+      + 'checked — it may have been asleep. Engine actions may fail.', 'error');
+  }
   // Tomorrow in the UK calendar, as the default override date. setDate() steps
   // the browser's local day and toISOString() then formats in UTC, so for an
   // admin anywhere ahead of UTC the two disagree and the field defaults to
@@ -607,10 +663,9 @@ async function triggerResettle() {
   btn.disabled = true; btn.textContent = 'Starting...';
   logEl.style.display = 'block'; logEl.textContent = 'Requesting resettlement...\n';
   try {
-    const ADMIN_KEY = localStorage.getItem('tipster_admin_key') || '';
     const res = await fetch(`${ENGINE_URL}/admin/resettle`, {
       method: 'POST',
-      headers: { 'Authorization': `Bearer ${ADMIN_KEY}` }
+      headers: { 'Authorization': `Bearer ${adminKey()}` }
     });
 
     // A rejected admin key returns plain text, not JSON — parse defensively so
@@ -660,8 +715,7 @@ async function triggerAccaGenerate() {
   btn.disabled = true; btn.textContent = 'Generating...';
   say('Requesting acca generation...');
   try {
-    const ADMIN_KEY = localStorage.getItem('tipster_admin_key') || '';
-    const res = await fetch(`${ENGINE_URL}/admin/generate-acca`, { headers: { 'Authorization': `Bearer ${ADMIN_KEY}` } });
+    const res = await fetch(`${ENGINE_URL}/admin/generate-acca`, { headers: { 'Authorization': `Bearer ${adminKey()}` } });
 
     let data = {};
     try { data = await res.json(); } catch (_) {}
