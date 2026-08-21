@@ -250,6 +250,8 @@ function readHashParams() {
     db.auth.onAuthStateChange(async (event, newSession) => {
       if (newSession) {
         currentUser = newSession.user;
+        // This is the path a confirmation link actually takes.
+        await ensureProfile(newSession);
         if (await loadProfile()) {
           await renderPage();
           applyRecoveryMode();
@@ -267,6 +269,7 @@ function readHashParams() {
     return;
   }
   currentUser = session.user;
+  await ensureProfile(session);
   if (await loadProfile()) {
     await renderPage();
     applyRecoveryMode();
@@ -294,6 +297,39 @@ function renderProfileError() {
       <button class="btn-save" onclick="location.reload()">Try again</button>
       <a class="btn btn-ghost" href="/" style="margin-left:8px">Back to Tips</a>
     </div>`;
+}
+
+// ── MAKE SURE THERE IS A PROFILE TO LOAD ──────────────────
+//
+// Nothing in the codebase creates the public.users row after signup; it is
+// assumed to arrive via a database trigger, and the engine has a service-role
+// repair route for when it does not. index.html called that route. This page
+// did not — and this page is where the signup confirmation link lands
+// (emailRedirectTo is '/account.html').
+//
+// So the very first page a newly confirmed account sees was the one that
+// could not create it. With no row: no emails, because the dispatchers select
+// from users; preference toggles update nothing; and, worst, paying from the
+// upgrade banner right here means checkout.session.completed matches no row,
+// answers non-2xx, and Stripe retries for days before giving up. Money taken,
+// nobody upgraded.
+//
+// Idempotent and race-tolerant on the engine side, so it costs one request
+// and is a no-op whenever the trigger did its job.
+async function ensureProfile(session) {
+  try {
+    const res = await fetch(ENGINE_URL + '/ensure-profile', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + session.access_token },
+    });
+    return res.ok;
+  } catch (e) {
+    // Not fatal: loadProfile below reports a missing row honestly, and the
+    // next visit tries again. Failing the whole page here would hide an
+    // account that exists perfectly well.
+    console.error('ensure-profile failed:', e.message);
+    return false;
+  }
 }
 
 // ── LOAD PROFILE ──────────────────────────────────────────
