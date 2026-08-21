@@ -1253,6 +1253,69 @@ function stakeLabel(s) {
   return s+'u';
 }
 
+// What to say when the card is empty.
+//
+// There was one line for this: "No tips yet — the engine is fetching the latest
+// odds." It is shown whenever the filtered list comes back empty, and it is
+// wrong in every case except one:
+//
+//   * a sport chip is selected and this card has none of that sport. There ARE
+//     tips; the reader has filtered them out, and the message neither says so
+//     nor hints at the way back.
+//   * the Tomorrow tab, any time before the morning fetch. Tomorrow's card does
+//     not exist yet and nothing is fetching it.
+//   * the Today tab after the last kickoff. The day is done.
+//   * nothing published at all — which, when the engine is down, means the page
+//     tells every visitor that work is in progress for as long as it stays
+//     down. Ours said exactly that for nine days.
+//
+// A failed query is NOT one of these: loadTips renders its own error state, so
+// a read that did not happen is never reported as an empty card.
+function sportLabel(v) {
+  return { 'Football': 'football', 'Basketball': 'basketball',
+           'Ice Hockey': 'ice hockey' }[v] || String(v).toLowerCase();
+}
+
+function emptyTipsState(now) {
+  const ukToday    = ukDateString(now);
+  const ukTomorrow = ukDateString(new Date(now.getTime() + 86400000));
+  const inDay = (t) => {
+    if (activeDayFilter === 'all') return true;
+    const d = ukDateString(new Date(t.event_time));
+    return activeDayFilter === 'today' ? d === ukToday : d === ukTomorrow;
+  };
+  const upcoming = allTips.filter(t => new Date(t.event_time) > now && inDay(t));
+
+  // The chip is hiding a card that exists. Say how many, and where they are.
+  if (activeFilter !== 'all' && upcoming.length) {
+    return { icon: '🔍',
+      title: 'No ' + sportLabel(activeFilter) + ' tips on this card',
+      body: upcoming.length + (upcoming.length === 1 ? ' other tip is' : ' other tips are')
+            + ' still to come — choose All to see them.' };
+  }
+
+  if (activeDayFilter === 'today') {
+    const started = allTips.filter(t => ukDateString(new Date(t.event_time)) === ukToday
+                                     && new Date(t.event_time) <= now);
+    if (started.length) {
+      return { icon: '🏁', title: "Today's card is under way",
+        body: (started.length === 1 ? "Today's one tip has started."
+                                    : 'All ' + started.length + ' tips have started.')
+              + " Tomorrow's card is published each morning, UK time." };
+    }
+    return { icon: '📅', title: 'Nothing published for today',
+      body: 'The card is published each morning, UK time.' };
+  }
+
+  if (activeDayFilter === 'tomorrow') {
+    return { icon: '📅', title: "Tomorrow's card is not out yet",
+      body: 'It is published each morning, UK time.' };
+  }
+
+  return { icon: '📅', title: 'No tips are published right now',
+    body: 'The card is published each morning, UK time.' };
+}
+
 function renderTips() {
   const grid=document.getElementById('tipsGrid');
   const now=new Date();
@@ -1271,7 +1334,12 @@ function renderTips() {
   });
   if(activeFilter!=='all') list=list.filter(t=>t.sport===activeFilter);
   const sorted=[...list].sort((a,b)=>b.confidence-a.confidence);
-  if(!sorted.length){grid.innerHTML='<div class="empty-state"><div class="ei">🔍</div><h3>No tips yet</h3><p>The engine is fetching the latest odds.</p></div>';return;}
+  if(!sorted.length){
+    const e = emptyTipsState(now);
+    grid.innerHTML='<div class="empty-state"><div class="ei">'+e.icon+'</div>'
+      +'<h3>'+esc(e.title)+'</h3><p>'+esc(e.body)+'</p></div>';
+    return;
+  }
   grid.innerHTML='';
   sorted.forEach((tip,i)=>{
     // Which tips are free is a stored fact now (engine: tagFreeTips), not a
