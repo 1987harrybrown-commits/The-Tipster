@@ -876,12 +876,10 @@ function showAlert(el, msg, type) {
 // The toggle on the page reads this on render. index.html also reads it.
 function setOddsFormat(isFractional) {
   localStorage.setItem('oddsFormat', isFractional ? 'fractional' : 'decimal');
-  showAlert(
-    { textContent: '', className: 'alert' },
-    '',
-    'success'
-  );
-  // Show confirmation without a full alert element
+  // The confirmation goes in the row's own subtitle rather than the page's
+  // alert bar. This used to call showAlert with a throwaway object literal as
+  // the element, which set textContent on nothing anyone could see and left a
+  // four-second timer behind to clear it again.
   const sub = document.querySelector('#pref-fractional')?.closest('.pref-row')?.querySelector('.pref-sub');
   if (sub) {
     const orig = sub.textContent;
