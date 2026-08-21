@@ -1722,7 +1722,12 @@ function switchPLTab(tab){
 function renderHistoryTable(){
   const container=document.getElementById('plBody');
   let rows=allHistory;
-  if(activePLTab!=='all')rows=rows.filter(r=>(r.tier||'free')===activePLTab);
+  // FREE and PRO split on is_free, not on tier. tier only ever holds 'pro' or
+  // 'insight', so `tier==='free'` was true for exactly fourteen legacy rows
+  // that were mislabelled — and once the migration repairs those, it is true
+  // of nothing. The FREE tab would have shown an empty table for ever.
+  if(activePLTab==='free')      rows=rows.filter(r=>r.is_free===true);
+  else if(activePLTab==='pro')  rows=rows.filter(r=>r.is_free!==true&&(r.tier||'')!=='insight');
   renderROIGraph(rows).catch(e => console.error('ROI graph:', e.message));
   if(!rows.length){container.innerHTML='<div style="text-align:center;color:var(--muted);padding:36px;font-size:13px;">No settled results yet.</div>';updatePLSummary(rows);return;}
 
@@ -2152,9 +2157,11 @@ async function loadConversionBlock(){
   if(isProUser)return;
   const block=document.getElementById('proConversion');if(block)block.style.display='block';
   const thirtyDaysAgo=new Date();thirtyDaysAgo.setDate(thirtyDaysAgo.getDate()-30);
-  const {data:history}=await db.from('results_history').select('tier,result,profit_loss,stake,settled_at').gte('settled_at',thirtyDaysAgo.toISOString());
+  const {data:history}=await db.from('results_history').select('tier,is_free,result,profit_loss,stake,settled_at').gte('settled_at',thirtyDaysAgo.toISOString());
   if(history&&history.length){
-    const proRows=history.filter(r=>r.tier==='pro'),freeRows=history.filter(r=>r.tier==='free');
+    // Same correction as the results tabs: free-ness is is_free, not tier.
+    const freeRows=history.filter(r=>r.is_free===true);
+    const proRows=history.filter(r=>r.is_free!==true&&(r.tier||'')!=='insight');
     // Denominator is wins + losses. It counted every row that was not 'pending',
     // which holds while a row can only be WON or LOST, but a VOID push is
     // neither and would otherwise drag the win rate down.
@@ -2170,7 +2177,7 @@ async function loadConversionBlock(){
   const todayStart=ukDayStart();
   const todayResults=(history||[]).filter(r=>new Date(r.settled_at)>=todayStart);
   if(todayResults){
-    const proWins=todayResults.filter(r=>r.tier==='pro'&&r.result==='WON').length;
+    const proWins=todayResults.filter(r=>r.is_free!==true&&(r.tier||'')!=='insight'&&r.result==='WON').length;
     const el=document.getElementById('missedWinsText');
     if(el&&proWins>0)el.innerHTML='Pro members have already banked <span style="color:var(--gold);font-weight:700;">'+proWins+' winning tip'+(proWins!==1?'s':'')+'</span> today that you missed.';
     else if(el)el.innerHTML='Pro members received the full card at <span style="color:var(--gold);font-weight:700;">07:00</span> — 90 minutes before free members.';
