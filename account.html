@@ -69,6 +69,10 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
 .status-badge.unverified{background:rgba(255,61,90,0.1);color:var(--red);}
 .status-badge.free{background:rgba(74,90,112,0.2);color:var(--muted-tint);}
 .status-badge.pro{background:rgba(240,180,41,0.12);color:var(--gold);}
+/* Same tint and colour as .unverified, which is the pair already checked for
+   contrast on this card. Both mean "needs your attention", so they should
+   look alike. */
+.status-badge.pastdue{background:rgba(255,61,90,0.1);color:var(--red);}
 .status-dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
 
 /* INFO ROWS */
@@ -114,6 +118,13 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
 .upgrade-text h2{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--gold);margin:0 0 4px;}
 .upgrade-text p{font-size:12px;color:var(--muted);line-height:1.5;}
 
+/* Payment failed. Same shape as the upgrade banner because it occupies the
+   same slot, but red rather than gold: this is a warning about a subscription
+   they already pay for, not a pitch for one they don't. */
+.billing-alert{background:rgba(255,61,90,0.07);border:1px solid rgba(255,61,90,0.3);border-radius:8px;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
+.billing-alert h2{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--red);margin:0 0 4px;}
+.billing-alert p{font-size:12px;color:var(--muted);line-height:1.5;}
+
 /* ALERT */
 .alert{padding:10px 14px;border-radius:5px;font-size:12px;margin-bottom:14px;display:none;}
 .alert.success{background:rgba(24,224,122,0.1);border:1px solid rgba(24,224,122,0.3);color:var(--green);}
@@ -133,7 +144,7 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
   .page{padding:80px 14px 40px;}
   .account-grid{grid-template-columns:1fr;}
   nav{padding:0 14px;}
-  .upgrade-banner{flex-direction:column;align-items:flex-start;}
+  .upgrade-banner,.billing-alert{flex-direction:column;align-items:flex-start;}
 }
 
 /* Touch targets.
@@ -422,6 +433,23 @@ async function loadRecentEmails() {
 // the best answer available. The engine takes the account from the token, so
 // there is nothing to send.
 //
+// Stripe's status vocabulary, reduced to the three values our users column
+// holds. This mirrors mapSubStatus in engine.js and must keep mirroring it:
+// the engine writes the row, this only decides what to render before the next
+// read. null means a status with no mapping ('incomplete', 'paused'), for which
+// the caller keeps whatever the row already said.
+function mapSubStatus(stripeStatus) {
+  switch (stripeStatus) {
+    case 'active':
+    case 'trialing':           return 'pro';
+    case 'past_due':           return 'past_due';
+    case 'canceled':
+    case 'unpaid':
+    case 'incomplete_expired': return 'free';
+    default:                   return null;
+  }
+}
+
 // Never blocks the first render, and never shows an error: this is a correction
 // to something already displayed, and a failed correction leaves it as it was.
 async function reconcileSubscription() {
@@ -436,11 +464,20 @@ async function reconcileSubscription() {
     const data = await res.json();
     if (!data || data.verified !== true) return null;
 
-    const wasPro = userProfile.subscription_status === 'pro';
-    if (data.isPro !== wasPro) {
-      // The engine has already written this to the row; keep the copy this page
-      // renders from in step rather than re-reading it.
-      userProfile.subscription_status = data.isPro ? 'pro' : 'free';
+    // The engine has already written this to the row; keep the copy this page
+    // renders from in step rather than re-reading it.
+    //
+    // "not pro" is not the same as "free". A past_due subscriber is not pro,
+    // and collapsing the two here overwrote the one fact the page needs in
+    // order to offer them Manage Billing -- contradicting the very row this is
+    // supposed to be mirroring. The engine sends the Stripe status back
+    // precisely so the difference survives.
+    const mapped = data.isPro ? 'pro'
+      : (data.subscriptionStatus ? mapSubStatus(data.subscriptionStatus) : 'free');
+    // null is a Stripe status we have no mapping for. The stored row is a
+    // better answer than anything invented here, so leave it alone.
+    if (mapped && mapped !== userProfile.subscription_status) {
+      userProfile.subscription_status = mapped;
       await renderPage();
     }
     return data.isPro;
@@ -550,6 +587,14 @@ async function handleReturnFromCheckout() {
 async function renderPage() {
   const recentEmails = await loadRecentEmails();
   const isPro = userProfile.subscription_status === 'pro';
+  // Stripe retries a failed payment for about two weeks before giving up, and
+  // for that fortnight the subscriber sits here: not pro, but not free either,
+  // and one card update away from being pro again. Rendering them as free sent
+  // them to /#pricing to buy a subscription they already have, which the engine
+  // refuses with "manage it from your account rather than starting a new one"
+  // -- advice they could not act on, because Manage Billing was inside the pro
+  // branch. That is a loop with no exit, on the customers most worth keeping.
+  const isPastDue = userProfile.subscription_status === 'past_due';
   const isVerified = currentUser.email_confirmed_at != null;
   const joined = new Date(currentUser.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
   // Shown with the time as well as the date. The date alone is almost always
@@ -568,7 +613,14 @@ async function renderPage() {
     <h1 class="page-title">My Account</h1>
     <div class="page-sub">Manage your tips, preferences and subscription.</div>
 
-    ${!isPro ? `
+    ${isPastDue ? `
+    <div class="billing-alert">
+      <div>
+        <h2>Payment failed</h2>
+        <p>We couldn't take the last payment for your Pro subscription, so Pro tips are paused. Update your card and it resumes straight away — you don't need to subscribe again.</p>
+      </div>
+      <button onclick="manageSubscription()" class="btn btn-pro" style="white-space:nowrap;">Update Payment</button>
+    </div>` : !isPro ? `
     <div class="upgrade-banner">
       <div class="upgrade-text">
         <h2>Upgrade to Pro</h2>
@@ -602,8 +654,8 @@ async function renderPage() {
         </div>
         <div class="info-row">
           <span class="info-key">Subscription</span>
-          <span class="status-badge ${isPro ? 'pro' : 'free'}">
-            <span class="status-dot"></span>${isPro ? 'Pro' : 'Free'}
+          <span class="status-badge ${isPro ? 'pro' : isPastDue ? 'pastdue' : 'free'}">
+            <span class="status-dot"></span>${isPro ? 'Pro' : isPastDue ? 'Past Due' : 'Free'}
           </span>
         </div>
         <div class="info-row">
