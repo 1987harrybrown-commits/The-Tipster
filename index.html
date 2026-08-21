@@ -1881,7 +1881,7 @@ async function loadConversionBlock(){
   if(isProUser)return;
   const block=document.getElementById('proConversion');if(block)block.style.display='block';
   const thirtyDaysAgo=new Date();thirtyDaysAgo.setDate(thirtyDaysAgo.getDate()-30);
-  const {data:history}=await db.from('results_history').select('tier,result,profit_loss,stake').gte('settled_at',thirtyDaysAgo.toISOString());
+  const {data:history}=await db.from('results_history').select('tier,result,profit_loss,stake,settled_at').gte('settled_at',thirtyDaysAgo.toISOString());
   if(history&&history.length){
     const proRows=history.filter(r=>r.tier==='pro'),freeRows=history.filter(r=>r.tier==='free');
     // Denominator is wins + losses. It counted every row that was not 'pending',
@@ -1893,8 +1893,11 @@ async function loadConversionBlock(){
     if(proWr)proWr.textContent=proStats.wr;if(proPl){proPl.textContent=proStats.pl;proPl.style.color=proStats.pos?'var(--green)':'var(--red)';}
     if(freeWr)freeWr.textContent=freeStats.wr;if(freePl){freePl.textContent=freeStats.pl;freePl.style.color=freeStats.pos?'var(--green)':'var(--red)';}
   }
+  // Today is inside the last thirty days, so this was a second read of rows
+  // already in hand. Two reads also meant the two figures could straddle a
+  // settlement and disagree with each other; one read cannot.
   const todayStart=ukDayStart();
-  const {data:todayResults}=await db.from('results_history').select('tier,result').gte('settled_at',todayStart.toISOString());
+  const todayResults=(history||[]).filter(r=>new Date(r.settled_at)>=todayStart);
   if(todayResults){
     const proWins=todayResults.filter(r=>r.tier==='pro'&&r.result==='WON').length;
     const el=document.getElementById('missedWinsText');
@@ -2012,11 +2015,24 @@ function setPricingToggle(plan){
     db.auth.onAuthStateChange((_e,session)=>{if(session)updateNavAuth();});
   }
   applyStoredOddsFormat();
+  // updateNavAuth first, and alone: it sets isProUser, which renderTips and
+  // loadConversionBlock both read.
   await updateNavAuth();
-  await loadLiveBar();
-  await loadHistory();
-  await loadTips();
-  await loadConversionBlock();
+
+  // The rest do not depend on each other. Run sequentially they were four more
+  // round trips deep before the tips board — the thing people came for — had
+  // any content in it. Together they are one.
+  //
+  // Safe because each owns its own state: loadTips is the only writer of
+  // allTips, loadHistory of allHistory, and the other two touch elements
+  // nothing else renders. Both renderTips callers draw the same state, so an
+  // interleaving lands on the same result whichever finishes last.
+  await Promise.all([
+    loadLiveBar(),
+    loadHistory(),
+    loadTips(),
+    loadConversionBlock(),
+  ].map(p => p.catch(e => console.error('boot:', e && e.message))));
   const params=new URLSearchParams(window.location.search);
   if(params.get('auth')==='login')openModal('login');
   // There is no ?upgraded=1 handling here. Stripe's success_url sends the
