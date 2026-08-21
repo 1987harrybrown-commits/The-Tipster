@@ -231,7 +231,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center;}
 .overlay.open{display:flex;}
 .modal{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:34px;width:100%;max-width:390px;position:relative;animation:up 0.2s ease;}
-.modal-x{position:absolute;top:12px;right:13px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;}
+.modal-x{position:absolute;top:6px;right:7px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;}
 .fg{margin-bottom:11px;}
 .fg label{font-size:11px;font-weight:700;display:block;margin-bottom:4px;}
 .fg input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;padding:10px 11px;font-size:13px;color:var(--text);font-family:'Lato',sans-serif;outline:none;transition:border-color 0.2s;}
@@ -320,6 +320,22 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
   .tips-grid{grid-template-columns:1fr;}
   footer{padding:32px 14px 20px;}
   .footer-top{flex-direction:column;}
+  /* Touch targets.
+     Measured at 375px: the day tabs, sport chips, odds-format and tier
+     filters were 25-27px tall and the nav buttons 29px. That clears the
+     24px WCAG 2.5.8 floor and is well under the 44px both Apple and
+     Google publish -- and these are the primary controls on a page whose
+     readers are mostly holding a phone.
+     min-height with centring rather than more padding, so the number is
+     the thing being set and does not drift with the font. The nav is 56px,
+     so 44 fits inside it. #sportTabs already wraps to two rows and simply
+     becomes two taller rows. */
+  .tab,.btn,.ptab,.btn-p,#toggle-monthly,#toggle-annual{min-height:44px;
+    display:inline-flex;align-items:center;justify-content:center;}
+  .logo{min-height:44px;display:inline-flex;align-items:center;}
+  /* The login and signup fields, which are the whole conversion flow.
+     min-height on an input does not need the flex treatment. */
+  .fg input,.btn-msubmit{min-height:44px;}
 }
 
 /* Motion is a preference, and this page did not read it.
@@ -1777,8 +1793,21 @@ function _openDialog(el, focusFirst) {
   _lastFocus = document.activeElement;
   el.classList.add('open');
   document.body.style.overflow = 'hidden';
+  // Pick from the focusable set, not from the whole subtree.
+  //
+  // querySelector returns the first match in DOM order anywhere inside the
+  // overlay, and the overlay holds four panels of which three are
+  // display:none at any moment. openModal('login') passes
+  // "input:not([type=hidden])", whose first match is #su-name in the hidden
+  // SIGNUP panel. Focusing a display:none element silently does nothing, so
+  // focus never entered the dialog at all for login or forgot-password —
+  // only for signup, where the intended field happened to be first.
+  //
+  // _focusable already applies exactly the right filter.
   const targets = _focusable(el);
-  const first = focusFirst ? (el.querySelector(focusFirst) || targets[0]) : targets[0];
+  const first = focusFirst
+    ? (targets.find(t => t.matches(focusFirst)) || targets[0])
+    : targets[0];
   if (first) setTimeout(() => first.focus(), 0);
 }
 
