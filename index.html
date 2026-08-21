@@ -1572,9 +1572,20 @@ async function renderROIGraph(rows) {
     return;
   }
 
-  // Filter to settled rows only, sort chronologically
+  // Settled BETS only, sorted chronologically.
+  //
+  // isBet is what every other published figure is built from — the KPI
+  // cards, the summary and the sport breakdown all filter through it. This
+  // chart was the one place that did not, and the one place that read the
+  // stored running_pl instead of adding up what it was showing.
+  //
+  // Both of those matter because the live ledger holds two rows that are
+  // tier 'insight' and yet carry a stake — 2.0 and 1.0, both lost. Every
+  // other figure excludes them by tier; running_pl includes them. So the
+  // curve ended at -45.46 while the headline beside it said -42.46, three
+  // units apart on the same screen.
   const settled = [...rows]
-    .filter(r => r.result === 'WON' || r.result === 'LOST')
+    .filter(r => (r.result === 'WON' || r.result === 'LOST') && isBet(r))
     .sort((a, b) => new Date(a.settled_at) - new Date(b.settled_at));
 
   if (!settled.length) {
@@ -1584,16 +1595,25 @@ async function renderROIGraph(rows) {
 
   document.getElementById('roiGraphWrap').style.display = 'block';
 
-  // Build cumulative PL from running_pl (already correct after recalculation)
+  // Accumulate the rows being charted, rather than reading running_pl.
+  //
+  // running_pl is the engine's cumulative column over the WHOLE ledger, so
+  // it can never agree with a filtered view — and it is only as right as
+  // the last row written into it. Measured on the live ledger: 135 of its
+  // 136 rows disagreed with an accumulation of their own profit_loss. The
+  // engine repairs that now; this no longer depends on it either way.
   const labels = [];
   const values = [];
   let running = 0;
 
-  // Group by date for cleaner x-axis
+  // Group by date for cleaner x-axis, carrying the running total forward
+  // so a date shows where the record stood at the end of that day.
   const byDate = {};
+  let acc = 0;
   for (const r of settled) {
+    acc += parseFloat(r.profit_loss || 0);
     const date = new Date(r.settled_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-    byDate[date] = parseFloat(r.running_pl || 0);
+    byDate[date] = parseFloat(acc.toFixed(2));
   }
 
   // Add a zero start point
