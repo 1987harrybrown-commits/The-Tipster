@@ -69,15 +69,19 @@ footer a:hover{color:var(--text);}
     scroll-behavior:auto !important;
   }
 }
+
+.skip-link{position:absolute;left:-9999px;top:0;z-index:200;background:var(--green);color:#07090d;padding:10px 16px;font-family:'Lato',sans-serif;font-size:13px;font-weight:700;border-radius:0 0 5px 0;text-decoration:none;}
+.skip-link:focus{left:0;}
 </style>
 </head>
 <body>
+<a href="#main" class="skip-link">Skip to content</a>
 <nav>
   <a class="logo" href="/">The <em>Tipster</em></a>
   <a class="nav-back" href="/">← Back to site</a>
 </nav>
 
-<main class="wrap" id="main">
+<main class="wrap" id="main" tabindex="-1">
   <div class="page-label">Legal</div>
   <h1>Terms of Service</h1>
   <p class="meta">Last updated: April 2026 &nbsp;·&nbsp; Effective immediately</p>
