@@ -134,6 +134,30 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
   .account-grid{grid-template-columns:1fr;}
   nav{padding:0 14px;}
   .upgrade-banner{flex-direction:column;align-items:flex-start;}
+}
+
+/* Touch targets.
+
+   Keyed on the pointer, not the viewport. These lived in each page's
+   max-width block, which asks the wrong question twice over: index.html
+   breaks at 600px and the other two at 640, so between those a phone-sized
+   window got desktop-sized controls on one page and touch-sized ones on the
+   others; and a tablet -- 768px in portrait, 1024 in landscape -- is a touch
+   device that never matched any of them, so every control on an iPad was the
+   25-30px it is on a laptop.
+
+   (pointer: coarse) is true when the primary input is a finger and false for
+   a mouse at any width, which is the actual condition. A touch laptop
+   reports a fine primary pointer and is deliberately left alone rather than
+   having its controls grow.
+
+   Measured before the change, at 375px:
+     index    day tabs, sport chips, odds-format and tier filters 25-27px,
+              nav buttons 29, billing toggle 30, modal fields 38
+     account  fields 38, save buttons 31-36, switches 40x22
+     admin    fourteen under 44, smallest an in-table Edit at 42x23
+   24x24 is the WCAG 2.5.8 floor; 44 is what Apple and Google publish. */
+@media (pointer: coarse){
   /* Touch targets, measured at 375px.
      Every field was 38px, the save buttons 31-36, Manage Billing 33 and
      Log out / Delete account 35. The four preference switches were 40x22 --
@@ -149,6 +173,7 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
   .toggle::after{content:'';position:absolute;left:50%;top:50%;
     transform:translate(-50%,-50%);width:44px;height:44px;}
 }
+
 
 /* Motion is a preference, and this page did not read it.
    Three animations here run forever — the results ticker for 40s a loop, the
