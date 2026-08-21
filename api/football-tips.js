@@ -186,7 +186,12 @@ module.exports = async (req, res) => {
   // the structured data below agree with each other rather than one of them
   // showing NaN.
   const freeTips = freeOf((tips || []).filter(priced), 3);
-  const leagues = [...new Set((tips||[]).map(t=>t.league))];
+  // From the cards actually shown, not from the whole day's card. Two reasons:
+  // the unfiltered list names the leagues the PRO tips are in, which is a small
+  // thing to publish on a free page; and once rls-policies.sql is applied the
+  // anon key only receives free tips anyway, so deriving from the full list
+  // would quietly change what these pills mean on the day RLS goes on.
+  const leagues = [...new Set(freeTips.map(t=>t.league))];
 
   const tipCards = freeTips.map(t=>`
     <article class="tip-card">
