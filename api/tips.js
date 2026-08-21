@@ -286,14 +286,14 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <div class="tips-grid">
     ${tipCards || '<p style="color:#6c83a3">Tips loading — check back shortly.</p>'}
     <div class="locked-card">
-      <h3>🔒 Pro members get 15+ tips daily across all sports</h3>
+      <h3>🔒 Pro members get the full card, across all sports</h3>
       <a href="/">Unlock Full Card →</a>
     </div>
   </div>
 
   <div class="content-block">
     <h2>How Our Free Football Tips Work</h2>
-    <p>The Tipster uses a Dixon-Coles Poisson model combined with live odds data from over 40 UK bookmakers to identify value bets across Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League fixtures. Our model calculates the true probability of each outcome and compares it against bookmaker-implied probability to find genuine edge.</p>
+    <p>The Tipster uses a Dixon-Coles Poisson model combined with live odds data from an aggregated UK bookmaker feed to identify value bets across Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League fixtures. Our model calculates the true probability of each outcome and compares it against bookmaker-implied probability to find genuine edge.</p>
     <p>Every tip is published with a confidence rating and value edge percentage. Tips are only published when the model identifies a positive expected value — meaning the true probability of winning exceeds what the bookmaker's odds imply.</p>
     <p>All results are logged automatically when fixtures complete. Nothing is deleted, edited or excluded. The win rate you see reflects every single settled tip in our database.</p>
   </div>

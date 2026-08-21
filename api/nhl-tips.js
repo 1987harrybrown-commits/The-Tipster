@@ -285,7 +285,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <div class="block">
     <h2>NHL Betting Tips Model</h2>
     <p>For each NHL game, our model calculates the expected goals for each team based on their season-long offensive and defensive performance metrics relative to league averages. These expected goals feed into a bivariate Poisson distribution to generate win, loss and overtime probabilities.</p>
-    <p>We compare these probabilities against the best available odds from 40+ UK-licensed bookmakers. Tips are only published when we identify a value edge of 8% or more — meaning our model gives significantly better odds than the bookmaker implies.</p>
+    <p>We compare these probabilities against the best available odds from an aggregated UK bookmaker feed. Tips are only published when we identify a value edge of 8% or more — meaning our model gives significantly better odds than the bookmaker implies.</p>
   </div>
   <div class="block">
     <h2>NHL Regular Season vs Playoffs</h2>

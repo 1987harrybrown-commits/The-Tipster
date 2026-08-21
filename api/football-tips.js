@@ -311,7 +311,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
 
   <div class="block">
     <h2>Premier League Tips Today</h2>
-    <p>Our Dixon-Coles Poisson model is optimised for Premier League fixtures, using team season statistics, home/away attack and defence strength ratings, head-to-head records and live odds data from Bet365, Betfair, William Hill, Paddy Power and 37 other UK-licensed bookmakers.</p>
+    <p>Our Dixon-Coles Poisson model is optimised for Premier League fixtures, using team season statistics, home/away attack and defence strength ratings, head-to-head records and live odds data from an aggregated odds feed covering UK bookmakers. Where a specific book offers the best price, it is named on the tip.</p>
     <p>Premier League tips are published when our model identifies a value edge of 8% or more above the bookmaker's implied probability. Only selections that pass our strict confidence threshold appear on the platform.</p>
   </div>
 
