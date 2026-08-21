@@ -1021,6 +1021,24 @@ let cachedStats = {}, isProUser = false;
 // describe two different sets of tips.
 const isBet = (r) => r.tier !== 'insight' && parseFloat(r.stake ?? 1) > 0;
 
+// The book to show on a tip, or nothing.
+//
+// The engine writes `pick.bookmaker || 'Sofascore'`, so Sofascore is not a
+// bookmaker in this column — it is the placeholder for "the feed did not
+// name one". It is on 124 of the 139 tips published so far, and the card was
+// printing it as the book to bet with. Nobody can place a bet at an odds
+// aggregator.
+//
+// The modal already said 'Best available' when the field was empty, which is
+// the right thing to say here too: the price is real, the venue is not known.
+const AGGREGATORS = ['sofascore'];
+function bookLabel(tip) {
+  const raw = (tip && tip.bookmaker || '').trim();
+  if (!raw) return '';
+  if (AGGREGATORS.includes(raw.toLowerCase())) return '';
+  return raw.replace(/_/g, ' ');
+}
+
 // PostgREST caps every response at 1000 rows. Any query over results_history
 // that can exceed that has to paginate or it truncates silently — which is how
 // the headline figures below stopped counting once the ledger passed 1000
@@ -1455,7 +1473,7 @@ function renderTips() {
           '<div style="text-align:right">'+
             '<div class="tcard-odds">'+oddsDisplay+'</div>'+
             (moved?'<div style="font-size:9px;color:var(--muted);font-family:Space Mono,monospace;margin-top:2px;">now '+fmtOdds(moved)+'</div>':'')+
-            (tip.bookmaker?'<div style="font-size:9px;color:#4a9eff;font-family:Space Mono,monospace;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">'+esc(tip.bookmaker.replace(/_/g,' '))+'</div>':'')+
+            (bookLabel(tip)?'<div style="font-size:9px;color:#4a9eff;font-family:Space Mono,monospace;text-transform:uppercase;letter-spacing:0.5px;margin-top:3px;">'+esc(bookLabel(tip))+'</div>':'')+
           '</div>'+
         '</div>'+
         '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;padding:7px 10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;">'+
@@ -1866,7 +1884,7 @@ function openTipModal(tip){
   const stakeCell=document.getElementById('tm-stake-cell');
   if(stakeCell){if(isProUser){stakeCell.style.display='block';}else{stakeCell.innerHTML='<div class="tm-meta-label">Recommended Stake</div><div style="font-size:11px;color:var(--gold);font-weight:700;">Pro Members Only 🔒</div>';}}
   const bkEl=document.getElementById('tm-bookmaker'),mkEl=document.getElementById('tm-market');
-  if(bkEl)bkEl.textContent=tip.bookmaker?tip.bookmaker.replace(/_/g,' '):'Best available';
+  if(bkEl)bkEl.textContent=bookLabel(tip)||'Best available';
   if(mkEl)mkEl.textContent=tip.market||'Match winner';
   const fill=document.getElementById('tm-conf-fill');fill.style.width=conf+'%';fill.style.background=confCls;
   _openDialog(document.getElementById('tipOverlay'));
