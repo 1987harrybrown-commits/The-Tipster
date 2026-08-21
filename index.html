@@ -58,7 +58,7 @@
   --green:#18e07a; --green-dim:rgba(24,224,122,0.08);
   --red:#ff3d5a; --red-dim:rgba(255,61,90,0.08);
   --gold:#f0b429; --gold-dim:rgba(240,180,41,0.10);
-  --blue:#4a9eff;
+  --blue:#4a9eff; --blue-dim:rgba(74,158,255,0.10);
   --text:#dde6f0; --muted:#6c83a3; --muted2:#7c828b;
   /* Text on a translucent tinted badge. The tint lightens the card
      underneath, so --muted lands at 4.04-4.31:1 there — under AA — even
@@ -158,6 +158,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:56px;display:flex;ali
 .tcard-badge{font-size:9px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 7px;border-radius:3px;}
 .tcard-badge.free{background:var(--green-dim);color:var(--green);}
 .tcard-badge.pro{background:var(--gold-dim);color:var(--gold);}
+/* The results table badges a third kind, and there was no rule for it: an
+   insight row rendered the word INSIGHT with the padding of a badge but no
+   background and no colour of its own, which reads as stray text rather than
+   a label. That is 29 of the 136 settled rows. Blue because an insight is
+   informational rather than a bet — it carries no stake — and it clears 5.7:1
+   on its own tint. */
+.tcard-badge.insight{background:var(--blue-dim);color:var(--blue);}
 .tcard-match{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:2px;line-height:1.3;}
 .tcard-league{font-size:11px;color:var(--muted);margin-bottom:12px;}
 .tcard-pick-row{display:flex;justify-content:space-between;align-items:center;background:var(--bg3);border-radius:5px;padding:10px 13px;margin-bottom:11px;}
@@ -1747,7 +1754,12 @@ function renderHistoryTable(){
     const pl=parseFloat(r.profit_loss||0);
     const rpl=r._running;
     const date=new Date(r.settled_at).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-    const won=r.result==='WON',isVoid=r.result==='VOID',tier=r.tier||'free';
+    const won=r.result==='WON',isVoid=r.result==='VOID';
+    // The same basis the FREE and PRO tabs filter on, twenty lines above. This
+    // read r.tier||'free', which disagreed with them: a tip published free
+    // carries tier 'pro' and is_free true, so every row under the FREE tab was
+    // badged PRO. The fallback also invented a value the column never holds.
+    const tier=r.is_free===true?'free':(r.tier||'')==='insight'?'insight':'pro';
     const plCol=pl>=0?'var(--green)':'var(--red)',rplCol=rpl>=0?'var(--green)':'var(--red)';
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);gap:10px;">'+
       '<div style="flex:1;min-width:0;">'+
