@@ -72,6 +72,11 @@ td{padding:9px 11px;}
 .pill.failed{background:rgba(255,61,90,0.1);color:var(--red);}
 .pill.free{background:rgba(74,90,112,0.15);color:var(--muted-tint);}
 .pill.pro{background:rgba(240,180,41,0.1);color:var(--gold);}
+/* subscription_status also holds past_due, and there was no rule for it: the
+   pill rendered as unstyled text, so the subscribers most worth chasing were
+   the least visible in this table. Red like .failed — it is the same kind of
+   news and should catch the eye. */
+.pill.past_due{background:rgba(255,61,90,0.1);color:var(--red);}
 /* Login screen */
 .login-screen{max-width:380px;margin:120px auto;padding:0 20px;}
 @media(max-width:640px){.grid{grid-template-columns:1fr;}
@@ -1015,7 +1020,7 @@ async function loadSubscribers() {
     return `<tr>
       <td style="font-size:12px">${esc(u.email||'')}</td>
       <td style="font-size:12px">${esc(u.first_name||'—')}</td>
-      <td><span class="pill ${esc(status)}">${esc(status)}</span></td>
+      <td><span class="pill ${esc(status)}">${esc(status.replace('_', ' '))}</span></td>
       <td style="font-size:11px;color:var(--muted)">${joined}</td>
       <td style="text-align:center;color:${u.email_opt_in?'var(--green)':'var(--muted)'}">${u.email_opt_in ? '✓' : '✗'}</td>
       <td style="font-size:11px;color:var(--muted)">${last}</td>
