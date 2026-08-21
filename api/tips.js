@@ -301,7 +301,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <div class="content-block">
     <h2>Free NHL Ice Hockey Tips Today</h2>
     <p>NHL ice hockey is one of the most inefficient major betting markets, offering consistent value opportunities for data-driven models. Our Poisson-based prediction engine analyses team form, home ice advantage, goaltending matchups and recent 5-on-5 performance metrics to identify mispriced lines across all NHL games.</p>
-    <p>Free NHL tips are published daily throughout the regular season and playoffs, updated every 15 minutes as odds move.</p>
+    <p>Free NHL tips are published daily throughout the regular season and playoffs. The card is rebuilt every 15 minutes; odds are refreshed twice a day, at 06:00 and 13:00 UK.</p>
   </div>
 
   <div class="content-block">
