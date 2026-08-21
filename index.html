@@ -643,7 +643,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <div class="sec-label">FAQ</div>
       <h2 class="sec-title">COMMON QUESTIONS</h2>
       <div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;" itemscope itemtype="https://schema.org/FAQPage">
-        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">Are the tips free?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Yes — 3 free tips are available every day with no account required. You get the full selection, odds and bookmaker on each pick. Free members also receive the Saturday accumulator by email each week. Pro members unlock the full daily card delivered by email at 07:00, including confidence ratings, value edge % and stake recommendations on every tip.</p></div></div>
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">Are the tips free?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Yes — 3 free tips are available every day with no account required. You get the full selection, odds and bookmaker on each pick. Free members also receive the Saturday accumulator by email whenever the card supports one. Pro members unlock the full daily card delivered by email at 07:00, including confidence ratings, value edge % and stake recommendations on every tip.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How often are the tips updated?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Every 15 minutes. The engine reads live odds data continuously and recalculates the value edge on every tip as prices change. When lines move significantly, picks update automatically.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How is the track record calculated?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Every tip is timestamped and logged the moment it is published. Results are recorded automatically when fixtures complete — nothing is removed, edited or excluded. The win rate and P&L you see reflects every single settled tip in the database.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">What sports are covered?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">NHL Ice Hockey and NBA Basketball are our primary focus. Football is covered as a secondary market across the Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League.</p></div></div>
@@ -713,7 +713,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         <div><h3 style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--green);">NHL &amp; NBA Tips</h3><p style="font-size:12px;color:var(--muted);line-height:1.7;">Our primary markets. Ice hockey and basketball offer the best opportunity for statistical models to find genuine value.</p></div>
         <div><h3 style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--green);">Value Betting</h3><p style="font-size:12px;color:var(--muted);line-height:1.7;">Every tip includes the value edge %: the difference between our model probability and the bookmaker's implied probability.</p></div>
         <div><h3 style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--green);">Verified Record</h3><p style="font-size:12px;color:var(--muted);line-height:1.7;">Every advised single is logged and published, win or lose. Win rate and P&L are calculated over the same set of bets — short-price picks published for information carry no stake and count towards neither, and accumulators are emailed rather than recorded.</p></div>
-        <div><h3 style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--green);">Saturday Accumulator</h3><p style="font-size:12px;color:var(--muted);line-height:1.7;">Free Saturday accumulator each week. Combined selections from top-confidence picks across all covered markets.</p></div>
+        <div><h3 style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--green);">Saturday Accumulator</h3><p style="font-size:12px;color:var(--muted);line-height:1.7;">Free Saturday accumulator whenever the card supports one. Combined selections from top-confidence picks across all covered markets.</p></div>
       </div>
     </div></div>
   </section>
@@ -1996,7 +1996,32 @@ async function doLogin(){
     } else showMAlert(alert,error.message,'error');
     return;
   }
+  // users.last_login was read by the account page and written by nobody, so
+  // every one of the 23 accounts on the live database has it null and the
+  // page tells all of them "First session" for ever. Record it here, which is
+  // the only moment it means anything.
+  //
+  // Not awaited and not surfaced: a reader who has just signed in correctly
+  // must not be held up, or shown an error, because a bookkeeping column
+  // could not be written. Under rls-policies.sql the 'users update own'
+  // policy is what permits this, and it permits nothing else.
+  recordSignIn();
   closeModal();updateNavAuth();
+}
+
+async function recordSignIn(){
+  try{
+    const {data:{session}}=await db.auth.getSession();
+    if(!session)return;
+    const {data,error}=await db.from('users')
+      .update({last_login:new Date().toISOString()})
+      .eq('id',session.user.id).select('id');
+    // A refused write returns no error and no rows, which is why the row
+    // count is checked as well — the same thing updateChecked() does in the
+    // engine. Under RLS a policy change would show up here and nowhere else.
+    if(error)console.warn('last_login not recorded:',error.message);
+    else if(!data||!data.length)console.warn('last_login not recorded: the write was refused');
+  }catch(e){console.warn('last_login not recorded:',e.message);}
 }
 
 // Resending needs the address, not a session — which is the point, since the

@@ -552,8 +552,16 @@ async function renderPage() {
   const isPro = userProfile.subscription_status === 'pro';
   const isVerified = currentUser.email_confirmed_at != null;
   const joined = new Date(currentUser.created_at).toLocaleDateString('en-GB', { day:'numeric', month:'long', year:'numeric' });
+  // Shown with the time as well as the date. The date alone is almost always
+  // today -- this page is usually opened in the session that wrote the value
+  // -- which reads as though the field is stuck. The point of showing it at
+  // all is that someone can recognise a sign-in that was not theirs.
+  //
+  // 'First session' is still right for an account that has not signed in
+  // since this started being recorded, which today is every account.
   const lastLogin = userProfile.last_login
-    ? new Date(userProfile.last_login).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' })
+    ? new Date(userProfile.last_login).toLocaleString('en-GB',
+        { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' })
     : 'First session';
 
   document.getElementById('pageContent').innerHTML = `
