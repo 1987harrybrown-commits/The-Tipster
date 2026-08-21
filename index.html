@@ -1008,6 +1008,27 @@ async function loadLiveBar() {
   loadBestBetStreak();
 }
 
+// PostgREST puts .in() into the query string, so the list of values is part
+// of the URL and the URL has a ceiling. Measured against this project: 1,400
+// refs go through, 1,600 come back a bare `Bad Request` from the gateway —
+// not JSON, so it is not even a PostgREST error with a message in it.
+//
+// The streak below is an all-time figure and cannot be limited without
+// changing what it means, so the list only grows: one best bet a day reaches
+// that ceiling in about four years. Fetch it in chunks instead, which has the
+// same result at any size.
+const IN_CHUNK = 300;
+async function selectIn(table, cols, col, values) {
+  const rows = [];
+  for (let i = 0; i < values.length; i += IN_CHUNK) {
+    const { data, error } = await db.from(table).select(cols)
+      .in(col, values.slice(i, i + IN_CHUNK));
+    if (error) return { rows: null, error };
+    rows.push(...(data || []));
+  }
+  return { rows, error: null };
+}
+
 async function loadBestBetStreak() {
   try {
     // Load all tagged best bets from tips table
@@ -1019,12 +1040,17 @@ async function loadBestBetStreak() {
 
     if (!bestBets) return;
 
-    // Cross-reference results_history for accurate settled status
+    // Cross-reference results_history for accurate settled status.
+    // tips.status carries the same three values and is written by the same
+    // settlement pass, so this is a second opinion rather than the only one:
+    // if the lookup fails, every tip falls back to its own status, which is
+    // right except in the narrow case where the status write failed and the
+    // results_history row landed.
     const tipRefs = bestBets.map(t => t.tip_ref);
-    const { data: settledResults } = await db
-      .from('results_history')
-      .select('tip_ref, result')
-      .in('tip_ref', tipRefs);
+    const { rows: settledResults, error: settledErr } =
+      await selectIn('results_history', 'tip_ref, result', 'tip_ref', tipRefs);
+    if (settledErr) console.warn('Best-bet settlement lookup failed, falling back to tips.status:',
+                                 settledErr.message);
 
     const settledMap = {};
     for (const r of (settledResults || [])) {
