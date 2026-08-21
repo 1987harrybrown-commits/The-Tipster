@@ -651,44 +651,44 @@ async function renderPage() {
 
       <div class="pref-row">
         <div>
-          <div class="pref-label">All emails</div>
-          <div class="pref-sub">Master switch for all emails from The Tipster</div>
+          <div class="pref-label" id="pref-label-opt-in">All emails</div>
+          <div class="pref-sub" id="pref-sub-opt-in">Master switch for all emails from The Tipster</div>
         </div>
         <label class="toggle">
-          <input type="checkbox" id="pref-opt-in" ${userProfile.email_opt_in ? 'checked' : ''} onchange="savePref('email_opt_in', this.checked)">
+          <input type="checkbox" id="pref-opt-in" aria-labelledby="pref-label-opt-in" aria-describedby="pref-sub-opt-in" ${userProfile.email_opt_in ? 'checked' : ''} onchange="savePref('email_opt_in', this.checked)">
           <span class="toggle-slider"></span>
         </label>
       </div>
 
       <div class="pref-row">
         <div>
-          <div class="pref-label">Daily Bet of the Day</div>
-          <div class="pref-sub">Sent every morning at 08:30 UK time</div>
+          <div class="pref-label" id="pref-label-daily">Daily Bet of the Day</div>
+          <div class="pref-sub" id="pref-sub-daily">Sent every morning at 08:30 UK time</div>
         </div>
         <label class="toggle">
-          <input type="checkbox" id="pref-daily" ${userProfile.email_daily !== false ? 'checked' : ''} ${!userProfile.email_opt_in ? 'disabled' : ''} onchange="savePref('email_daily', this.checked)">
+          <input type="checkbox" id="pref-daily" aria-labelledby="pref-label-daily" aria-describedby="pref-sub-daily" ${userProfile.email_daily !== false ? 'checked' : ''} ${!userProfile.email_opt_in ? 'disabled' : ''} onchange="savePref('email_daily', this.checked)">
           <span class="toggle-slider"></span>
         </label>
       </div>
 
       <div class="pref-row">
         <div>
-          <div class="pref-label">Saturday Accumulator</div>
-          <div class="pref-sub">Weekend acca delivered Saturday morning</div>
+          <div class="pref-label" id="pref-label-saturday">Saturday Accumulator</div>
+          <div class="pref-sub" id="pref-sub-saturday">Weekend acca delivered Saturday morning</div>
         </div>
         <label class="toggle">
-          <input type="checkbox" id="pref-saturday" ${userProfile.email_saturday !== false ? 'checked' : ''} ${!userProfile.email_opt_in ? 'disabled' : ''} onchange="savePref('email_saturday', this.checked)">
+          <input type="checkbox" id="pref-saturday" aria-labelledby="pref-label-saturday" aria-describedby="pref-sub-saturday" ${userProfile.email_saturday !== false ? 'checked' : ''} ${!userProfile.email_opt_in ? 'disabled' : ''} onchange="savePref('email_saturday', this.checked)">
           <span class="toggle-slider"></span>
         </label>
       </div>
 
       <div class="pref-row">
         <div>
-          <div class="pref-label">Fractional Odds</div>
-          <div class="pref-sub">Display odds as fractions (e.g. 5/2) instead of decimals (3.50). Display only — no calculations change.</div>
+          <div class="pref-label" id="pref-label-fractional">Fractional Odds</div>
+          <div class="pref-sub" id="pref-sub-fractional">Display odds as fractions (e.g. 5/2) instead of decimals (3.50). Display only — no calculations change.</div>
         </div>
         <label class="toggle">
-          <input type="checkbox" id="pref-fractional" ${typeof window !== 'undefined' && localStorage.getItem('oddsFormat') === 'fractional' ? 'checked' : ''} onchange="setOddsFormat(this.checked)">
+          <input type="checkbox" id="pref-fractional" aria-labelledby="pref-label-fractional" aria-describedby="pref-sub-fractional" ${typeof window !== 'undefined' && localStorage.getItem('oddsFormat') === 'fractional' ? 'checked' : ''} onchange="setOddsFormat(this.checked)">
           <span class="toggle-slider"></span>
         </label>
       </div>
