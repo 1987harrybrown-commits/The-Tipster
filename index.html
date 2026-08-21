@@ -231,7 +231,12 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center;}
 .overlay.open{display:flex;}
 .modal{background:var(--card);border:1px solid var(--border2);border-radius:10px;padding:34px;width:100%;max-width:390px;position:relative;animation:up 0.2s ease;}
-.modal-x{position:absolute;top:6px;right:7px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center;border-radius:4px;}
+.modal-x{position:absolute;top:12px;right:13px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer;}
+/* The X was 13x21 — under the 24px WCAG 2.5.8 floor, on the control that
+   dismisses the signup and login dialogs. Growing the button moves the
+   glyph, so the hit area is widened behind it instead: an invisible 44x44
+   centred on the X, which is part of the button and takes its clicks. */
+.modal-x::after{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;}
 .fg{margin-bottom:11px;}
 .fg label{font-size:11px;font-weight:700;display:block;margin-bottom:4px;}
 .fg input{width:100%;background:var(--bg2);border:1px solid var(--border2);border-radius:5px;padding:10px 11px;font-size:13px;color:var(--text);font-family:'Lato',sans-serif;outline:none;transition:border-color 0.2s;}
@@ -1659,10 +1664,24 @@ function updatePLSummary(rawData){
   const p=document.getElementById('ps-pl');p.textContent=fmtU(pl);p.style.color=pl>=0?'var(--green)':'var(--red)';
 }
 
-db.channel('live-updates')
-  .on('postgres_changes',{event:'*',schema:'public',table:'tips'},          ()=>{loadTips();loadLiveBar();})
-  .on('postgres_changes',{event:'*',schema:'public',table:'results_history'},()=>{loadHistory();loadLiveBar();})
-  .subscribe();
+// Live updates are an enhancement: every panel this refreshes is also loaded
+// on boot and re-read by its own path. The subscription ran unguarded at the
+// top level, and everything below this line — PANEL_LABELS, openModal, the
+// tip modal, the whole boot sequence — is declared after it. Anything thrown
+// here therefore stopped the script dead and left the page rendered but
+// inert, with one console error to show for it.
+//
+// The real client always has .channel(), so this is not a fault anyone has
+// hit; it is a single point of failure sitting in front of the entire page
+// for the sake of a nice-to-have.
+try {
+  db.channel('live-updates')
+    .on('postgres_changes',{event:'*',schema:'public',table:'tips'},          ()=>{loadTips();loadLiveBar();})
+    .on('postgres_changes',{event:'*',schema:'public',table:'results_history'},()=>{loadHistory();loadLiveBar();})
+    .subscribe();
+} catch (e) {
+  console.error('Live updates unavailable, the page still loads normally:', e && e.message);
+}
 
 async function loadHistory(){
   // Was ascending — i.e. the OLDEST 500 rows — so once the ledger passed 500

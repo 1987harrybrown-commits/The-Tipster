@@ -134,6 +134,20 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
   .account-grid{grid-template-columns:1fr;}
   nav{padding:0 14px;}
   .upgrade-banner{flex-direction:column;align-items:flex-start;}
+  /* Touch targets, measured at 375px.
+     Every field was 38px, the save buttons 31-36, Manage Billing 33 and
+     Log out / Delete account 35. The four preference switches were 40x22 --
+     the height failing the 24px WCAG 2.5.8 floor outright, on the controls
+     that include the master email opt-out. */
+  .btn,.btn-save,.btn-danger{min-height:44px;display:inline-flex;
+    align-items:center;justify-content:center;}
+  .form-group input,.form-group select,.form-group textarea{min-height:44px;}
+  /* The switch is meant to look small, so the box stays 40x22 and the hit
+     area is widened behind it instead. Absolutely positioned, so nothing
+     moves; invisible, so nothing looks different. Rows are 54px apart and
+     the area is 44, so neighbouring switches do not overlap. */
+  .toggle::after{content:'';position:absolute;left:50%;top:50%;
+    transform:translate(-50%,-50%);width:44px;height:44px;}
 }
 
 /* Motion is a preference, and this page did not read it.

@@ -74,7 +74,17 @@ td{padding:9px 11px;}
 .pill.pro{background:rgba(240,180,41,0.1);color:var(--gold);}
 /* Login screen */
 .login-screen{max-width:380px;margin:120px auto;padding:0 20px;}
-@media(max-width:640px){.grid{grid-template-columns:1fr;}.stats-row{grid-template-columns:repeat(2,1fr);}nav{padding:0 14px;}.page{padding:66px 14px 40px;}}
+@media(max-width:640px){.grid{grid-template-columns:1fr;}
+  .stats-row{grid-template-columns:repeat(2,1fr);}nav{padding:0 14px;}
+  .page{padding:66px 14px 40px;}
+  /* Touch targets, measured at 375px. Fourteen controls were under 44px,
+     the smallest an in-table Edit button at 42x23 -- below the 24px WCAG
+     2.5.8 floor. The four tables were already wrapped in overflow-x:auto
+     and needed nothing. */
+  .btn{min-height:44px;display:inline-flex;align-items:center;justify-content:center;}
+  input:not([type=checkbox]):not([type=radio]),select,textarea{min-height:44px;}
+  .logo{min-height:44px;display:inline-flex;align-items:center;}
+}
 
 /* Motion is a preference, and this page did not read it.
    Three animations here run forever — the results ticker for 40s a loop, the
