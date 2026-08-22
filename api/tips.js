@@ -160,6 +160,13 @@ module.exports = async (req, res) => {
   const winRate  = stats?.win_rate || 0;
   const totalWon = stats?.total_won || 0;
   const totalLost= stats?.total_lost || 0;
+  // With nothing settled, win_rate is 0, and every sentence built from it
+  // reads as losing every bet rather than having no record yet. Say nothing
+  // about a rate we do not have.
+  const settled  = totalWon + totalLost;
+  const recordPhrase = settled > 0
+    ? `Data-driven predictions with ${winRate}% win rate.`
+    : 'Data-driven predictions from published, verifiable results.';
 
   const tipCards = freeTips.map(t => `
     <article class="tip-card" itemscope itemtype="https://schema.org/Event">
@@ -181,12 +188,12 @@ module.exports = async (req, res) => {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Free Betting Tips Today — ${todayStr} | The Tipster</title>
-<meta name="description" content="Free football tips, NHL tips and NBA tips for ${todayStr}. Data-driven predictions with ${winRate}% win rate. Updated every 15 minutes.">
+<meta name="description" content="Free football tips, NHL tips and NBA tips for ${todayStr}. ${recordPhrase} Updated every 15 minutes.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.thetipsteredge.com/tips">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <meta property="og:title" content="Free Betting Tips Today — ${todayStr}">
-<meta property="og:description" content="Today's free sports betting tips. ${winRate}% verified win rate. Football, NHL, NBA.">
+<meta property="og:description" content="Today's free sports betting tips.${settled > 0 ? ` ${winRate}% verified win rate.` : ''} Football, NHL, NBA.">
 <meta property="og:url" content="https://www.thetipsteredge.com/tips">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="The Tipster Edge">
@@ -197,7 +204,7 @@ module.exports = async (req, res) => {
 <meta property="og:image:alt" content="The Tipster Edge — data-driven sports betting tips">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Free Betting Tips Today — ${todayStr} | The Tipster">
-<meta name="twitter:description" content="Free football tips, NHL tips and NBA tips for ${todayStr}. Data-driven predictions with ${winRate}% win rate. Updated every 15 minutes.">
+<meta name="twitter:description" content="Free football tips, NHL tips and NBA tips for ${todayStr}. ${recordPhrase} Updated every 15 minutes.">
 <meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
 <meta name="twitter:site" content="@TheTipsterApp">
 ${freeTips.length ? `<script type="application/ld+json">${jsonLd({
@@ -275,7 +282,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <p class="page-sub">Data-driven sports predictions across football, NBA basketball and NHL ice hockey. Every tip verified and tracked.</p>
 
   <div class="stats-bar">
-    <div class="stat"><div class="stat-label">Win Rate</div><div class="stat-val green">${winRate}%</div></div>
+    <div class="stat"><div class="stat-label">Win Rate</div><div class="stat-val green">${settled > 0 ? winRate + '%' : '&mdash;'}</div></div>
     <div class="stat"><div class="stat-label">Tips Won</div><div class="stat-val green">${totalWon}</div></div>
     <div class="stat"><div class="stat-label">Tips Lost</div><div class="stat-val" style="color:#ff3d5a">${totalLost}</div></div>
     <div class="stat"><div class="stat-label">Updates</div><div class="stat-val gold">15 min</div></div>
@@ -313,7 +320,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <div class="content-block">
     <h2>What Is Value Betting?</h2>
     <p>Value betting means placing bets only when the true probability of an outcome is higher than what the bookmaker's odds imply. For example, if our model calculates a 60% chance of a team winning, but the bookmaker's odds imply only a 50% chance, there is a +10% value edge on that selection.</p>
-    <p>Consistently backing value selections is how professional bettors build a long-term record. Every advised single is published on the <a href="/results" style="color:#18e07a;">track record</a>, win or lose: ${totalWon + totalLost} settled so far, at a ${winRate}% strike rate. Accumulators are emailed rather than recorded, so they are not counted there. Value betting is a long-term approach and individual results vary.</p>
+    <p>Consistently backing value selections is how professional bettors build a long-term record. Every advised single is published on the <a href="/results" style="color:#18e07a;">track record</a>, win or lose${settled > 0 ? `: ${settled} settled so far, at a ${winRate}% strike rate` : ''}. Accumulators are emailed rather than recorded, so they are not counted there. Value betting is a long-term approach and individual results vary.</p>
   </div>
 </div>
 

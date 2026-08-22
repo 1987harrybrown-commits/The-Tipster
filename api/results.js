@@ -131,6 +131,14 @@ module.exports = async (req, res) => {
   const roi       = num(stats?.roi,        'roi');
   const totalWon  = num(stats?.total_won,  'total_won');
   const totalLost = num(stats?.total_lost, 'total_lost');
+  // Nothing settled yet is not a 0% win rate and not 0.00u of profit made —
+  // it is an absence of a record. The title, the three descriptions and the
+  // structured data all built sentences out of those zeros.
+  const settled = totalWon + totalLost;
+  const titleRate = settled > 0 ? ' — ' + winRate + '% Win Rate' : '';
+  const recordPhrase = settled > 0
+    ? `${totalWon} winners from ${settled} settled tips. ${winRate}% win rate. ${fmt(pl)}u profit.`
+    : 'No tips have settled yet.';
 
   // Last 30 days by day
   const byDay = {};
@@ -168,13 +176,13 @@ module.exports = async (req, res) => {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Verified Betting Tips Track Record — ${winRate}% Win Rate | The Tipster</title>
-<meta name="description" content="Fully transparent verified betting tips track record. ${totalWon} winners from ${totalWon+totalLost} settled tips. ${winRate}% win rate. ${fmt(pl)}u profit. Every advised single published, win or lose.">
+<title>Verified Betting Tips Track Record${titleRate} | The Tipster</title>
+<meta name="description" content="Fully transparent verified betting tips track record. ${recordPhrase} Every advised single published, win or lose.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.thetipsteredge.com/results">
 <meta property="og:type" content="website">
-<meta property="og:title" content="Verified Betting Tips Track Record — ${winRate}% Win Rate | The Tipster">
-<meta property="og:description" content="Fully transparent verified betting tips track record. ${totalWon} winners from ${totalWon+totalLost} settled tips. ${winRate}% win rate. ${fmt(pl)}u profit. Every advised single published, win or lose.">
+<meta property="og:title" content="Verified Betting Tips Track Record${titleRate} | The Tipster">
+<meta property="og:description" content="Fully transparent verified betting tips track record. ${recordPhrase} Every advised single published, win or lose.">
 <meta property="og:url" content="https://www.thetipsteredge.com/results">
 <meta property="og:site_name" content="The Tipster Edge">
 <meta property="og:locale" content="en_GB">
@@ -183,8 +191,8 @@ module.exports = async (req, res) => {
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="The Tipster Edge — data-driven sports betting tips">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Verified Betting Tips Track Record — ${winRate}% Win Rate | The Tipster">
-<meta name="twitter:description" content="Fully transparent verified betting tips track record. ${totalWon} winners from ${totalWon+totalLost} settled tips. ${winRate}% win rate. ${fmt(pl)}u profit. Every advised single published, win or lose.">
+<meta name="twitter:title" content="Verified Betting Tips Track Record${titleRate} | The Tipster">
+<meta name="twitter:description" content="Fully transparent verified betting tips track record. ${recordPhrase} Every advised single published, win or lose.">
 <meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
 <meta name="twitter:site" content="@TheTipsterApp">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -192,7 +200,7 @@ module.exports = async (req, res) => {
   "@context":"https://schema.org",
   "@type":"Dataset",
   "name":"The Tipster — Verified Betting Tips Track Record",
-  "description":`Complete betting tips results history. ${totalWon} winners from ${totalWon+totalLost} tips. ${winRate}% win rate.`,
+  "description":`Complete betting tips results history. ${recordPhrase}`,
   "url":"https://www.thetipsteredge.com/results",
   "publisher":{"@type":"Organization","name":"The Tipster","url":"https://www.thetipsteredge.com"}
 })}</script>
@@ -239,19 +247,19 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <p class="page-sub">Every tip logged from the moment it's published. Results recorded automatically. Nothing deleted, edited or cherry-picked.</p>
 
   <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">Win Rate</div><div class="kpi-val green">${winRate}%</div></div>
+    <div class="kpi"><div class="kpi-label">Win Rate</div><div class="kpi-val ${settled > 0 ? 'green' : 'white'}">${settled > 0 ? winRate + '%' : '&mdash;'}</div></div>
     <div class="kpi"><div class="kpi-label">Tips Won</div><div class="kpi-val green">${totalWon}</div></div>
     <div class="kpi"><div class="kpi-label">Tips Lost</div><div class="kpi-val red">${totalLost}</div></div>
     <div class="kpi"><div class="kpi-label">Total Tips</div><div class="kpi-val white">${totalWon+totalLost}</div></div>
-    <div class="kpi"><div class="kpi-label">Net Profit</div><div class="kpi-val ${pl>=0?'green':'red'}">${fmt(pl)}u</div></div>
-    <div class="kpi"><div class="kpi-label">ROI</div><div class="kpi-val gold">${fmt(roi,1)}%</div></div>
+    <div class="kpi"><div class="kpi-label">Net Profit</div><div class="kpi-val ${settled===0?'white':(pl>=0?'green':'red')}">${settled>0?fmt(pl)+'u':'&mdash;'}</div></div>
+    <div class="kpi"><div class="kpi-label">ROI</div><div class="kpi-val ${settled > 0 ? 'gold' : 'white'}">${settled > 0 ? fmt(roi,1) + '%' : '&mdash;'}</div></div>
   </div>
 
   <h2>Daily Results — Last 30 Days</h2>
   <div class="tbl-wrap">
     <table>
       <thead><tr><th>Date</th><th>Tips</th><th>Won</th><th>Lost</th><th>Win Rate</th><th>P&amp;L</th></tr></thead>
-      <tbody>${dayRows || '<tr><td colspan="6" style="text-align:center;padding:24px;color:#6c83a3">Loading...</td></tr>'}</tbody>
+      <tbody>${dayRows || '<tr><td colspan="6" style="text-align:center;padding:24px;color:#6c83a3">No tips have settled in the last 30 days.</td></tr>'}</tbody>
     </table>
   </div>
 

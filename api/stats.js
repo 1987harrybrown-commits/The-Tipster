@@ -96,19 +96,24 @@ module.exports = async (req, res) => {
 
   const sportRows = Object.entries(bySport).map(([sport,d])=>{
     const total=d.won+d.lost;
-    const wr=total>0?((d.won/total)*100).toFixed(1):0;
-    const roi=d.staked>0?((d.pl/d.staked)*100).toFixed(1):0;
-    const avgOdds=d.odds.length>0?(d.odds.reduce((a,b)=>a+b,0)/d.odds.length).toFixed(2):0;
+    // A sport can appear here with a denominator of zero — every settled bet
+    // in it was a push. 0.0% is not that sport's win rate; it does not have
+    // one yet, and neither does its ROI or its average price. null means
+    // "no figure", which the cells below render as a dash rather than a claim.
+    const wr=total>0?(d.won/total)*100:null;
+    const roi=d.staked>0?(d.pl/d.staked)*100:null;
+    const avgOdds=d.odds.length>0?d.odds.reduce((a,b)=>a+b,0)/d.odds.length:null;
+    const MUTED='#6c83a3';
     const icon={Football:'⚽',Basketball:'🏀','Ice Hockey':'🏒'}[sport]||'🏅';
     return `<tr>
       <td style="font-weight:700">${icon} ${esc(sport)}</td>
       <td>${total}</td>
       <td style="color:#18e07a">${d.won}</td>
       <td style="color:#ff3d5a">${d.lost}</td>
-      <td style="color:#18e07a;font-family:monospace">${wr}%</td>
+      <td style="color:${wr===null?MUTED:'#18e07a'};font-family:monospace">${wr===null?'&mdash;':wr.toFixed(1)+'%'}</td>
       <td style="color:${d.pl>=0?'#18e07a':'#ff3d5a'};font-family:monospace">${fmt(d.pl)}u</td>
-      <td style="color:${parseFloat(roi)>=0?'#18e07a':'#ff3d5a'};font-family:monospace">${fmt(parseFloat(roi),1)}%</td>
-      <td style="color:#f0b429;font-family:monospace">${avgOdds}</td>
+      <td style="color:${roi===null?MUTED:(roi>=0?'#18e07a':'#ff3d5a')};font-family:monospace">${roi===null?'&mdash;':fmt(roi,1)+'%'}</td>
+      <td style="color:${avgOdds===null?MUTED:'#f0b429'};font-family:monospace">${avgOdds===null?'&mdash;':avgOdds.toFixed(2)}</td>
     </tr>`;
   }).join('');
 
@@ -117,18 +122,23 @@ module.exports = async (req, res) => {
   const roi = stats?.roi||0;
   const tw = stats?.total_won||0;
   const tl = stats?.total_lost||0;
+  // Nothing settled means there is no rate and no return, only counts.
+  const settled = tw + tl;
+  const overallPhrase = settled > 0
+    ? `Overall ${winRate}% win rate.`
+    : 'Every advised single included, win or lose.';
 
   const html = `<!DOCTYPE html>
 <html lang="en-GB">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Betting Tips Statistics — Win Rate, ROI & P&L by Sport | The Tipster</title>
-<meta name="description" content="Detailed betting tips statistics by sport. Overall ${winRate}% win rate. Full breakdown of football tips, NHL tips and NBA tips performance with ROI, P&amp;L and average odds.">
+<meta name="description" content="Detailed betting tips statistics by sport. ${overallPhrase} Full breakdown of football tips, NHL tips and NBA tips performance with ROI, P&amp;L and average odds.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.thetipsteredge.com/betting-stats">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Betting Tips Statistics — Win Rate, ROI &amp; P&amp;L by Sport | The Tipster">
-<meta property="og:description" content="Detailed betting tips statistics by sport. Overall ${winRate}% win rate. Full breakdown of football tips, NHL tips and NBA tips performance with ROI, P&amp;L and average odds.">
+<meta property="og:description" content="Detailed betting tips statistics by sport. ${overallPhrase} Full breakdown of football tips, NHL tips and NBA tips performance with ROI, P&amp;L and average odds.">
 <meta property="og:url" content="https://www.thetipsteredge.com/betting-stats">
 <meta property="og:site_name" content="The Tipster Edge">
 <meta property="og:locale" content="en_GB">
@@ -138,7 +148,7 @@ module.exports = async (req, res) => {
 <meta property="og:image:alt" content="The Tipster Edge — data-driven sports betting tips">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Betting Tips Statistics — Win Rate, ROI &amp; P&amp;L by Sport | The Tipster">
-<meta name="twitter:description" content="Detailed betting tips statistics by sport. Overall ${winRate}% win rate. Full breakdown of football tips, NHL tips and NBA tips performance with ROI, P&amp;L and average odds.">
+<meta name="twitter:description" content="Detailed betting tips statistics by sport. ${overallPhrase} Full breakdown of football tips, NHL tips and NBA tips performance with ROI, P&amp;L and average odds.">
 <meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
 <meta name="twitter:site" content="@TheTipsterApp">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -179,18 +189,18 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <p class="sub">Complete performance breakdown across all sports. Every advised single included, win or lose — accumulators are emailed rather than recorded and are not counted here. Updated automatically after each settlement.</p>
 
   <div class="kpi-grid">
-    <div class="kpi"><div class="kpi-label">Overall Win Rate</div><div class="kpi-val" style="color:#18e07a">${winRate}%</div></div>
+    <div class="kpi"><div class="kpi-label">Overall Win Rate</div><div class="kpi-val" style="color:${settled>0?'#18e07a':'#6c83a3'}">${settled>0?winRate+'%':'&mdash;'}</div></div>
     <div class="kpi"><div class="kpi-label">Total Won</div><div class="kpi-val" style="color:#18e07a">${tw}</div></div>
     <div class="kpi"><div class="kpi-label">Total Lost</div><div class="kpi-val" style="color:#ff3d5a">${tl}</div></div>
-    <div class="kpi"><div class="kpi-label">Net Profit</div><div class="kpi-val" style="color:${pl>=0?'#18e07a':'#ff3d5a'}">${fmt(pl)}u</div></div>
-    <div class="kpi"><div class="kpi-label">Overall ROI</div><div class="kpi-val" style="color:#f0b429">${fmt(roi,1)}%</div></div>
+    <div class="kpi"><div class="kpi-label">Net Profit</div><div class="kpi-val" style="color:${settled===0?'#6c83a3':(pl>=0?'#18e07a':'#ff3d5a')}">${settled>0?fmt(pl)+'u':'&mdash;'}</div></div>
+    <div class="kpi"><div class="kpi-label">Overall ROI</div><div class="kpi-val" style="color:${settled>0?'#f0b429':'#6c83a3'}">${settled>0?fmt(roi,1)+'%':'&mdash;'}</div></div>
   </div>
 
   <h2>Performance by Sport</h2>
   <div class="tbl-wrap">
     <table>
       <thead><tr><th>Sport</th><th>Total Tips</th><th>Won</th><th>Lost</th><th>Win Rate</th><th>P&L</th><th>ROI</th><th>Avg Odds</th></tr></thead>
-      <tbody>${sportRows||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#6c83a3">Loading...</td></tr>'}</tbody>
+      <tbody>${sportRows||'<tr><td colspan="8" style="text-align:center;padding:24px;color:#6c83a3">No settled tips yet.</td></tr>'}</tbody>
     </table>
   </div>
 

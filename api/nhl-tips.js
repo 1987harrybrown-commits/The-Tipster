@@ -276,10 +276,10 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <h1>Free NHL Ice Hockey Tips — ${todayStr}</h1>
   <p class="sub">Poisson-model NHL predictions covering all regular season and playoff games. Ice hockey is our primary market — the most inefficient major betting league.</p>
   <div class="stats">
-    <div class="stat"><div class="sl">NHL Win Rate</div><div class="sv" style="color:#18e07a">${winRate}%</div></div>
+    <div class="stat"><div class="sl">NHL Win Rate</div><div class="sv" style="color:${total > 0 ? '#18e07a' : '#6c83a3'}">${total > 0 ? winRate + '%' : '&mdash;'}</div></div>
     <div class="stat"><div class="sl">Tips Won</div><div class="sv" style="color:#18e07a">${won}</div></div>
     <div class="stat"><div class="sl">Total Tips</div><div class="sv" style="color:#dde6f0">${total}</div></div>
-    <div class="stat"><div class="sl">Net P&L</div><div class="sv" style="color:${pl>=0?'#18e07a':'#ff3d5a'};font-family:monospace">${pl>=0?'+':''}${pl.toFixed(1)}u</div></div>
+    <div class="stat"><div class="sl">Net P&L</div><div class="sv" style="color:${total === 0 ? '#6c83a3' : (pl>=0?'#18e07a':'#ff3d5a')};font-family:monospace">${total === 0 ? '&mdash;' : (pl>=0?'+':'') + pl.toFixed(1) + 'u'}</div></div>
   </div>
   <div class="label">Today's NHL Picks</div>
   <h2>Free NHL Tips — ${todayStr}</h2>
