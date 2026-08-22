@@ -926,13 +926,25 @@ async function manageSubscription() {
   try {
     const { data: { session } } = await db.auth.getSession();
     if (session) {
-      const res = await fetch(ENGINE_URL + '/stripe/portal', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + session.access_token },
-      });
-      let data = {};
-      try { data = await res.json(); } catch (_) {}
-      if (data.url) { window.location.href = data.url; return; }
+      // Bounded, so the fallback below is actually reachable. "The engine is
+      // down" has two flavours: refused, which throws and lands in the catch,
+      // and stalled, which does neither — a fetch with no timeout waits as long
+      // as the network lets it, which on mobile can be minutes. That left the
+      // reader on a dead page with a working fallback sitting right underneath
+      // it. Same shape as verifyAdminKey in admin.html; shorter, because
+      // opening a billing portal should be quick.
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 20000);
+      try {
+        const res = await fetch(ENGINE_URL + '/stripe/portal', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + session.access_token },
+          signal: controller.signal,
+        });
+        let data = {};
+        try { data = await res.json(); } catch (_) {}
+        if (data.url) { window.location.href = data.url; return; }
+      } finally { clearTimeout(timer); }
     }
   } catch (e) {
     console.error('Portal session failed, falling back to hosted login:', e.message);

@@ -2297,7 +2297,18 @@ async function startCheckout(plan){
   try{
     // The engine resolves the account from this token now rather than from
     // the body, so the id and email no longer travel as parameters.
-    const res=await fetch(ENGINE_URL+'/stripe/checkout',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({plan})});
+    //
+    // Bounded, so the catch below is reachable. A refused connection throws and
+    // re-enables the button; a stalled one does neither, and a fetch with no
+    // timeout waits as long as the network allows — which on mobile can be
+    // minutes of a button reading "Loading..." with no way back. This is the
+    // buy button, so that is the worst place on the site for it.
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),20000);
+    let res;
+    try{
+      res=await fetch(ENGINE_URL+'/stripe/checkout',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+session.access_token},body:JSON.stringify({plan}),signal:controller.signal});
+    } finally { clearTimeout(timer); }
     let data={};
     try{data=await res.json();}catch(_){}
 
