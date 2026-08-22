@@ -1098,7 +1098,11 @@ async function loadLiveBar() {
   // entire ledger into the browser on every page load. The paginated fallback
   // covers a missing or not-yet-written cache row.
   let s = null;
-  const { data: cache } = await db.from('stats_cache').select('*').eq('id', 1).maybeSingle();
+  const { data: cache, error: cacheErr } = await db.from('stats_cache').select('*').eq('id', 1).maybeSingle();
+  // Not fatal — the paginated fallback below covers it — but a silent fall
+  // back to reading the whole ledger is worth one line to whoever is wondering
+  // why the headline took a second.
+  if (cacheErr) console.warn('stats_cache unavailable, reading the ledger instead:', cacheErr.message);
   if (cache && cache.total_tips != null) {
     s = {
       total_tips:   Number(cache.total_tips)   || 0,
@@ -1170,12 +1174,15 @@ async function selectIn(table, cols, col, values) {
 async function loadBestBetStreak() {
   try {
     // Load all tagged best bets from tips table
-    const { data: bestBets } = await db
+    const { data: bestBets, error: bestErr } = await db
       .from('tips')
       .select('tip_ref, status, event_time, confidence')
       .eq('is_best_bet', true)
       .order('event_time', { ascending: true });
 
+    // Hiding the streak is the right outcome either way, but "no best bets
+    // tagged yet" and "the read failed" are different things to be told.
+    if (bestErr) console.warn('Best-bet streak unavailable:', bestErr.message);
     if (!bestBets) return;
 
     // Cross-reference results_history for accurate settled status.
@@ -2197,16 +2204,32 @@ async function updateNavAuth(){
   const rightEl=document.querySelector('.nav-right');
   if(!rightEl)return;
   if(session){
-    let {data:profile}=await db.from('users').select('subscription_status').eq('id',session.user.id).single();
-    // No row means the trigger never ran for this account. Repair it once, so
-    // anyone who signed up during a gap is fixed on their next visit rather
-    // than staying invisible to the mailer forever.
-    if(!profile && await ensureProfile(session)){
-      ({data:profile}=await db.from('users').select('subscription_status').eq('id',session.user.id).single());
+    let {data:profile,error:profileErr}=await db.from('users').select('subscription_status').eq('id',session.user.id).single();
+    // PGRST116 is "no row", which is a real state. Anything else is a read that
+    // did not happen, and the two must not be confused — the same distinction
+    // account.html already makes.
+    //
+    // Both branches below were wrong for a failed read. It would POST to
+    // /ensure-profile to create a row this account already has; and it would
+    // set isProUser false, which strips the PRO badge, brings back the upsell
+    // and re-renders the card with the tips locked — on the account of somebody
+    // paying for them. One dropped packet demoted a subscriber.
+    //
+    // On a failed read, say so and change nothing: whatever was already known
+    // about this session stands until a read succeeds.
+    if(profileErr && profileErr.code !== 'PGRST116'){
+      console.error('Could not read subscription status, leaving it as it was:', profileErr.message);
+    }else{
+      // No row means the trigger never ran for this account. Repair it once, so
+      // anyone who signed up during a gap is fixed on their next visit rather
+      // than staying invisible to the mailer forever.
+      if(!profile && await ensureProfile(session)){
+        ({data:profile}=await db.from('users').select('subscription_status').eq('id',session.user.id).single());
+      }
+      // Coerce: `profile && ...` yields null, not false, when there is no row.
+      isProUser=!!(profile&&profile.subscription_status==='pro');
+      isPastDueUser=!!(profile&&profile.subscription_status==='past_due');
     }
-    // Coerce: `profile && ...` yields null, not false, when there is no row.
-    isProUser=!!(profile&&profile.subscription_status==='pro');
-    isPastDueUser=!!(profile&&profile.subscription_status==='past_due');
     syncProCta();
     rightEl.innerHTML='<a href="/account.html" class="btn btn-ghost" style="text-decoration:none;font-size:13px;padding:7px 16px;border-radius:4px;border:1px solid var(--border2);color:var(--text);">'+(isProUser?'<span style="color:var(--gold);margin-right:5px;">PRO</span>':'')+'My Account</a><button class="btn btn-ghost" onclick="handleLogout()">Log Out</button>';
     if(allTips.length)renderTips();
@@ -2283,7 +2306,8 @@ async function loadConversionBlock(){
     // exactly one row, so as soon as two future Saturday overrides existed
     // this teaser silently vanished; take the nearest one instead.
     const ukToday=new Date().toLocaleDateString('en-CA',{timeZone:'Europe/London'});
-    const {data:accaOverride}=await db.from('email_overrides').select('acca_combined_odds,acca_selections').eq('type','saturday').gte('date',ukToday).order('date',{ascending:true}).limit(1).maybeSingle();
+    const {data:accaOverride,error:accaErr}=await db.from('email_overrides').select('acca_combined_odds,acca_selections').eq('type','saturday').gte('date',ukToday).order('date',{ascending:true}).limit(1).maybeSingle();
+    if(accaErr)console.warn('Saturday acca teaser unavailable:',accaErr.message);
     if(accaOverride&&accaOverride.acca_selections){
       const teaserEl=document.getElementById('accaTeaser'),oddsEl=document.getElementById('accaTeaserOdds'),legsEl=document.getElementById('accaTeaserLegs');
       if(teaserEl)teaserEl.style.display='block';if(oddsEl)oddsEl.textContent=parseFloat(accaOverride.acca_combined_odds||0).toFixed(2);if(legsEl)legsEl.textContent=accaOverride.acca_selections.length+' selections';
