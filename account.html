@@ -294,7 +294,24 @@ function readHashParams() {
   // A token in the hash is either an email confirmation or a password reset,
   // and they need different things to happen next.
   const hash = readHashParams();
-  isRecovery = hash.type === 'recovery';
+  // A recovery link carries a token. Typing one does not.
+  //
+  // This read `hash.type === 'recovery'` alone, and that string is simply part
+  // of the URL — so anyone sitting at an already signed-in browser could go to
+  // /account.html#type=recovery, watch the current-password field disappear,
+  // and set a new password without knowing the old one. That turns borrowed
+  // access into a permanent lockout of the actual owner, which is the exact
+  // escalation the current-password check exists to stop.
+  //
+  // Requiring the access_token as well means the fragment has to carry
+  // something only the emailed link contains. The PASSWORD_RECOVERY listener
+  // below is the authoritative half: Supabase emits it only when the token it
+  // just processed really was a recovery token, and it also covers the case
+  // where the exchange finishes after this line has run.
+  isRecovery = hash.type === 'recovery' && !!hash.access_token;
+  db.auth.onAuthStateChange((event) => {
+    if (event === 'PASSWORD_RECOVERY') { isRecovery = true; applyRecoveryMode(); }
+  });
   if (window.location.hash && window.location.hash.includes('access_token')) {
     // Let Supabase exchange the token automatically
     await new Promise(r => setTimeout(r, 1200));
