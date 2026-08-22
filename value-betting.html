@@ -101,7 +101,7 @@ footer a{color:var(--muted);text-decoration:none;margin:0 8px;}
 
   <h2>How The Tipster Finds Value Bets</h2>
   <p>Our engine uses a <strong>Dixon-Coles Poisson model</strong> for football and a <strong>Poisson goals model</strong> for NHL ice hockey, combined with team efficiency ratings for NBA basketball. These models calculate true win probabilities for every game.</p>
-  <p>We then compare these probabilities against live odds from an aggregated UK-licensed bookmaker feed, adjusted for their margin, to calculate the true value edge on every available market. Only tips with a positive edge above our minimum threshold (8% for H2H markets, 12% for totals) are published.</p>
+  <p>We then compare these probabilities against live odds from an aggregated UK-licensed bookmaker feed, adjusted for their margin, to calculate the true value edge on every available market. There is no minimum edge. A selection is published when it clears a confidence floor and survives a check on how far the model has strayed from the de-vigged price — a model that disagrees violently with the market is usually wrong rather than early. What happens to a selection with no edge is described under staking below: it is sized at zero and published as information rather than as a bet.</p>
 
   <h2>Kelly Criterion — Optimal Stake Sizing</h2>
   <p>Finding value bets is only half the equation. Stake sizing determines how quickly your bankroll grows (or shrinks). The <strong>Kelly Criterion</strong> is the mathematically optimal formula for sizing bets based on your edge and odds.</p>
@@ -122,7 +122,7 @@ footer a{color:var(--muted);text-decoration:none;margin:0 8px;}
   <h3>Is value betting legal?</h3>
   <p>Yes, completely. Value betting is simply placing bets at favourable odds — there is nothing illegal about it. Some bookmakers may limit or close accounts of consistently profitable bettors, which is why using multiple bookmakers and betting exchanges is advisable.</p>
   <h3>How much edge do I need to be profitable?</h3>
-  <p>Any positive edge makes a bet theoretically profitable. In practice, a minimum edge of 5% is recommended to overcome bookmaker margin reliably. Our threshold is 8% for head-to-head markets.</p>
+  <p>Any positive edge makes a bet theoretically profitable. In practice a minimum of around 5% is often recommended to overcome bookmaker margin reliably. <strong>We do not enforce one.</strong> Our staking does the same job from the other end: quarter-Kelly sizes a selection with no edge against the price at zero, so it appears on the card as an informational pick, carries no stake, and is excluded from the win rate and ROI we publish.</p>
   <h3>Can I value bet on any sport?</h3>
   <p>Value betting works best in markets where bookmakers are less accurate — typically lower-profile leagues, player props, and sports with less public interest. NHL ice hockey and NBA basketball are our primary markets for this reason.</p>
 </main>
