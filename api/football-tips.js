@@ -248,6 +248,9 @@ module.exports = async (req, res) => {
 <meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
 <meta name="twitter:site" content="@TheTipsterApp">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#07090d">
 ${freeTips.length ? `<script type="application/ld+json">${jsonLd({
   "@context":"https://schema.org",
   "@type":"ItemList",

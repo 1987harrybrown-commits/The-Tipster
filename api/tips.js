@@ -198,6 +198,9 @@ module.exports = async (req, res) => {
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.thetipsteredge.com/tips">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#07090d">
 <meta property="og:title" content="Free Betting Tips Today — ${todayStr}">
 <meta property="og:description" content="Today's free sports betting tips.${settled > 0 ? ` ${winRate}% verified win rate.` : ''} Football, NHL, NBA.">
 <meta property="og:url" content="https://www.thetipsteredge.com/tips">
