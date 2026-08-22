@@ -1288,16 +1288,22 @@ function renderDashboard(period) {
   set('kpi-bets', total>0?total:0, 'w', total>0?won+'W / '+lost+'L':'no settled bets');
   set('kpi-won',  won, 'g', '');
   set('kpi-lost', lost, 'r', '');
-  set('kpi-rate', total>0?rate.toFixed(1)+'%':'0%', 'g', total>0?total+' settled':'awaiting results');
+  // A period with nothing settled in it has no rate, no profit and no ROI —
+  // and 'Yesterday' is in that state routinely, whenever the card is still
+  // pending. Printing 0% and +0.00u there reads as a period that went badly
+  // rather than one that has not finished. The em dash is what the markup
+  // already ships as its placeholder.
+  set('kpi-rate', total>0?rate.toFixed(1)+'%':'—', 'g', total>0?total+' settled':'awaiting results');
   const ple=document.getElementById('kpi-pl');
-  if(ple){ple.textContent=total>0?fmtU(pl):'+0.00u';ple.className='kpi-val '+(pl>=0?'g':'r');}
-  set('kpi-roi', total>0?fmt(roi,1)+'%':'+0.0%', 'go', total>0?'on '+staked.toFixed(1)+'u staked':'awaiting results');
+  if(ple){ple.textContent=total>0?fmtU(pl):'—';ple.className='kpi-val '+(total>0&&pl<0?'r':'g');}
+  set('kpi-roi', total>0?fmt(roi,1)+'%':'—', 'go', total>0?'on '+staked.toFixed(1)+'u staked':'awaiting results');
   document.getElementById('sum-period-label').textContent = (labels[period]||'Last 30 Days')+' Summary';
   document.getElementById('sum-bets').textContent     = total||0;
   document.getElementById('sum-staked').textContent   = total>0?staked.toFixed(1)+'u':'0u';
   document.getElementById('sum-returned').textContent = total>0?(staked+pl).toFixed(2)+'u':'0u';
   const sn=document.getElementById('sum-net');
-  sn.textContent=total>0?fmtU(pl):'+0.00u'; sn.style.color='var(--green)';
+  sn.textContent=total>0?fmtU(pl):'—';
+  sn.style.color = total>0 && pl<0 ? 'var(--red)' : 'var(--green)';
   document.getElementById('sum-avgodds').textContent  = total>0?avgOdds.toFixed(2):'N/A';
 }
 
