@@ -15,7 +15,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{
   --bg:#07090d;--bg2:#0c0f15;--bg3:#111620;
@@ -238,6 +237,15 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
   </div>
 </div>
 
+<!-- Moved out of <head>, matching index.html. Render-blocking with no defer,
+     so ~120KB of JS had to download and execute before the browser painted
+     anything -- and nothing above this point uses it, so the nav and the
+     loading state now paint first.
+
+     defer is not an option: the inline script below runs during parsing and
+     calls createClient immediately, and deferred scripts execute after that.
+     Position is what orders them. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // ── SUPABASE ──────────────────────────────────────────────
 const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';

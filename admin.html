@@ -6,7 +6,6 @@
 <title>Admin | The Tipster</title>
 <meta name="robots" content="noindex, nofollow">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=Space+Mono:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#07090d;--bg2:#0c0f15;--bg3:#111620;--card:#0f141c;--border:#1c2535;--border2:#243044;--green:#18e07a;--red:#ff3d5a;--gold:#f0b429;--text:#dde6f0;--muted:#6c83a3;--muted2:#7c828b;
   /* Text on a translucent tinted badge. The tint lightens the card
@@ -404,6 +403,15 @@ td{padding:9px 11px;}
 </div>
 </div>
 
+<!-- Moved out of <head>, matching index.html. Render-blocking with no defer,
+     so ~120KB of JS had to download and execute before the browser painted
+     anything -- and nothing above this point uses it, so the nav and the
+     loading state now paint first.
+
+     defer is not an option: the inline script below runs during parsing and
+     calls createClient immediately, and deferred scripts execute after that.
+     Position is what orders them. -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
