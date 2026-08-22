@@ -331,7 +331,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
 </div>
 
 <footer>
-  <p style="margin-bottom:10px">© 2026 The Tipster · Free sports betting tips updated every 15 minutes · 18+ only · Please gamble responsibly &bull; <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer">BeGambleAware.org</a> &bull; National Gambling Helpline <a href="tel:08088020133">0808 8020 133</a></p>
+  <p style="margin-bottom:10px">© 2026 The Tipster · Free sports betting tips updated every 15 minutes · 18+ only · Tips are for informational purposes only · Past performance does not guarantee future results · Please gamble responsibly &bull; <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer">BeGambleAware.org</a> &bull; National Gambling Helpline <a href="tel:08088020133">0808 8020 133</a></p>
   <div>
     <a href="/">Home</a>
     <a href="/results">Track Record</a>

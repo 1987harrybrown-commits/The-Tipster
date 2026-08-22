@@ -311,7 +311,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   </div>
 </div>
 <footer>
-  <p style="margin-bottom:10px">© 2026 The Tipster · Free NHL betting tips · 18+ only · Please gamble responsibly &bull; <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer">BeGambleAware.org</a> &bull; National Gambling Helpline <a href="tel:08088020133">0808 8020 133</a></p>
+  <p style="margin-bottom:10px">© 2026 The Tipster · Free NHL betting tips · 18+ only · Tips are for informational purposes only · Past performance does not guarantee future results · Please gamble responsibly &bull; <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer">BeGambleAware.org</a> &bull; National Gambling Helpline <a href="tel:08088020133">0808 8020 133</a></p>
   <div><a href="/">Home</a><a href="/tips">All Tips</a><a href="/results">Track Record</a><a href="/football-tips-today">Football Tips</a><a href="/nba-tips-today">NBA Tips</a><a href="/responsible-gambling.html">Responsible Gambling</a></div>
 </footer>
 </body>
