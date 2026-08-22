@@ -31,22 +31,107 @@
 <meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
 <meta name="twitter:site" content="@TheTipsterApp">
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@graph": [
-    {"@type":"WebSite","@id":"https://www.thetipsteredge.com/#website","url":"https://www.thetipsteredge.com/","name":"The Tipster Edge","description":"Statistical sports betting tips across NHL, NBA and Football. Every tip logged and tracked.","publisher":{"@id":"https://www.thetipsteredge.com/#organization"}},
-    {"@type":"Organization","@id":"https://www.thetipsteredge.com/#organization","name":"The Tipster Edge","url":"https://www.thetipsteredge.com/","description":"Independent sports betting intelligence platform providing data-driven tips and predictions.","foundingDate":"2026","knowsAbout":["Sports Betting Tips","Value Betting","NHL Predictions","NBA Predictions","Football Betting Tips","Premier League Predictions"]},
-    {"@type":"FAQPage","mainEntity":[
-      {"@type":"Question","name":"Are the tips free?","acceptedAnswer":{"@type":"Answer","text":"Yes. Free members get 3 tips daily with no account required. Pro members get the full daily card delivered by email at 07:00, including confidence ratings, value edge % and stake recommendations on every tip."}},
-      {"@type":"Question","name":"How often are tips updated?","acceptedAnswer":{"@type":"Answer","text":"The card is rebuilt every 15 minutes, and odds are refreshed twice a day at 06:00 and 13:00 UK, so the value edge is recalculated against the most recent prices we hold."}},
-      {"@type":"Question","name":"How is the track record calculated?","acceptedAnswer":{"@type":"Answer","text":"Every tip is timestamped and logged when published. Results are recorded automatically when fixtures complete. Nothing is removed or adjusted — the win rate and P&L reflect every settled tip in the database."}},
-      {"@type":"Question","name":"What sports are covered?","acceptedAnswer":{"@type":"Answer","text":"NHL Ice Hockey and NBA Basketball are our primary markets. Football is covered as a secondary market across Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League."}},
-      {"@type":"Question","name":"How do you find value bets?","acceptedAnswer":{"@type":"Answer","text":"The engine fetches live odds, strips the bookmaker margin to find the true implied probability, then compares to our statistical model. When the model probability exceeds the market implied probability by a meaningful margin, that is a value bet."}},
-      {"@type":"Question","name":"How much does Pro cost?","acceptedAnswer":{"@type":"Answer","text":"Pro is £9.99 per month, or £99.90 per year — equivalent to two months free. Cancel any time."}}
-    ]}
-  ]
-}
-</script>
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://www.thetipsteredge.com/#website",
+          "url": "https://www.thetipsteredge.com/",
+          "name": "The Tipster Edge",
+          "description": "Statistical sports betting tips across NHL, NBA and Football. Every tip logged and tracked.",
+          "publisher": {
+            "@id": "https://www.thetipsteredge.com/#organization"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://www.thetipsteredge.com/#organization",
+          "name": "The Tipster Edge",
+          "url": "https://www.thetipsteredge.com/",
+          "description": "Independent sports betting intelligence platform providing data-driven tips and predictions.",
+          "foundingDate": "2026",
+          "knowsAbout": [
+            "Sports Betting Tips",
+            "Value Betting",
+            "NHL Predictions",
+            "NBA Predictions",
+            "Football Betting Tips",
+            "Premier League Predictions"
+          ]
+        },
+        {
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Are the tips free?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes — 3 free tips are available every day with no account required. You get the full selection, odds and bookmaker on each pick. Free members also receive the Saturday accumulator by email whenever the card supports one. Pro members unlock the full daily card delivered by email at 07:00, including confidence ratings, value edge % and stake recommendations on every tip."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How often are the tips updated?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Every 15 minutes the card is rebuilt. Odds are refreshed twice a day, at 06:00 and 13:00 UK, and the engine recalculates the value edge on every tip as prices change. When lines move significantly, picks update automatically."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How is the track record calculated?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Every tip is timestamped and logged the moment it is published. Results are recorded automatically when fixtures complete — nothing is removed, edited or excluded. The win rate and P&L you see reflects every single settled tip in the database."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What sports are covered?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Eight competitions. Football is the largest, across the Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and the Champions League. Basketball is the NBA and ice hockey is the NHL."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "What does value edge mean?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Value edge is the gap between our model's estimated true probability of an outcome and the bookmaker's implied probability. A positive edge means the odds on offer are higher than they should be. Consistently backing positive-edge selections is how you build a long-term profitable record."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How do you find value bets?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The engine fetches live odds and strips the bookmaker's margin to find the true implied probability. It then compares that to a statistical model — Poisson-based for football and NHL, a season scoring-rate model for NBA. When the model's probability is higher than the one implied by the odds, the engine publishes that as a value tip."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Are these tips profitable long term?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "The live track record shows the running P&L on every settled tip — check the Results section to see the current numbers. Value betting is a long-term approach: individual results vary, but the edge plays out over volume. Following stake recommendations consistently matters more than any single result."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "How much does Pro cost?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Pro is £9.99 per month billed monthly, or £99.90 per year — equivalent to two months free. Cancel any time, no contracts."
+              }
+            }
+          ]
+        }
+      ]
+    }
+    </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://eyhlzzaaxrwisrtwyoyh.supabase.co">
@@ -691,9 +776,9 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">Are the tips free?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Yes — 3 free tips are available every day with no account required. You get the full selection, odds and bookmaker on each pick. Free members also receive the Saturday accumulator by email whenever the card supports one. Pro members unlock the full daily card delivered by email at 07:00, including confidence ratings, value edge % and stake recommendations on every tip.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How often are the tips updated?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Every 15 minutes the card is rebuilt. Odds are refreshed twice a day, at 06:00 and 13:00 UK, and the engine recalculates the value edge on every tip as prices change. When lines move significantly, picks update automatically.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How is the track record calculated?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Every tip is timestamped and logged the moment it is published. Results are recorded automatically when fixtures complete — nothing is removed, edited or excluded. The win rate and P&L you see reflects every single settled tip in the database.</p></div></div>
-        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">What sports are covered?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">NHL Ice Hockey and NBA Basketball are our primary focus. Football is covered as a secondary market across the Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League.</p></div></div>
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">What sports are covered?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Eight competitions. Football is the largest, across the Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and the Champions League. Basketball is the NBA and ice hockey is the NHL.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">What does value edge mean?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Value edge is the gap between our model's estimated true probability of an outcome and the bookmaker's implied probability. A positive edge means the odds on offer are higher than they should be. Consistently backing positive-edge selections is how you build a long-term profitable record.</p></div></div>
-        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How do you find value bets?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">The engine fetches live odds and strips the bookmaker's margin to find the true implied probability. It then compares that to a statistical model — Poisson-based for football and NHL, a season scoring-rate model for NBA. When the model probability meaningfully exceeds the market implied probability, the engine publishes that as a value tip.</p></div></div>
+        <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How do you find value bets?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">The engine fetches live odds and strips the bookmaker's margin to find the true implied probability. It then compares that to a statistical model — Poisson-based for football and NHL, a season scoring-rate model for NBA. When the model's probability is higher than the one implied by the odds, the engine publishes that as a value tip.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">Are these tips profitable long term?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">The live track record shows the running P&L on every settled tip — check the Results section to see the current numbers. Value betting is a long-term approach: individual results vary, but the edge plays out over volume. Following stake recommendations consistently matters more than any single result.</p></div></div>
         <div class="faq-item" itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"><button class="faq-q" onclick="toggleFaq(this)" aria-expanded="false"><span itemprop="name">How much does Pro cost?</span><span class="faq-icon">+</span></button><div class="faq-a" itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"><p itemprop="text">Pro is £9.99 per month billed monthly, or £99.90 per year — equivalent to two months free. Cancel any time, no contracts.</p></div></div>
       </div>
@@ -752,8 +837,8 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
   <section style="background:var(--bg2);border-top:1px solid var(--border);padding:48px 0;">
     <div class="wrap"><div style="max-width:780px;">
       <h2 style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:16px;">Statistical Sports Betting Tips — NHL, NBA &amp; Football</h2>
-      <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px;">The Tipster Edge publishes value betting tips. The card is rebuilt every 15 minutes; odds are refreshed twice a day, at 06:00 and 13:00 UK. Every tip shows the value edge — the gap between our model's probability and the bookmaker's implied odds. Only tips with meaningful positive edge are published.</p>
-      <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px;">Our primary focus is NHL Ice Hockey and NBA Basketball — markets where scoring and team strength data produces the most reliable models. Football is covered as a secondary market across the Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and Champions League. Every tip is logged the moment it's published and results settle automatically — giving you a live, unedited track record with no cherry-picking and no deleted tips.</p>
+      <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px;">The Tipster Edge publishes value betting tips. The card is rebuilt every 15 minutes; odds are refreshed twice a day, at 06:00 and 13:00 UK. Every tip shows the value edge — the gap between our model's probability and the bookmaker's implied odds. A tip is only staked when that gap is positive — the rest are published as insight, with no stake.</p>
+      <p style="font-size:13px;color:var(--muted);line-height:1.9;margin-bottom:16px;">Eight competitions in three sports: the Premier League, La Liga, Bundesliga, Serie A, Ligue 1 and the Champions League in football, the NBA in basketball and the NHL in ice hockey. Football is the largest of the three by tips published. Every tip is logged the moment it's published and results settle automatically — giving you a live, unedited track record with no cherry-picking and no deleted tips.</p>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:20px;margin-top:24px;">
         <div><h3 style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--green);">NHL &amp; NBA Tips</h3><p style="font-size:12px;color:var(--muted);line-height:1.7;">Our primary markets. Ice hockey and basketball offer the best opportunity for statistical models to find genuine value.</p></div>
         <div><h3 style="font-size:13px;font-weight:700;margin-bottom:8px;color:var(--green);">Value Betting</h3><p style="font-size:12px;color:var(--muted);line-height:1.7;">Every tip includes the value edge %: the difference between our model probability and the bookmaker's implied probability.</p></div>

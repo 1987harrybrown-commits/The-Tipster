@@ -306,7 +306,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
     <h2>NBA Betting — Key Factors</h2>
     <p><strong style="color:#dde6f0">Home court advantage</strong> — worth roughly 3 to 4 points on average in the NBA. Our model applies a flat 3.5 to the home side, the same figure at every arena.</p>
     <p><strong style="color:#dde6f0">How many games have been played</strong> — season averages taken from a handful of games are noisy, so a tip on a team with fewer than fifteen games behind it carries a lower confidence figure. That penalty is the only adjustment the NBA model makes beyond the two scoring numbers.</p>
-    <p><strong style="color:#dde6f0">The price, not just the pick</strong> — a selection is only published when the model's probability is meaningfully better than the price implies once the bookmaker's margin is removed. A team we expect to win is not a tip if the odds already say so.</p>
+    <p><strong style="color:#dde6f0">The price, not just the pick</strong> — a selection is only staked when the model's probability is higher than the price implies once the bookmaker's margin is removed — the rest are published as insight, with no stake. A team we expect to win is not a tip if the odds already say so.</p>
   </div>
   <div class="block">
     <h2>NBA Playoffs Betting Tips</h2>
