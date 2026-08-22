@@ -2130,11 +2130,24 @@ async function doForgot(){
   const btn=document.getElementById('foBtn'),alert=document.getElementById('forgotAlert');
   const email=document.getElementById('fo-email').value.trim();
   if(!email){showMAlert(alert,'Enter your email address.','error');return;}
+  // The same check signup makes, and this is the form that needs it most.
+  // Supabase deliberately answers resetPasswordForEmail the same way whether
+  // or not the account exists, so it cannot leak who has one \u2014 which means a
+  // typed-wrong address gets the identical cheerful answer as a correct one,
+  // and the reader waits for an email that was never going to arrive. Catching
+  // an address that is not an address is the one part of that we can fix.
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)){
+    showMAlert(alert,'That does not look like an email address.','error');return;
+  }
   btn.disabled=true;btn.textContent='Sending...';
   const {error}=await db.auth.resetPasswordForEmail(email,{redirectTo:window.location.origin+'/account.html'});
   btn.disabled=false;btn.textContent='Send Reset Link \u2192';
   if(error){showMAlert(alert,error.message,'error');return;}
-  showMAlert(alert,'Reset link sent. Check your inbox.','success');
+  // Says what is known, which is less than "sent". No error here does not mean
+  // an email went anywhere: it means Supabase is not telling us, on purpose.
+  // Claiming delivery for an address with no account is the same shape of
+  // untruth as reporting a save over a database that refused the write.
+  showMAlert(alert,'If an account exists for that address, a reset link is on its way.','success');
 }
 
 async function handleLogout(){await db.auth.signOut();updateNavAuth();}

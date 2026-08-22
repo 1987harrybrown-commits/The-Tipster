@@ -1180,6 +1180,12 @@ async function sendTest() {
   const to    = document.getElementById('testEmailTo').value.trim();
   const type  = document.getElementById('testEmailType').value;
   if (!to) { showAlert(alert, 'Enter an email address.', 'error'); return; }
+  // Checked here rather than three systems later. Without it a typo is queued
+  // as a job, claimed by the engine, handed to Resend and only then refused —
+  // so the dashboard says "queued" and the reason it went nowhere is in a log.
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(to)) {
+    showAlert(alert, 'That does not look like an email address.', 'error'); return;
+  }
   // Only a shape check — the point is to catch a typo before queuing a job
   // that can only fail at the provider a minute later, with no feedback here.
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(to)) {
