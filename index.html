@@ -946,9 +946,16 @@ function livePriceMove(tip) {
 }
 
 function fmtOdds(decimal) {
+  // parseFloat(null).toFixed(2) is the string "NaN", and this renders directly
+  // beside a selection — "Rangers @ NaN". No row in the live ledger has a null
+  // price today, so this is a guard rather than a fix for something observed;
+  // it is here because the failure is silent, visible to the reader, and about
+  // a number they would be staking money on.
+  const n = parseFloat(decimal);
+  if (!Number.isFinite(n)) return '—';
   return localStorage.getItem('oddsFormat') === 'fractional'
-    ? decimalToFractional(decimal)
-    : parseFloat(decimal).toFixed(2);
+    ? decimalToFractional(n)
+    : n.toFixed(2);
 }
 
 let activeDayFilter = 'today';
