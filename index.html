@@ -579,7 +579,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         </div>
         <button onclick="handleProClick()" class="btn btn-green" style="white-space:nowrap;padding:9px 20px;font-size:13px;">Go Pro</button>
       </div>
-      <div style="margin-bottom:20px;">
+      <div style="margin-bottom:20px;" id="proVsFreeBlock">
         <div style="font-family:'Space Mono',monospace;font-size:10px;text-transform:uppercase;letter-spacing:2px;color:var(--green);margin-bottom:14px;">Pro tips vs Free tips — last 30 days</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border-radius:8px;overflow:hidden;">
           <div style="background:var(--card);padding:18px 20px;">
@@ -2169,16 +2169,30 @@ async function loadConversionBlock(){
   if(isProUser)return;
   const block=document.getElementById('proConversion');if(block)block.style.display='block';
   const thirtyDaysAgo=new Date();thirtyDaysAgo.setDate(thirtyDaysAgo.getDate()-30);
-  const {data:history}=await db.from('results_history').select('tier,is_free,result,profit_loss,stake,settled_at').gte('settled_at',thirtyDaysAgo.toISOString());
-  if(history&&history.length){
-    // Same correction as the results tabs: free-ness is is_free, not tier.
-    const freeRows=history.filter(r=>r.is_free===true);
-    const proRows=history.filter(r=>r.is_free!==true&&(r.tier||'')!=='insight');
-    // Denominator is wins + losses. It counted every row that was not 'pending',
-    // which holds while a row can only be WON or LOST, but a VOID push is
-    // neither and would otherwise drag the win rate down.
-    const calcStats=rows=>{const won=rows.filter(r=>r.result==='WON').length,total=won+rows.filter(r=>r.result==='LOST').length,pl=rows.reduce((s,r)=>s+parseFloat(r.profit_loss||0),0);return{wr:total>0?(won/total*100).toFixed(1)+'%':'--',pl:total>0?(pl>=0?'+':'')+pl.toFixed(2)+'u':'--',pos:pl>=0};};
-    const proStats=calcStats(proRows),freeStats=calcStats(freeRows);
+  const {data:history,error:histErr}=await db.from('results_history').select('tier,is_free,result,profit_loss,stake,settled_at').gte('settled_at',thirtyDaysAgo.toISOString());
+  // This panel names is_free, and a column PostgREST does not know makes it
+  // refuse the whole statement rather than return partial rows — so this is the
+  // first thing to break if schema-migration.sql has not been run. Say which
+  // column, in the console, instead of leaving four em-dashes and no reason.
+  if(histErr)console.error('Pro vs Free panel could not load:',histErr.message);
+  const cmp=document.getElementById('proVsFreeBlock');
+  // Same correction as the results tabs: free-ness is is_free, not tier.
+  const freeRows=(history||[]).filter(r=>r.is_free===true);
+  const proRows=(history||[]).filter(r=>r.is_free!==true&&(r.tier||'')!=='insight');
+  // Denominator is wins + losses. It counted every row that was not 'pending',
+  // which holds while a row can only be WON or LOST, but a VOID push is
+  // neither and would otherwise drag the win rate down.
+  const calcStats=rows=>{const won=rows.filter(r=>r.result==='WON').length,total=won+rows.filter(r=>r.result==='LOST').length,pl=rows.reduce((s,r)=>s+parseFloat(r.profit_loss||0),0);return{n:total,wr:total>0?(won/total*100).toFixed(1)+'%':'--',pl:total>0?(pl>=0?'+':'')+pl.toFixed(2)+'u':'--',pos:pl>=0};};
+  const proStats=calcStats(proRows),freeStats=calcStats(freeRows);
+  // A comparison needs both sides. With one column empty this reads as broken
+  // rather than persuasive, and it is the free reader's first impression of
+  // whether the record is worth paying for. Three ways to end up there: the
+  // query failed, the site is new, or thirty quiet days — all of them show a
+  // panel headed "Pro tips vs Free tips" with four em-dashes under it. Drop the
+  // panel instead; the "today so far" line above it stands on its own.
+  const comparable=freeStats.n>0&&proStats.n>0;
+  if(cmp)cmp.style.display=comparable?'':'none';
+  if(comparable){
     const proWr=document.getElementById('pro-wr-display'),proPl=document.getElementById('pro-pl-display'),freeWr=document.getElementById('free-wr-display'),freePl=document.getElementById('free-pl-display');
     if(proWr)proWr.textContent=proStats.wr;if(proPl){proPl.textContent=proStats.pl;proPl.style.color=proStats.pos?'var(--green)':'var(--red)';}
     if(freeWr)freeWr.textContent=freeStats.wr;if(freePl){freePl.textContent=freeStats.pl;freePl.style.color=freeStats.pos?'var(--green)':'var(--red)';}
