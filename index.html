@@ -201,11 +201,20 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:56px;display:flex;ali
    Neutral, because it is neither a win nor a loss. */
 .res-pill.v{background:rgba(108,131,163,0.15);color:var(--muted-tint);}
 .sports-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:11px;}
-.sport-pill{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:17px 12px;text-align:center;cursor:pointer;transition:all 0.2s;}
+/* These were divs with an onclick: cursor:pointer, a hover lift, and a change to
+   what the page shows -- with no way for a keyboard to reach them, and nothing
+   telling a screen reader they did anything. Measured at 168x110 each, three of
+   them, on the homepage.
+   Not the Level A failure the auth switches were: filterBySport is also on the
+   sport tab row, which is buttons at 44px, so the function was never lost --
+   only this route to it. The children are styled by class rather than by tag,
+   so span with display:block leaves the layout exactly as it was. */
+.sport-pill{display:block;width:100%;font:inherit;color:inherit;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:17px 12px;text-align:center;cursor:pointer;transition:all 0.2s;}
 .sport-pill:hover{border-color:rgba(24,224,122,0.3);transform:translateY(-2px);}
-.sport-pill .sp-icon{font-size:26px;margin-bottom:6px;}
-.sport-pill .sp-name{font-size:12px;font-weight:700;margin-bottom:3px;}
-.sport-pill .sp-count{font-family:'Space Mono',monospace;font-size:10px;color:var(--green);}
+.sport-pill:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+.sport-pill .sp-icon{display:block;font-size:26px;margin-bottom:6px;}
+.sport-pill .sp-name{display:block;font-size:12px;font-weight:700;margin-bottom:3px;}
+.sport-pill .sp-count{display:block;font-family:'Space Mono',monospace;font-size:10px;color:var(--green);}
 .pricing-section{background:var(--bg2);border-top:1px solid var(--border);}
 .pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;max-width:780px;margin:0 auto;}
 .prc-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:30px;position:relative;}
@@ -1628,7 +1637,7 @@ function renderSportsGrid(){
   const counts={};allTips.forEach(t=>{counts[t.sport]=(counts[t.sport]||0)+1;});
   const sports=['Ice Hockey','Basketball','Football'];
   document.getElementById('sportsGrid').innerHTML=sports.map(s=>
-    '<div class="sport-pill" onclick="filterBySport(\''+s+'\')" style="cursor:pointer"><div class="sp-icon">'+sportIcon(s)+'</div><div class="sp-name">'+s+'</div><div class="sp-count">'+(counts[s]||0)+' tips today</div></div>'
+    '<button type="button" class="sport-pill" onclick="filterBySport(\''+s+'\')"><span class="sp-icon" aria-hidden="true">'+sportIcon(s)+'</span><span class="sp-name">'+s+'</span><span class="sp-count">'+(counts[s]||0)+' tips today</span></button>'
   ).join('');
 }
 
