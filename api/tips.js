@@ -319,7 +319,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
 
   <div class="content-block">
     <h2>Free NBA Basketball Tips Today</h2>
-    <p>NBA basketball offers daily betting opportunities across a long season. Our model incorporates pace metrics, offensive and defensive efficiency ratings, rest days, travel schedules and recent form to calculate win probabilities that consistently outperform market-implied odds.</p>
+    <p>NBA basketball offers daily betting opportunities across a long season. Our model is the simplest of the three: points scored and points allowed per game across the current season, set against the league average, with 3.5 points added for home court. It uses no pace, rest, travel or form data, and we would rather say that than describe a model we have not built.</p>
     <p>Free NBA tips are available every game day throughout the regular season and playoffs.</p>
   </div>
 

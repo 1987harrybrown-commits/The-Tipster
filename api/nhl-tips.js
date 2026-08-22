@@ -296,16 +296,18 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <div class="block">
     <h2>Why NHL is Our Primary Market</h2>
     <p>NHL ice hockey offers the best value betting opportunities of any major professional sport. Bookmakers systematically misprice NHL lines due to lower market liquidity compared to football or basketball, creating consistent opportunities for data-driven models to find edge.</p>
-    <p>Our Poisson goals model is specifically calibrated for NHL hockey, incorporating 5-on-5 Corsi and Fenwick metrics, goaltending save percentages, power play efficiency, home ice advantage, back-to-back game fatigue, and travel schedule factors.</p>
+    <p>Our Poisson goals model is calibrated for NHL hockey. It takes each team's goals scored and conceded across the season against a league average of 3.10 per game, applies the confirmed starting goaltender's save percentage to the shots that goaltender will face, adds a home-ice term, and adjusts for rest — a back-to-back is treated as the heavy case — recent form, and absences as a share of an eighteen-skater roster. Where two teams have met at least five times, the head-to-head record moves the projection a little.</p>
+    <p><strong style="color:#dde6f0">What it does not use:</strong> Corsi, Fenwick or any other shot-attempt metric, power-play efficiency, or travel. If the starting goalie has not been confirmed, the model says so to itself and publishes with lower confidence rather than guessing.</p>
   </div>
   <div class="block">
     <h2>NHL Betting Tips Model</h2>
-    <p>For each NHL game, our model calculates the expected goals for each team based on their season-long offensive and defensive performance metrics relative to league averages. These expected goals feed into a bivariate Poisson distribution to generate win, loss and overtime probabilities.</p>
-    <p>We compare these probabilities against the best available odds from an aggregated UK bookmaker feed. Tips are only published when we identify a value edge of 8% or more — meaning our model gives significantly better odds than the bookmaker implies.</p>
+    <p>For each NHL game, our model calculates the expected goals for each team from their season-long scoring and concession rates relative to the league average, then builds a grid of every plausible scoreline by treating the two totals as independent Poisson draws. Summing that grid gives the win, loss and overtime probabilities.</p>
+    <p>We compare these probabilities against the best available odds from an aggregated UK bookmaker feed, with the bookmaker's margin removed first so the two numbers describe the same thing.</p>
+    <p><strong style="color:#dde6f0">There is no minimum edge.</strong> A selection is published when it clears a confidence floor and survives a check on how far the model has strayed from the market — a model that disagrees violently with the price is usually wrong, not early. What happens to a selection with no edge is that our staking sizes it at zero, so it appears as an informational pick rather than an advised bet. Those carry no stake and are excluded from the win rate and ROI on this site.</p>
   </div>
   <div class="block">
     <h2>NHL Regular Season vs Playoffs</h2>
-    <p>Our NHL coverage runs throughout the regular season (October to April) and the Stanley Cup Playoffs (April to June). Playoff hockey has different statistical dynamics — teams are more evenly matched and series history becomes more relevant — and our model adjusts accordingly.</p>
+    <p>Our NHL coverage runs throughout the regular season (October to April) and the Stanley Cup Playoffs (April to June). Playoff hockey has different dynamics — teams are more evenly matched and series history matters more. <strong style="color:#dde6f0">Our model does not adjust for that.</strong> It applies the same season goal averages to a Game 7 as to a Tuesday in January, and we would rather say so than claim a postseason model we have not built.</p>
   </div>
 </div>
 <footer>

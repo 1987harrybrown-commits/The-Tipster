@@ -328,12 +328,13 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <div class="block">
     <h2>Premier League Tips Today</h2>
     <p>Our Dixon-Coles Poisson model is optimised for Premier League fixtures, using team season statistics, home/away attack and defence strength ratings, head-to-head records and live odds data from an aggregated odds feed covering UK bookmakers. Where a specific book offers the best price, it is named on the tip.</p>
-    <p>Premier League tips are published when our model identifies a value edge of 8% or more above the bookmaker's implied probability. Only selections that pass our strict confidence threshold appear on the platform.</p>
+    <p><strong style="color:#dde6f0">There is no minimum edge.</strong> A selection is published when it clears a confidence floor and survives a check on how far the model has strayed from the de-vigged market — a model that disagrees violently with the price is usually wrong rather than early. A selection with no edge against the price is not filtered out: our staking sizes it at zero, so it appears as an informational pick rather than an advised bet, and those carry no stake and sit outside the win rate and ROI published on this site.</p>
   </div>
 
   <div class="block">
     <h2>Champions League Tips</h2>
-    <p>Champions League football presents some of the best value betting opportunities due to the complexity of cross-league matchups. Our model incorporates group stage form, knockout round history, home and away European records, and squad depth to produce reliable win probabilities for every Champions League fixture.</p>
+    <p>Champions League football is genuinely harder to price, because a cross-league tie asks how a team's domestic goals translate against opposition it has no record against. Our model handles it the same way it handles a domestic fixture: attack and defence strength built from the Champions League table itself, recent form, rest, absences, and the head-to-head record where two clubs have met at least five times.</p>
+    <p><strong style="color:#dde6f0">It has no separate European module</strong> — no knockout-round history, no continental coefficient, no squad-depth rating. That is worth knowing when you read a Champions League tip from us, and it is why the early rounds of a group stage, where the table has little in it, produce lower confidence figures than a fixture in March.</p>
   </div>
 
   <div class="block">

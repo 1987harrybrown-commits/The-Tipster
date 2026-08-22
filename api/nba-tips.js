@@ -295,18 +295,19 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   </div>
   <div class="block">
     <h2>How Our NBA Prediction Model Works</h2>
-    <p>Our NBA model uses offensive and defensive efficiency ratings (points per 100 possessions), adjusted for pace, home court advantage, rest days, travel schedules and recent form. We calculate win probabilities for each game and compare them against bookmaker-implied odds to identify value.</p>
-    <p>NBA tips are published throughout the regular season (October to April) and the playoffs (April to June), covering all 30 teams across the full schedule of approximately 1,230 regular season games.</p>
+    <p>The NBA model is deliberately simple, and we would rather describe it accurately than dress it up. For each team it takes points scored and points allowed per game across the current season, expresses both relative to the league average, and uses them to project a score for each side. Home court adds 3.5 points. The projected margin becomes a win probability, which is compared against the bookmaker's implied probability with the margin stripped out.</p>
+    <p><strong style="color:#dde6f0">What it does not use:</strong> pace, possession-adjusted efficiency, rest days, travel, injuries or recent form. Those matter in basketball, and a model that used them would be a better model. Ours does not, and the record on this page is the record of the model as described.</p>
+    <p>NBA tips are published throughout the regular season (October to April) and the playoffs (April to June), across all 30 teams.</p>
   </div>
   <div class="block">
     <h2>NBA Betting — Key Factors</h2>
-    <p><strong style="color:#dde6f0">Back-to-back games</strong> — teams playing on consecutive nights show measurable performance decline. Our model weights this heavily when calculating win probabilities.</p>
-    <p><strong style="color:#dde6f0">Home court advantage</strong> — worth approximately 3-4 points on average in the NBA, with significant variation by arena and crowd intensity.</p>
-    <p><strong style="color:#dde6f0">Roster availability</strong> — load management and injuries are factored into our confidence ratings. Tips with injured star players carry reduced confidence scores.</p>
+    <p><strong style="color:#dde6f0">Home court advantage</strong> — worth roughly 3 to 4 points on average in the NBA. Our model applies a flat 3.5 to the home side, the same figure at every arena.</p>
+    <p><strong style="color:#dde6f0">How many games have been played</strong> — season averages taken from a handful of games are noisy, so a tip on a team with fewer than fifteen games behind it carries a lower confidence figure. That penalty is the only adjustment the NBA model makes beyond the two scoring numbers.</p>
+    <p><strong style="color:#dde6f0">The price, not just the pick</strong> — a selection is only published when the model's probability is meaningfully better than the price implies once the bookmaker's margin is removed. A team we expect to win is not a tip if the odds already say so.</p>
   </div>
   <div class="block">
     <h2>NBA Playoffs Betting Tips</h2>
-    <p>Playoff basketball is different from the regular season — teams adjust tactically, coaching becomes more decisive, and series momentum matters. Our playoff model incorporates series history, playoff experience and clutch performance metrics to produce more accurate win probabilities for postseason games.</p>
+    <p>Playoff basketball is different from the regular season — teams shorten rotations, coaching matters more, and series momentum is real. <strong style="color:#dde6f0">Our model does not adjust for any of that.</strong> It applies the same season scoring averages to a postseason game as to a game in November. We publish playoff tips on that basis and say so here rather than claiming an adjustment we have not built.</p>
   </div>
 </div>
 <footer>
