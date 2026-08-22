@@ -43,6 +43,15 @@ ul{padding-left:20px;margin-bottom:14px;}
 li{font-size:14px;color:#8a9bb0;margin-bottom:6px;}
 strong{color:var(--text);}
 table{width:100%;border-collapse:collapse;margin:16px 0 24px;font-size:13px;}
+/* On a narrow screen these tables are wider than the viewport — the cookie
+   table by 189px — and without this the whole PAGE scrolls sideways, which
+   takes the surrounding prose with it and is a well-known way to make a
+   document feel broken. Scroll the table inside itself instead. display:block
+   is what makes the element its own scroll box; the rows keep their own
+   table-internal display, so the columns still line up. */
+@media (max-width: 640px) {
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
 th{text-align:left;padding:10px 12px;background:var(--bg2);color:var(--text);border:1px solid var(--border);font-weight:700;}
 td{padding:10px 12px;color:#8a9bb0;border:1px solid var(--border);vertical-align:top;}
 .badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:1px;}
