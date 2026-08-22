@@ -674,7 +674,7 @@ async function renderPage() {
         </div>
         ${!isVerified ? `
         <div style="margin-top:14px;">
-          <button onclick="resendVerification()" class="btn-save" style="font-size:12px;padding:8px 16px;">
+          <button id="resendBtn" onclick="resendVerification(this)" class="btn-save" style="font-size:12px;padding:8px 16px;">
             Resend verification email
           </button>
           <div class="alert" id="verifyAlert"></div>
@@ -912,10 +912,20 @@ async function changePassword() {
 }
 
 // ── RESEND VERIFICATION ───────────────────────────────────
-async function resendVerification() {
+async function resendVerification(btn) {
   const alert = document.getElementById('verifyAlert');
-  const { error } = await db.auth.resend({ type: 'signup', email: currentUser.email });
-  showAlert(alert, error ? error.message : 'Verification email sent. Check your inbox.', error ? 'error' : 'success');
+  // Held while the request is in flight, like every other button on this page.
+  // Supabase rate-limits resend server-side and answers a second attempt with
+  // "you can only request this after 60 seconds" — which is correct, and reads
+  // to someone who clicked twice as though the email failed to send. Not
+  // offering the second click is kinder than explaining it.
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+  try {
+    const { error } = await db.auth.resend({ type: 'signup', email: currentUser.email });
+    showAlert(alert, error ? error.message : 'Verification email sent. Check your inbox.', error ? 'error' : 'success');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Resend verification email'; }
+  }
 }
 
 // ── LOGOUT ────────────────────────────────────────────────
