@@ -1043,15 +1043,38 @@ async function updateUserPlan() {
   const plan  = document.getElementById('editPlan').value;
   if (!email) { showAlert(alert, 'Enter an email address.', 'error'); return; }
   btn.disabled = true; btn.textContent = 'Updating...';
-  // .select() so we can tell "updated" from "matched nothing". PostgREST
-  // returns no error when an update matches zero rows, so a mistyped address
-  // used to report "updated to PRO" while changing nothing at all.
-  const { data, error } = await db.from('users')
-    .update({ subscription_status: plan }).eq('email', email).select('email');
+  // Through the engine, not straight at the table.
+  //
+  // This used to write users.subscription_status from the browser with the
+  // admin's own login. That worked only because a signed-in user could write
+  // any column of their own row — and the same grant let ANY user set their
+  // own status to 'pro' and take the Pro card for free, because the tips
+  // policy decides entitlement by reading exactly that column. The RLS file
+  // now caps what a browser may write, which closes that and takes this with
+  // it. The engine does it with the service role instead.
+  //
+  // It still reports "matched nothing" separately from "failed", which is what
+  // the .select() here was for: a mistyped address used to report "updated to
+  // PRO" while changing nothing at all.
+  let ok = false, why = 'The engine could not be reached.';
+  try {
+    const res = await fetch(ENGINE_URL + '/admin/set-plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + adminKey() },
+      body: JSON.stringify({ email, plan }),
+    });
+    let data = {};
+    try { data = await res.json(); } catch (_) {}
+    ok = res.ok && data.ok === true;
+    if (!ok) why = data.error || ('The engine answered ' + res.status + '.');
+  } catch (e) { why = 'The engine could not be reached: ' + e.message; }
   btn.disabled = false; btn.textContent = 'Update Plan';
-  if (error) { showAlert(alert, error.message, 'error'); return; }
-  if (!data || !data.length) { showAlert(alert, 'No user found with that email — nothing changed.', 'error'); return; }
-  showAlert(alert, email + ' updated to ' + plan.toUpperCase(), 'success');
+  if (!ok) { showAlert(alert, why, 'error'); return; }
+  // Stripe owns this column: /verify-pro rewrites it whenever the subscriber
+  // opens their account page. Say so, rather than implying it is permanent.
+  showAlert(alert, email + ' set to ' + plan.toUpperCase()
+    + ' — Stripe remains the source of truth, so this is overwritten the next '
+    + 'time that account is reconciled.', 'success');
   loadSubscribers();
 }
 
