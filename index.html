@@ -275,6 +275,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:56px;display:flex;ali
 .btn-unlock:hover{background:#ffe066;}
 .pl-section{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
 .pl-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:8px;overflow:hidden;margin-bottom:16px;}
+/* chart.js writes an inline pixel width on the canvas and does not revise it
+   when the window narrows -- not on a resize event, not on chart.resize(), not
+   on chart.resize(w, h). Load at 414 and narrow to 320, which is a phone
+   rotating to portrait, and the canvas stays 360 while the page gains a
+   sideways scroll that never goes away. A fresh load at 320 is fine, which is
+   why passes at 375 never caught it.
+   The canvas cannot be wider than the box it sits in. */
+#roiChart{max-width:100%;}
 .pl-s-cell{background:var(--card);padding:16px;text-align:center;}
 .pl-s-label{font-family:'Space Mono',monospace;font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted);margin-bottom:6px;}
 .pl-s-val{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;}
