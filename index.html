@@ -1133,10 +1133,15 @@ async function loadLiveBar() {
   document.getElementById('lb-tips').textContent  = s.total_tips || 0;
   document.getElementById('lb-won').textContent   = s.total_won  || 0;
   document.getElementById('lb-lost').textContent  = s.total_lost || 0;
-  document.getElementById('lb-rate').textContent  = s.win_rate + '%';
+  // A cache row of zeros is an empty ledger, not a 0% win rate on an
+  // empty return. The counts are still counts; the rates are not rates.
+  const lbSettled = (Number(s.total_won)||0) + (Number(s.total_lost)||0);
+  document.getElementById('lb-rate').textContent  = lbSettled>0 ? s.win_rate + '%' : '—';
   const plEl = document.getElementById('lb-pl'), roiEl = document.getElementById('lb-roi');
-  plEl.textContent  = fmtU(s.total_pl);  plEl.className  = 'lb-val '+(s.total_pl>=0?'g':'r');
-  roiEl.textContent = fmt(s.roi,1)+'%';  roiEl.className = 'lb-val '+(s.roi>=0?'g':'r');
+  plEl.textContent  = lbSettled>0 ? fmtU(s.total_pl) : '—';
+  plEl.className  = 'lb-val '+(lbSettled===0||s.total_pl>=0?'g':'r');
+  roiEl.textContent = lbSettled>0 ? fmt(s.roi,1)+'%' : '—';
+  roiEl.className = 'lb-val '+(lbSettled===0||s.roi>=0?'g':'r');
 
   loadBestBetStreak();
 }
@@ -1824,8 +1829,13 @@ function updatePLSummary(rawData){
   document.getElementById('ps-settled').textContent=total;
   document.getElementById('ps-won').textContent=won;
   document.getElementById('ps-lost').textContent=lost;
-  document.getElementById('ps-rate').textContent=total>0?((won/total)*100).toFixed(1)+'%':'0%';
-  const p=document.getElementById('ps-pl');p.textContent=fmtU(pl);p.style.color=pl>=0?'var(--green)':'var(--red)';
+  document.getElementById('ps-rate').textContent=total>0?((won/total)*100).toFixed(1)+'%':'—';
+  // A tab with nothing settled under it says so in the table below, and
+  // then showed +0.00u in the profit colour beside that message. There is
+  // no total to show, so show none.
+  const p=document.getElementById('ps-pl');
+  p.textContent=total>0?fmtU(pl):'—';
+  p.style.color=total===0?'var(--muted)':(pl>=0?'var(--green)':'var(--red)');
 }
 
 // Live updates are an enhancement: every panel this refreshes is also loaded
