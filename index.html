@@ -1354,8 +1354,20 @@ async function loadTips() {
     return tipDay === ukToday2 && new Date(t.event_time) > now;
   });
   // Both directions, and only while the reader has not chosen for themselves.
+  //
+  // Three cases, not two. `todayRemaining.length ? 'today' : 'tomorrow'` could
+  // not tell "today's card has finished" from "there is nothing at all", and
+  // landed both on Tomorrow — where the reader is told "Tomorrow's card is not
+  // out yet", which describes a site running normally that has finished for the
+  // day. On an empty table that is the wrong thing to say, and it is what the
+  // live site said for the two months it published nothing.
+  //
+  // Pointing at Tomorrow when today is done is right and stays. The signal that
+  // separates the two is whether the window holds any tip at all.
   if (!dayFilterChosen && activeDayFilter !== 'all') {
-    setDayTab(todayRemaining.length ? 'today' : 'tomorrow');
+    if (todayRemaining.length) setDayTab('today');
+    else if ((data||[]).length) setDayTab('tomorrow');
+    else setDayTab('today');
   }
   renderTips(); renderTicker(); renderSportsGrid();
 }
