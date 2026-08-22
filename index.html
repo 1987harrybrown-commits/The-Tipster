@@ -1389,7 +1389,13 @@ function deriveEdge(tip) {
   const modelProb   = tip.model_prob   != null ? parseFloat(tip.model_prob)   : parseFloat(tip.confidence || 0);
   const impliedProb = tip.implied_prob != null ? parseFloat(tip.implied_prob) : rawImplied;
   const edge        = tip.model_edge   != null ? parseFloat(tip.model_edge)   : (modelProb - impliedProb);
-  return { modelProb, impliedProb, edge };
+  // parseFloat over three columns, any of which can produce NaN, and the caller
+  // formats the result straight onto the card as "Value Edge NaN%". A number
+  // that is not a number is not an edge of zero either — but zero is what the
+  // legacy fallback already yields for a row with none of these columns, and
+  // the caller has no other way to say "no figure" here.
+  const finite = (n) => (Number.isFinite(n) ? n : 0);
+  return { modelProb: finite(modelProb), impliedProb: finite(impliedProb), edge: finite(edge) };
 }
 
 function stakeClass(s) { s=parseFloat(s??1); return s>0 ? (s>=3?'s3':s>=2?'s2':s>=1.5?'s15':'s1') : 's1'; }
@@ -1507,7 +1513,12 @@ function renderTips() {
     // added to close. Three slots from the top, like everywhere else.
     const isFree = tip.is_free != null ? !!tip.is_free : i<3;
     const free=isProUser||isFree, locked=!free;
-    const conf=tip.confidence||0, cls=conf>=85?'':conf>=72?'med':'low';
+    // `tip.confidence||0` kept any truthy value, and this one is printed as
+    // text AND interpolated into style="width:<conf>%" — where anything outside
+    // 0-100 draws the bar outside its track. Same guard fmtOdds carries.
+    const confRaw=parseFloat(tip.confidence);
+    const conf=Number.isFinite(confRaw)?Math.max(0,Math.min(100,confRaw)):0;
+    const cls=conf>=85?'':conf>=72?'med':'low';
     const isBestBet = isProUser && window._todayBestRef && tip.tip_ref === window._todayBestRef || isProUser && window._tomorrowBestRef && tip.tip_ref === window._tomorrowBestRef;
     const ev=new Date(tip.event_time);
     const ts=ev.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Europe/London'})+' . '+ev.toLocaleDateString('en-GB',{day:'numeric',month:'short',timeZone:'Europe/London'});
