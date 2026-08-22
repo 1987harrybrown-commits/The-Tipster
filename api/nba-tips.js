@@ -211,7 +211,7 @@ module.exports = async (req, res) => {
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Free NBA Basketball Tips Today — ${todayStr} | The Tipster</title>
-<meta name="description" content="Free NBA basketball betting tips for ${todayStr}. ${recordPhrase} Efficiency ratings, pace metrics and live odds analysis. Updated every 15 minutes.">
+<meta name="description" content="Free NBA basketball betting tips for ${todayStr}. ${recordPhrase} Season scoring rates, home court and live odds analysis. Updated every 15 minutes.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.thetipsteredge.com/nba-tips-today">
 ${freeTips.length ? `<script type="application/ld+json">${jsonLd({
@@ -230,7 +230,7 @@ ${freeTips.length ? `<script type="application/ld+json">${jsonLd({
 })}</script>` : ''}
 <meta property="og:type" content="website">
 <meta property="og:title" content="Free NBA Basketball Tips Today — ${todayStr} | The Tipster">
-<meta property="og:description" content="Free NBA basketball betting tips for ${todayStr}. ${recordPhrase} Efficiency ratings, pace metrics and live odds analysis. Updated every 15 minutes.">
+<meta property="og:description" content="Free NBA basketball betting tips for ${todayStr}. ${recordPhrase} Season scoring rates, home court and live odds analysis. Updated every 15 minutes.">
 <meta property="og:url" content="https://www.thetipsteredge.com/nba-tips-today">
 <meta property="og:site_name" content="The Tipster Edge">
 <meta property="og:locale" content="en_GB">
@@ -240,7 +240,7 @@ ${freeTips.length ? `<script type="application/ld+json">${jsonLd({
 <meta property="og:image:alt" content="The Tipster Edge — data-driven sports betting tips">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Free NBA Basketball Tips Today — ${todayStr} | The Tipster">
-<meta name="twitter:description" content="Free NBA basketball betting tips for ${todayStr}. ${recordPhrase} Efficiency ratings, pace metrics and live odds analysis. Updated every 15 minutes.">
+<meta name="twitter:description" content="Free NBA basketball betting tips for ${todayStr}. ${recordPhrase} Season scoring rates, home court and live odds analysis. Updated every 15 minutes.">
 <meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
 <meta name="twitter:site" content="@TheTipsterApp">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -280,7 +280,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <nav class="breadcrumb"><a href="/">Home</a> › <a href="/tips">Betting Tips</a> › NBA Basketball Tips</nav>
   <div class="label">NBA Primary Market</div>
   <h1>Free NBA Basketball Tips — ${todayStr}</h1>
-  <p class="sub">Data-driven NBA predictions using efficiency ratings, pace analysis and live odds. Updated every 15 minutes throughout the season.</p>
+  <p class="sub">Data-driven NBA predictions from season scoring rates and live odds. Updated every 15 minutes throughout the season.</p>
   <div class="stats">
     <div class="stat"><div class="sl">NBA Win Rate</div><div class="sv" style="color:${total > 0 ? '#18e07a' : '#6c83a3'}">${total > 0 ? winRate + '%' : '&mdash;'}</div></div>
     <div class="stat"><div class="sl">Tips Won</div><div class="sv" style="color:#18e07a">${won}</div></div>
