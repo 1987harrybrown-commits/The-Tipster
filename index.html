@@ -1023,6 +1023,11 @@ function updateDateHeader() {
 updateDateHeader();
 
 let cachedStats = {}, isProUser = false;
+// past_due is not Pro, but it is not "never subscribed" either: they have a
+// billing account, and checkout refuses them with a 409. Knowing which of the
+// two we are looking at is what lets the Go Pro button send them somewhere
+// that can actually help.
+let isPastDueUser = false;
 
 // The published record is bets, not everything the engine settled.
 //
@@ -2156,6 +2161,7 @@ async function updateNavAuth(){
     }
     // Coerce: `profile && ...` yields null, not false, when there is no row.
     isProUser=!!(profile&&profile.subscription_status==='pro');
+    isPastDueUser=!!(profile&&profile.subscription_status==='past_due');
     syncProCta();
     rightEl.innerHTML='<a href="/account.html" class="btn btn-ghost" style="text-decoration:none;font-size:13px;padding:7px 16px;border-radius:4px;border:1px solid var(--border2);color:var(--text);">'+(isProUser?'<span style="color:var(--gold);margin-right:5px;">PRO</span>':'')+'My Account</a><button class="btn btn-ghost" onclick="handleLogout()">Log Out</button>';
     if(allTips.length)renderTips();
@@ -2167,7 +2173,7 @@ async function updateNavAuth(){
       heroCta.onclick=()=>document.getElementById('tips')?.scrollIntoView({behavior:'smooth'});
     }
   }else{
-    isProUser=false;
+    isProUser=false;isPastDueUser=false;
     syncProCta();
     rightEl.innerHTML='<button class="btn btn-ghost" onclick="openModal(&quot;login&quot;)">Log In</button><button class="btn btn-green" onclick="openModal(&quot;signup&quot;)">Join Free</button>';
   }
@@ -2271,7 +2277,13 @@ async function startCheckout(plan){
   // Already subscribed — send them to the account page rather than opening a
   // second checkout. The engine refuses this too (409), but stopping here
   // saves a pointless round trip and a confusing error message.
-  if(isProUser){window.location.href='/account.html';return;}
+  //
+  // past_due goes the same way, for the same reason and one more: the engine's
+  // 409 tells them to "manage it from your account rather than starting a new
+  // one", so the round trip ends with an alert whose only instruction is to go
+  // where this line was already able to send them. The account page now shows
+  // them what failed and offers the billing portal.
+  if(isProUser||isPastDueUser){window.location.href='/account.html';return;}
 
   const btn=document.getElementById('pro-cta-btn');
   if(btn){btn.disabled=true;btn.textContent='Loading...';}
