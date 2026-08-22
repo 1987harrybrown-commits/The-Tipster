@@ -1736,7 +1736,16 @@ function renderHistoryTable(){
   if(activePLTab==='free')      rows=rows.filter(r=>r.is_free===true);
   else if(activePLTab==='pro')  rows=rows.filter(r=>r.is_free!==true&&(r.tier||'')!=='insight');
   renderROIGraph(rows).catch(e => console.error('ROI graph:', e.message));
-  if(!rows.length){container.innerHTML='<div style="text-align:center;color:var(--muted);padding:36px;font-size:13px;">No settled results yet.</div>';updatePLSummary(rows);return;}
+  // Say which of the two empty this is. "No settled results yet" is true only
+  // when nothing has settled at all; on a filtered tab with a full ledger
+  // behind it, it tells the reader the record is empty when it is not.
+  if(!rows.length){
+    const msg=allHistory.length
+      ? (activePLTab==='free'?'No free tips have settled yet.':activePLTab==='pro'?'No Pro tips have settled yet.':'No settled results yet.')
+      :'No settled results yet.';
+    container.innerHTML='<div style="text-align:center;color:var(--muted);padding:36px;font-size:13px;">'+msg+'</div>';
+    updatePLSummary(rows);return;
+  }
 
   // Sort by settled_at ascending to calculate running P&L correctly
   const sorted=[...rows].sort((a,b)=>new Date(a.settled_at)-new Date(b.settled_at));
