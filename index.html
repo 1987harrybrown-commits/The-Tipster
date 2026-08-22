@@ -1469,9 +1469,16 @@ function renderTips() {
     // Which tips are free is a stored fact now (engine: tagFreeTips), not a
     // position. It was computed differently here than everywhere else — this
     // locked index 0 while the engine route, the four sport pages and the free
-    // email all treated the top three as free. Falls back to the old rule for
-    // rows written before the column existed.
-    const isFree = tip.is_free != null ? !!tip.is_free : (i>0&&i<4);
+    // email all treated the top three as free.
+    //
+    // The fallback, for rows written before the column existed, kept that
+    // disagreement: `i>0&&i<4` is three slots starting at the second tip, so
+    // the highest-confidence one stayed locked here while /tips, the sport
+    // pages and the email all had it open. The free email sends the top staked
+    // tip, so a free subscriber was emailed a tip and then found it locked on
+    // the page they clicked through to — which is the exact failure is_free was
+    // added to close. Three slots from the top, like everywhere else.
+    const isFree = tip.is_free != null ? !!tip.is_free : i<3;
     const free=isProUser||isFree, locked=!free;
     const conf=tip.confidence||0, cls=conf>=85?'':conf>=72?'med':'low';
     const isBestBet = isProUser && window._todayBestRef && tip.tip_ref === window._todayBestRef || isProUser && window._tomorrowBestRef && tip.tip_ref === window._tomorrowBestRef;
