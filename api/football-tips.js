@@ -95,6 +95,12 @@ function jsonLd(obj) {
     .replace(/\u2029/g, '\\u2029');
 }
 
+// The structured data below is interpolated raw — jsonLd() escapes for JSON,
+// which is correct, but by then a null has already become the string "null".
+// esc() guards the visible page the same way; this guards the machine-readable
+// half. No escaping, because jsonLd() does that.
+function txt(v) { return v == null ? '' : String(v); }
+
 // These pages query today AND tomorrow, but their title and H1 say "Today".
 // A bare clock time therefore presented a tomorrow fixture as one of today's,
 // so anything outside the current UK day is labelled.
@@ -252,8 +258,8 @@ ${freeTips.length ? `<script type="application/ld+json">${jsonLd({
   "itemListElement": freeTips.map((t,i) => ({
     "@type":"ListItem",
     "position": i+1,
-    "name":`${t.home_team} vs ${t.away_team} — ${t.selection}`,
-    "description":`${t.league} tip at ${advisedPrice(t).toFixed(2)} odds`
+    "name":`${txt(t.home_team)} vs ${txt(t.away_team)} — ${txt(t.selection)}`,
+    "description":`${txt(t.league)} tip at ${advisedPrice(t).toFixed(2)} odds`
   }))
 })}</script>` : ''}
 <style>

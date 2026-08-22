@@ -104,9 +104,12 @@ module.exports = async (req, res) => {
     const roi=d.staked>0?(d.pl/d.staked)*100:null;
     const avgOdds=d.odds.length>0?d.odds.reduce((a,b)=>a+b,0)/d.odds.length:null;
     const MUTED='#6c83a3';
+    // A row whose sport is blank groups under the key 'null', and esc() turns
+    // that into the visible word. The icon fallback already anticipates a
+    // sport this map does not know; the label needs the same.
     const icon={Football:'⚽',Basketball:'🏀','Ice Hockey':'🏒'}[sport]||'🏅';
     return `<tr>
-      <td style="font-weight:700">${icon} ${esc(sport)}</td>
+      <td style="font-weight:700">${icon} ${esc(sport && sport !== 'null' ? sport : 'Other')}</td>
       <td>${total}</td>
       <td style="color:#18e07a">${d.won}</td>
       <td style="color:#ff3d5a">${d.lost}</td>
