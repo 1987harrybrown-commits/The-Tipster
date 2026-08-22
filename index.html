@@ -2364,6 +2364,22 @@ function setPricingToggle(plan){
     // Belt and braces: if the exchange lands after the wait, redraw then.
     db.auth.onAuthStateChange((_e,session)=>{if(session)updateNavAuth();});
   }
+  // Signing out in one tab should not leave this one offering "My Account".
+  //
+  // The listener above is registered only on the activation path, and only
+  // reacts to a session arriving — so nothing noticed one going away: the nav
+  // kept its signed-in buttons and isProUser stayed true until a reload.
+  // Access is enforced by the database and the engine either way, so this is
+  // the appearance being wrong rather than the entitlement. It is the
+  // appearance on a shared machine, immediately after someone chose to sign
+  // out, which is where it matters.
+  //
+  // SIGNED_OUT only, and deliberately not the other events: updateNavAuth
+  // reads the users table when there IS a session, so running it on every
+  // token refresh would cost a query an hour per open tab for nothing. The
+  // signed-out branch it takes here touches no database at all.
+  db.auth.onAuthStateChange((event) => { if (event === 'SIGNED_OUT') updateNavAuth(); });
+
   applyStoredOddsFormat();
   // updateNavAuth first, and alone: it sets isProUser, which renderTips and
   // loadConversionBlock both read.
