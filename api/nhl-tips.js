@@ -159,6 +159,16 @@ module.exports = async (req, res) => {
   const won = h.filter(r=>r.result==='WON').length;
   const total = h.filter(r=>r.result==='WON'||r.result==='LOST').length;
   const winRate = total>0?((won/total)*100).toFixed(1):0;
+  // What the description tells a search result about the record.
+  //
+  // With no settled bets winRate is 0, and the sentence then reads as
+  // losing every bet rather than having no record yet — which is what a
+  // new sport has, or one out of season long enough for its window to
+  // empty. NBA and NHL are dark from spring to October. Claim nothing
+  // about a rate we do not have.
+  const recordPhrase = total > 0
+    ? `Data-driven predictions with ${winRate}% win rate.`
+    : 'Data-driven predictions from published, verifiable results.';
   const pl = h.reduce((s,r)=>s+parseFloat(r.profit_loss||0),0);
   // The engine tags exactly FREE_TIPS_PER_DAY tips a day with is_free, and
   // index.html gates on that flag. These pages instead took the top N by
@@ -195,7 +205,7 @@ module.exports = async (req, res) => {
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Free NHL Ice Hockey Tips Today — ${todayStr} | The Tipster</title>
-<meta name="description" content="Free NHL ice hockey betting tips for ${todayStr}. Data-driven predictions with ${winRate}% win rate. Poisson model analysis across all NHL games. Updated every 15 minutes.">
+<meta name="description" content="Free NHL ice hockey betting tips for ${todayStr}. ${recordPhrase} Poisson model analysis across all NHL games. Updated every 15 minutes.">
 <meta name="robots" content="index, follow">
 <link rel="canonical" href="https://www.thetipsteredge.com/nhl-tips-today">
 ${freeTips.length ? `<script type="application/ld+json">${jsonLd({
@@ -214,7 +224,7 @@ ${freeTips.length ? `<script type="application/ld+json">${jsonLd({
 })}</script>` : ''}
 <meta property="og:type" content="website">
 <meta property="og:title" content="Free NHL Ice Hockey Tips Today — ${todayStr} | The Tipster">
-<meta property="og:description" content="Free NHL ice hockey betting tips for ${todayStr}. Data-driven predictions with ${winRate}% win rate. Poisson model analysis across all NHL games. Updated every 15 minutes.">
+<meta property="og:description" content="Free NHL ice hockey betting tips for ${todayStr}. ${recordPhrase} Poisson model analysis across all NHL games. Updated every 15 minutes.">
 <meta property="og:url" content="https://www.thetipsteredge.com/nhl-tips-today">
 <meta property="og:site_name" content="The Tipster Edge">
 <meta property="og:locale" content="en_GB">
@@ -224,7 +234,7 @@ ${freeTips.length ? `<script type="application/ld+json">${jsonLd({
 <meta property="og:image:alt" content="The Tipster Edge — data-driven sports betting tips">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Free NHL Ice Hockey Tips Today — ${todayStr} | The Tipster">
-<meta name="twitter:description" content="Free NHL ice hockey betting tips for ${todayStr}. Data-driven predictions with ${winRate}% win rate. Poisson model analysis across all NHL games. Updated every 15 minutes.">
+<meta name="twitter:description" content="Free NHL ice hockey betting tips for ${todayStr}. ${recordPhrase} Poisson model analysis across all NHL games. Updated every 15 minutes.">
 <meta name="twitter:image" content="https://www.thetipsteredge.com/og-image.jpg">
 <meta name="twitter:site" content="@TheTipsterApp">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
@@ -274,7 +284,7 @@ footer a{color:#6c83a3;text-decoration:none;margin:0 8px;}
   <div class="label">Today's NHL Picks</div>
   <h2>Free NHL Tips — ${todayStr}</h2>
   <div class="tips-grid">
-    ${tipCards||'<p style="color:#6c83a3;grid-column:1/-1">No NHL tips right now — check back later today.</p>'}
+    ${tipCards||'<p style="color:#6c83a3;grid-column:1/-1">No NHL tips published yet. The card goes up each morning, UK time, when there are fixtures to price.</p>'}
     <div class="locked"><p>🔒 Pro members get the full NHL card with value edge % and stake recommendations</p><a href="/">Unlock Pro →</a></div>
   </div>
   <div class="block">
