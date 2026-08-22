@@ -276,6 +276,20 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 .btn-msubmit:hover{background:#2fffa0;}
 .mswitch{font-size:11px;color:var(--muted);text-align:center;margin-top:11px;}
 .mswitch a{color:var(--green);cursor:pointer;}
+/* These were <a> with no href: not focusable, not announced, and skipped by
+   the focus trap, whose selector is a[href]. They are buttons -- each acts in
+   place rather than navigating -- and these rules keep them looking exactly as
+   they did, since the appearance was never the problem. */
+/* 13px of text is a 13px tap target. "Forgot password?" sits alone on its
+   line, so 2.5.8's inline exception does not cover it, and its nearest
+   neighbour is 7px away, so the spacing exception does not either -- measured
+   in a browser. Padding takes each to 25px, which satisfies the criterion on
+   size alone -- the two still sit 7px apart, but they are no longer
+   undersized, so the spacing exception is not what they depend on. It also
+   halves the mis-tap risk that mattered here: on the login form, hitting
+   "Join free" instead of "Forgot password?" throws away the email just typed. */
+.mswitch button{background:none;border:0;padding:6px 4px;font:inherit;color:var(--green);cursor:pointer;vertical-align:baseline;}
+.mswitch button:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:2px;}
 .tip-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);backdrop-filter:blur(10px);z-index:600;align-items:center;justify-content:center;padding:16px;}
 .tip-overlay.open{display:flex;}
 .tip-modal{background:var(--card);border:1px solid var(--border2);border-radius:10px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;position:relative;animation:up 0.22s ease;}
@@ -458,7 +472,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 <a href="#main-content" class="skip-link">Skip to content</a>
 
 <nav role="navigation" aria-label="Main navigation">
-  <a class="logo" href="#">The <em>Tipster</em></a>
+  <a class="logo" href="/">The <em>Tipster</em></a>
   <div class="nav-mid">
     <a href="#performance">Performance</a>
     <a href="#tips">Today's Tips</a>
@@ -747,7 +761,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
         <p>Statistical sports betting tips updated every 15 minutes. Covering NHL Ice Hockey, NBA Basketball and Football. Full track record published — every tip, every result.</p>
       </div>
       <div class="flinks"><h4>Sports</h4><ul><li><a href="/nhl-tips-today">Ice Hockey</a></li><li><a href="/nba-tips-today">Basketball</a></li><li><a href="/football-tips-today">Football</a></li></ul></div>
-      <div class="flinks"><h4>Account</h4><ul><li><a href="#" onclick="openModal('signup')">Sign Up Free</a></li><li><a href="#" onclick="openModal('login')">Log In</a></li><li><a href="#pricing">Go Pro</a></li><li><a href="#record">Track Record</a></li></ul></div>
+      <div class="flinks"><h4>Account</h4><ul><li><a href="#" onclick="openModal('signup');return false;">Sign Up Free</a></li><li><a href="#" onclick="openModal('login');return false;">Log In</a></li><li><a href="#pricing">Go Pro</a></li><li><a href="#record">Track Record</a></li></ul></div>
       <div class="flinks"><h4>Legal</h4><ul><li><a href="/terms.html">Terms of Service</a></li><li><a href="/privacy.html">Privacy Policy</a></li><li><a href="/responsible-gambling.html">Responsible Gambling</a></li><li><a href="/cookies.html">Cookie Policy</a></li></ul></div>
     </div>
     <div style="max-width:1200px;margin:0 auto 0;padding:24px 0 0;border-top:1px solid var(--border);">
@@ -822,7 +836,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <div class="fg"><label for="su-pw">Password <span style="color:var(--red);">*</span></label><input type="password" id="su-pw" placeholder="Minimum 8 characters" autocomplete="new-password"></div>
       <button class="btn-msubmit" onclick="doSignup()" id="suBtn">Create Free Account &#x2192;</button>
       <div style="font-size:10px;color:var(--muted);text-align:center;margin-top:9px;line-height:1.5;">By signing up you agree to receive daily tips by email. Unsubscribe any time. 18+ only.</div>
-      <div class="mswitch" style="margin-top:11px;">Already a member? <a onclick="openModal('login')">Log in</a></div>
+      <div class="mswitch" style="margin-top:11px;">Already a member? <button type="button" onclick="openModal('login')">Log in</button></div>
     </div>
     <div id="mLogin" style="display:none">
       <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Welcome back</h2>
@@ -831,9 +845,9 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <div class="fg"><label for="li-email">Email</label><input type="email" id="li-email" placeholder="you@email.com" autocomplete="email"></div>
       <div class="fg"><label for="li-pw">Password</label><input type="password" id="li-pw" placeholder="Your password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"></div>
       <button class="btn-msubmit" onclick="doLogin()" id="liBtn">Log In &#x2192;</button>
-      <div class="mswitch" id="liResend" style="margin-top:9px;display:none;"><a onclick="resendConfirmation()" id="liResendLink">Resend the confirmation email</a></div>
-      <div class="mswitch" style="margin-top:9px;"><a onclick="openModal('forgot')" style="color:var(--muted);">Forgot password?</a></div>
-      <div class="mswitch" style="margin-top:7px;">No account? <a onclick="openModal('signup')">Join free</a></div>
+      <div class="mswitch" id="liResend" style="margin-top:9px;display:none;"><button type="button" onclick="resendConfirmation()" id="liResendLink">Resend the confirmation email</button></div>
+      <div class="mswitch" style="margin-top:9px;"><button type="button" onclick="openModal('forgot')" style="color:var(--muted);">Forgot password?</button></div>
+      <div class="mswitch" style="margin-top:7px;">No account? <button type="button" onclick="openModal('signup')">Join free</button></div>
     </div>
     <div id="mForgot" style="display:none">
       <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:4px;">Reset password</h2>
@@ -841,7 +855,7 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
       <div class="alert" id="forgotAlert"></div>
       <div class="fg"><label for="fo-email">Email</label><input type="email" id="fo-email" placeholder="you@email.com"></div>
       <button class="btn-msubmit" onclick="doForgot()" id="foBtn">Send Reset Link &#x2192;</button>
-      <div class="mswitch" style="margin-top:9px;"><a onclick="openModal('login')">&#x2190; Back to login</a></div>
+      <div class="mswitch" style="margin-top:9px;"><button type="button" onclick="openModal('login')">&#x2190; Back to login</button></div>
     </div>
     <div id="mSuccess" style="display:none;text-align:center;padding:16px 0;">
       <div style="font-size:36px;margin-bottom:12px;">&#x2709;&#xfe0f;</div>
@@ -2007,6 +2021,44 @@ function closeTipOuter(e){if(e.target===document.getElementById('tipOverlay'))cl
 // place for it.
 let _lastFocus = null;
 
+// Back is how an overlay is dismissed on a phone, and neither dialog listened
+// for it. Opening one pushed a bare "#" from the trigger's href, so Back
+// stripped the "#", left the dialog open, and the next press took the reader
+// off the site -- from the signup form, on a site whose manifest asks for
+// portrait-primary.
+//
+// One entry per dialog, not per open: _openDialog runs again to switch panels,
+// and pushing again there would need two presses to escape one dialog.
+let _dialogHistory = false;
+
+function _pushDialogState() {
+  if (_dialogHistory) return;
+  _dialogHistory = true;
+  // Same URL. This exists to give Back something to consume, not to make the
+  // dialog addressable -- a dialog with its own URL is a page, and it is not.
+  history.pushState({ tipsterDialog: true }, '', location.href);
+}
+
+// Closing by button or Escape consumes the entry too, or Back would afterwards
+// step through one dead state per dialog the reader had opened.
+function _consumeDialogState() {
+  if (!_dialogHistory) return;
+  _dialogHistory = false;
+  history.back();
+}
+
+window.addEventListener('popstate', () => {
+  // Back, with a dialog open. The entry is already gone, so clear the flag
+  // before closing: _closeDialog calls _consumeDialogState, and without this
+  // it would call history.back() again and take the reader off the page.
+  if (!_dialogHistory) return;
+  _dialogHistory = false;
+  const open = [document.getElementById('overlay'), document.getElementById('tipOverlay')]
+    .find(el => el && el.classList.contains('open'));
+  if (!open) return;
+  if (open.id === 'overlay') closeModal(); else closeTipModal();
+});
+
 function _focusable(root) {
   return [...root.querySelectorAll(
     'a[href],button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')]
@@ -2015,7 +2067,14 @@ function _focusable(root) {
 }
 
 function _openDialog(el, focusFirst) {
-  _lastFocus = document.activeElement;
+  // Only remember where focus came from if we are not already in this dialog.
+  // openModal runs again to switch panels, and overwriting _lastFocus there
+  // made it a control inside the dialog -- so on close the reader was sent to
+  // an element whose panel is display:none, which focuses nothing and drops
+  // them at the body. Unreachable until the switch controls became keyboard
+  // controls, which is the rest of this change.
+  if (!el.classList.contains('open')) _lastFocus = document.activeElement;
+  _pushDialogState();
   el.classList.add('open');
   document.body.style.overflow = 'hidden';
   // Pick from the focusable set, not from the whole subtree.
@@ -2037,6 +2096,7 @@ function _openDialog(el, focusFirst) {
 }
 
 function _closeDialog(el) {
+  _consumeDialogState();
   el.classList.remove('open');
   document.body.style.overflow = '';
   if (_lastFocus && document.contains(_lastFocus)) _lastFocus.focus();
