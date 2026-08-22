@@ -122,6 +122,12 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
    same slot, but red rather than gold: this is a warning about a subscription
    they already pay for, not a pitch for one they don't. */
 .billing-alert{background:rgba(255,61,90,0.07);border:1px solid rgba(255,61,90,0.3);border-radius:8px;padding:22px 24px;display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
+/* Let the text shrink instead of pushing the button onto its own line. A flex
+   item sizes to its max-content by default, and this copy is longer than the
+   upgrade banner's, so the line overflowed and wrap put the button underneath,
+   left-aligned — measured against the real stylesheet, 153px tall against the
+   upgrade banner's 89. min-width:0 is what actually allows the shrink. */
+.billing-alert>div{flex:1 1 320px;min-width:0;}
 .billing-alert h2{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;color:var(--red);margin:0 0 4px;}
 .billing-alert p{font-size:12px;color:var(--muted);line-height:1.5;}
 
