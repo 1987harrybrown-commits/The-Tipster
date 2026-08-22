@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Page not found | The Tipster</title>
+<meta name="description" content="That page could not be found. Here are the pages that do exist.">
+<meta name="robots" content="noindex, follow">
+<meta property="og:site_name" content="The Tipster Edge">
+<meta property="og:locale" content="en_GB">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#07090d">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#07090d;--bg2:#0c0f15;--border:#1c2535;--green:#18e07a;--text:#dde6f0;--muted:#6c83a3;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Lato',sans-serif;line-height:1.7;}
+nav{position:sticky;top:0;z-index:100;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;background:rgba(7,9,13,0.97);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);}
+.logo{font-family:'Syne',sans-serif;font-size:19px;font-weight:800;color:var(--text);text-decoration:none;}
+.logo em{color:var(--green);font-style:normal;}
+.nav-back{font-size:12px;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:5px 12px;border-radius:4px;transition:color 0.2s,border-color 0.2s;}
+.nav-back:hover{color:var(--green);border-color:var(--green);}
+.wrap{max-width:760px;margin:0 auto;padding:60px 24px 100px;}
+.page-label{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:10px;}
+h1{font-family:'Syne',sans-serif;font-size:clamp(24px,5vw,40px);font-weight:800;margin-bottom:8px;line-height:1.15;}
+.meta{font-size:12px;color:var(--muted);margin-bottom:48px;}
+h2{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin:40px 0 12px;color:var(--text);}
+p{font-size:14px;color:#8a9bb0;margin-bottom:14px;}
+ul{padding-left:20px;margin-bottom:14px;}
+li{font-size:14px;color:#8a9bb0;margin-bottom:6px;}
+strong{color:var(--text);}
+table{width:100%;border-collapse:collapse;margin:16px 0 24px;font-size:13px;}
+/* On a narrow screen these tables are wider than the viewport — the cookie
+   table by 189px — and without this the whole PAGE scrolls sideways, which
+   takes the surrounding prose with it and is a well-known way to make a
+   document feel broken. Scroll the table inside itself instead. display:block
+   is what makes the element its own scroll box; the rows keep their own
+   table-internal display, so the columns still line up. */
+@media (max-width: 640px) {
+  table { display: block; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+}
+th{text-align:left;padding:10px 12px;background:var(--bg2);color:var(--text);border:1px solid var(--border);font-weight:700;}
+td{padding:10px 12px;color:#8a9bb0;border:1px solid var(--border);vertical-align:top;}
+.badge{display:inline-block;font-size:10px;font-weight:700;padding:2px 8px;border-radius:3px;text-transform:uppercase;letter-spacing:1px;}
+.badge.essential{background:rgba(24,224,122,0.1);color:var(--green);}
+.badge.functional{background:rgba(74,158,255,0.1);color:#4a9eff;}
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:24px;text-align:center;font-size:11px;color:var(--muted);}
+footer a{color:var(--muted);text-decoration:none;margin:0 10px;}
+footer a:hover{color:var(--text);}
+
+/* Motion is a preference, and this page did not read it.
+   Three animations here run forever — the results ticker for 40s a loop, the
+   live dot, and the loading shimmer — and continuous motion is the kind that
+   causes trouble for vestibular disorders. The blanket rule below near-zeroes
+   durations rather than removing them, so anything whose end state matters
+   still lands there; the ticker is called out separately because snapping it
+   to the end of a translate would leave the track parked half off-screen. */
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{
+    animation-duration:0.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:0.01ms !important;
+    scroll-behavior:auto !important;
+  }
+}
+
+.skip-link{position:absolute;left:-9999px;top:0;z-index:200;background:var(--green);color:#07090d;padding:10px 16px;font-family:'Lato',sans-serif;font-size:13px;font-weight:700;border-radius:0 0 5px 0;text-decoration:none;}
+.skip-link:focus{left:0;}
+
+/* The destination list. Everything above is cookies.html's stylesheet, kept as
+   it is so this page cannot drift away from the rest of the site. */
+.go{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:10px;margin:36px 0 0;padding:0;list-style:none;}
+.go li{margin:0;}
+.go a{display:block;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:6px;color:var(--text);text-decoration:none;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;transition:border-color 0.2s,color 0.2s;}
+.go a:hover{border-color:var(--green);color:var(--green);}
+.go a:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
+.go span{display:block;margin-top:3px;font-family:'Lato',sans-serif;font-size:12px;font-weight:400;color:var(--muted);}
+</style>
+</head>
+<body>
+<a href="#main" class="skip-link">Skip to content</a>
+<nav>
+  <a class="logo" href="/">The <em>Tipster</em></a>
+  <a class="nav-back" href="/">← Back to site</a>
+</nav>
+
+<main class="wrap" id="main" tabindex="-1">
+  <div class="page-label">404</div>
+  <h1>That page isn&rsquo;t here</h1>
+  <p class="meta">The link may be out of date, or the address slightly off.</p>
+
+  <p>Nothing is wrong with the site &mdash; there is just nothing at that
+     address. Every page that does exist is one click away:</p>
+
+  <ul class="go">
+    <li><a href="/">Home<span>Today&rsquo;s board and the running record</span></a></li>
+    <li><a href="/tips">Today&rsquo;s tips<span>Every tip currently live</span></a></li>
+    <li><a href="/results">Results<span>Settled tips and how they finished</span></a></li>
+    <li><a href="/betting-stats">Statistics<span>Win rate, P&amp;L and ROI</span></a></li>
+    <li><a href="/football-tips-today">Football tips<span>Today&rsquo;s football selections</span></a></li>
+    <li><a href="/nba-tips-today">NBA tips<span>Today&rsquo;s basketball selections</span></a></li>
+    <li><a href="/nhl-tips-today">NHL tips<span>Today&rsquo;s ice hockey selections</span></a></li>
+    <li><a href="/free-betting-tips.html">Free tips<span>What the free tier includes</span></a></li>
+  </ul>
+</main>
+
+<footer>
+  <p style="margin-bottom:10px">© 2026 The Tipster. All rights reserved.</p>
+  <div>
+    <a href="/terms.html">Terms</a>
+    <a href="/privacy.html">Privacy</a>
+    <a href="/responsible-gambling.html">Responsible Gambling</a>
+    <a href="/cookies.html">Cookies</a>
+  </div>
+  <p style="margin-top:14px;font-size:11px;line-height:1.8;">&#9888; <strong>18+ only.</strong> Tips are for informational purposes only. Past performance does not guarantee future results. Please gamble responsibly. <a href="https://www.begambleaware.org" target="_blank" rel="noopener noreferrer">BeGambleAware.org</a> &bull; National Gambling Helpline <a href="tel:08088020133">0808 8020 133</a></p>
+</footer>
+</body>
+</html>
