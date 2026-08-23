@@ -2357,7 +2357,10 @@ async function doSignup(){
   btn.disabled=false;btn.textContent='Create Free Account \u2192';
   if(error){showMAlert(alert,error.message,'error');return;}
   // Create the profile row now rather than waiting for the next page load.
-  const {data:{session:newSession}}=await db.auth.getSession();
+  const {data:sdSignup,error:seSignup}=await db.auth.getSession();
+  // Self-healing: the next page load creates the row. Say why it did not now.
+  if(seSignup) console.warn('Profile row not created yet — session unreadable:',seSignup.message);
+  const newSession=sdSignup&&sdSignup.session;
   if(newSession) await ensureProfile(newSession);
   document.getElementById('successEmail').textContent=email;
   showPanel('mSuccess');updateNavAuth();
@@ -2398,7 +2401,9 @@ async function doLogin(){
 
 async function recordSignIn(){
   try{
-    const {data:{session}}=await db.auth.getSession();
+    const {data:sdSignIn,error:seSignIn}=await db.auth.getSession();
+    if(seSignIn){console.warn('last_login not recorded — session unreadable:',seSignIn.message);return;}
+    const session=sdSignIn&&sdSignIn.session;
     if(!session)return;
     const {data,error}=await db.from('users')
       .update({last_login:new Date().toISOString()})
@@ -2468,9 +2473,14 @@ async function ensureProfile(session){
 }
 
 async function updateNavAuth(){
-  const {data:{session}}=await db.auth.getSession();
+  const {data:sdNav,error:seNav}=await db.auth.getSession();
   const rightEl=document.querySelector('.nav-right');
   if(!rightEl)return;
+  // A failed read used to render the nav signed-out, which for a subscriber is
+  // their account link disappearing because the network hiccuped. Leave it as
+  // it was found instead.
+  if(seNav){console.warn('Nav left as it was — session unreadable:',seNav.message);return;}
+  const session=sdNav&&sdNav.session;
   if(session){
     let {data:profile,error:profileErr}=await db.from('users').select('subscription_status').eq('id',session.user.id).single();
     // PGRST116 is "no row", which is a real state. Anything else is a read that
@@ -2584,7 +2594,16 @@ async function loadConversionBlock(){
 }
 
 async function handleProClick(){
-  const {data:{session}}=await db.auth.getSession();
+  const {data:sdPro,error:sePro}=await db.auth.getSession();
+  // Scrolling to the pricing table is the safe half of this: it tells a
+  // signed-out reader nothing they should not see, and does not claim a
+  // signed-in one needs an account.
+  if(sePro){
+    console.warn('Session unreadable, showing pricing:',sePro.message);
+    document.getElementById('pricing').scrollIntoView({behavior:'smooth'});
+    return;
+  }
+  const session=sdPro&&sdPro.session;
   if(session)document.getElementById('pricing').scrollIntoView({behavior:'smooth'});
   else openModal('signup');
 }
@@ -2608,7 +2627,16 @@ function syncProCta(){
 }
 
 async function startCheckout(plan){
-  const {data:{session}}=await db.auth.getSession();
+  const {data:sdCheckout,error:seCheckout}=await db.auth.getSession();
+  // The buy button. A failed read used to open the signup modal, telling a
+  // reader who is already signed in to create the account they have -- on the
+  // one path where being wrong costs a sale. Say what actually happened.
+  if(seCheckout){
+    console.error('Checkout could not read the session:',seCheckout.message);
+    alert('We could not check your account just now. Please try again in a moment.');
+    return;
+  }
+  const session=sdCheckout&&sdCheckout.session;
   if(!session){openModal('signup');return;}
 
   // Already subscribed — send them to the account page rather than opening a

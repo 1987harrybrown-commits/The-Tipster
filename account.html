@@ -325,7 +325,19 @@ function readHashParams() {
     await new Promise(r => setTimeout(r, 1200));
   }
 
-  const { data: { session } } = await db.auth.getSession();
+  // Bind the error. supabase-js resolves with { error } rather than rejecting,
+  // so destructuring only `session` cannot tell "signed out" from "could not
+  // ask" -- and a Supabase outage produced the first from the second, waited
+  // two seconds, and sent a paying subscriber to the login page. Where they
+  // then failed to log in, because the outage was still on.
+  const { data: sessionData, error: sessionErr } = await db.auth.getSession();
+  const session = sessionData && sessionData.session;
+  if (sessionErr) {
+    console.error('Session could not be read:', sessionErr.message);
+    profileError = sessionErr.message;
+    renderProfileError();
+    return;
+  }
   if (!session) {
     // Try listening for auth state change (covers token exchange delay)
     db.auth.onAuthStateChange(async (event, newSession) => {
@@ -485,7 +497,11 @@ function mapSubStatus(stripeStatus) {
 // to something already displayed, and a failed correction leaves it as it was.
 async function reconcileSubscription() {
   try {
-    const { data: { session } } = await db.auth.getSession();
+    const { data: sd, error: se } = await db.auth.getSession();
+    // Correct already, and now says why: a failed read leaves the status
+    // exactly as the row had it, which is what the note above intends.
+    if (se) { console.warn('Subscription not reconciled — session unreadable:', se.message); return null; }
+    const session = sd && sd.session;
     if (!session) return null;
     const res = await fetch(ENGINE_URL + '/verify-pro', {
       method: 'POST',
@@ -959,7 +975,9 @@ async function manageSubscription() {
   // user straight into their billing page; the hosted login link below only
   // emails them a magic link, which is a round trip they do not need.
   try {
-    const { data: { session } } = await db.auth.getSession();
+    const { data: sd2, error: se2 } = await db.auth.getSession();
+    if (se2) console.warn('Falling back to the hosted portal link — session unreadable:', se2.message);
+    const session = sd2 && sd2.session;
     if (session) {
       // Bounded, so the fallback below is actually reachable. "The engine is
       // down" has two flavours: refused, which throws and lands in the catch,

@@ -481,7 +481,12 @@ function isAdmin(user) {
 }
 
 (async () => {
-  const { data: { session } } = await db.auth.getSession();
+    const { data: sd, error: se } = await db.auth.getSession();
+    // The login screen is the right place to land either way, but 'not signed
+    // in' and 'could not ask' are different things, and only one of them is
+    // worth retrying. Say which it was.
+    if (se) { console.error('Session could not be read:', se.message); return; }
+    const session = sd && sd.session;
   if (!session) return;                    // not signed in — login screen stays
   if (!isAdmin(session.user)) {
     // Signed in, but not an admin. Drop the session so the page cannot be
