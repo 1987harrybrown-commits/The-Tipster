@@ -1270,7 +1270,6 @@ async function loadLiveBar() {
   roiEl.textContent = lbSettled>0 ? fmt(s.roi,1)+'%' : '—';
   roiEl.className = 'lb-val '+(lbSettled===0||s.roi>=0?'g':'r');
 
-  loadBestBetStreak();
 }
 
 // PostgREST puts .in() into the query string, so the list of values is part
@@ -2756,6 +2755,11 @@ function setPricingToggle(plan){
     loadHistory(),
     loadTips(),
     loadConversionBlock(),
+    // Was called from the end of loadLiveBar, so it waited on a read it does
+    // not use: measured start 253ms against 33ms for the rest. Its own second
+    // read does depend on it -- it looks up the results of the refs it has
+    // just learned -- and now starts earlier too.
+    loadBestBetStreak(),
   ].map(p => p.catch(e => console.error('boot:', e && e.message))));
   const params=new URLSearchParams(window.location.search);
   if(params.get('auth')==='login')openModal('login');
