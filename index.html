@@ -237,6 +237,11 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;height:56px;display:flex;ali
 .tcard{background:var(--card);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:all 0.2s;position:relative;cursor:pointer;}
 .tcard:hover{border-color:rgba(24,224,122,0.2);transform:translateY(-2px);box-shadow:0 10px 36px rgba(0,0,0,0.35);}
 .tcard.pro-card{border-color:rgba(240,180,41,0.12);}
+/* Only an unlocked card opens anything; the locked one carries its own Go Pro
+   button and the card itself does nothing, so it should not offer a pointer. */
+.tcard.pro-card{cursor:default;}
+/* A card that can be focused has to show it. */
+.tcard:focus-visible{outline:2px solid var(--green);outline-offset:2px;}
 .tcard-top{height:3px;background:var(--green);}
 .tcard.pro-card .tcard-top{background:var(--gold);}
 .tcard-body{padding:16px 18px;}
@@ -1603,10 +1608,9 @@ function emptyTipsState(now) {
     body: 'The card is published each morning, UK time.' };
 }
 
-function renderTips() {
-  const grid=document.getElementById('tipsGrid');
-  const now=new Date();
-  // Get today and tomorrow date strings in UK time
+// Which tips belong on the card at a given moment. Split out of renderTips so
+// the staleness timer below can ask the question without rebuilding anything.
+function visibleTips(now) {
   const ukToday=ukDateString(now);
   const ukTomorrow=ukDateString(new Date(now.getTime()+86400000));
 
@@ -1620,7 +1624,22 @@ function renderTips() {
     return true;
   });
   if(activeFilter!=='all') list=list.filter(t=>t.sport===activeFilter);
-  const sorted=[...list].sort((a,b)=>b.confidence-a.confidence);
+  return [...list].sort((a,b)=>b.confidence-a.confidence);
+}
+
+// What the grid is currently showing, as one comparable string. The UK day is
+// in it because the empty-state message depends on the day, not just on which
+// tips are visible.
+function tipsSignature(now, sorted) {
+  return ukDateString(now) + '|' + sorted.map(t => t.id).join(',');
+}
+let _renderedSignature = null;
+
+function renderTips() {
+  const grid=document.getElementById('tipsGrid');
+  const now=new Date();
+  const sorted=visibleTips(now);
+  _renderedSignature=tipsSignature(now, sorted);
   if(!sorted.length){
     const e = emptyTipsState(now);
     grid.innerHTML='<div class="empty-state"><div class="ei">'+e.icon+'</div>'
@@ -1659,7 +1678,27 @@ function renderTips() {
     const moved=livePriceMove(tip);
     const d=document.createElement('div');
     d.className='tcard '+(locked?'pro-card':'');
-    if(!locked){d.style.cursor='pointer';d.addEventListener('click',()=>openTipModal(tip));}
+    if(!locked){
+      // The card opens the tip detail dialog, and a div with a click listener
+      // is not a control: no role, no tab stop, and focus() does nothing. The
+      // dialog has a focus trap and an Escape route built for it that a
+      // keyboard could never reach.
+      //
+      // No aria-label on purpose. On a role="button" the label would replace
+      // the card's text, which is where the odds, the selection and the
+      // confidence are -- so a screen reader would lose them. The name is
+      // verbose this way and it is what a sighted reader sees.
+      d.style.cursor='pointer';
+      d.setAttribute('role','button');
+      d.tabIndex=0;
+      const open=()=>openTipModal(tip);
+      d.addEventListener('click',open);
+      d.addEventListener('keydown',(e)=>{
+        // Space scrolls the page by default, which is the wrong thing when the
+        // reader meant to open the card.
+        if(e.key==='Enter'||e.key===' '){e.preventDefault();open();}
+      });
+    }
     d.innerHTML=
       '<div class="tcard-top"></div>'+
       '<div class="tcard-body">'+
@@ -1986,6 +2025,28 @@ function updatePLSummary(rawData){
   p.style.color=total===0?'var(--muted)':(pl>=0?'var(--green)':'var(--red)');
 }
 
+// A fixture that has kicked off stayed on the card until something else
+// happened to re-render. renderTips filters started games out correctly; it
+// just never ran again on its own, because the only thing that re-renders is
+// the subscription below, and that fires when a row changes rather than when
+// the clock passes a kickoff. Measured: six seconds after a tip's event_time
+// passed it was still listed, and calling renderTips() by hand dropped it.
+//
+// Only re-render when the visible set would actually differ. Rebuilding the
+// grid every half minute regardless would take keyboard focus out of it for
+// nothing.
+function refreshIfStale() {
+  const now = new Date();
+  if (tipsSignature(now, visibleTips(now)) !== _renderedSignature) renderTips();
+}
+setInterval(refreshIfStale, 30000);
+
+// The common case is a phone that has been in a pocket: the timer has been
+// throttled or stopped, so check on the way back rather than waiting.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) refreshIfStale();
+});
+
 // Live updates are an enhancement: every panel this refreshes is also loaded
 // on boot and re-read by its own path. The subscription ran unguarded at the
 // top level, and everything below this line — PANEL_LABELS, openModal, the
@@ -2102,9 +2163,29 @@ function openTipModal(tip){
   // stakeLabel, not a second copy of it. This one had no branch for stake 0, so
   // an informational pick was presented here as a "0u" bet while the card
   // beside it said "No stake — insight only".
-  document.getElementById('tm-stake').textContent   =stakeLabel(stake);
+  // Write into the value element; never rebuild the cell around it.
+  //
+  // This used to set #tm-stake and then, for a non-Pro reader, replace the
+  // innerHTML of #tm-stake-cell -- the element #tm-stake sits in. The first
+  // open destroyed the node the next open needed, so the second call threw on
+  // a null and the dialog never opened again. Signed out, that meant one tip
+  // detail per page load and then nothing, with no error the reader could see.
+  //
+  // Doing it this way is idempotent, and it also means someone who subscribes
+  // without reloading gets their stake figure back instead of staying on the
+  // upsell.
+  const stakeEl=document.getElementById('tm-stake');
+  if(stakeEl){
+    if(isProUser){
+      stakeEl.textContent=stakeLabel(stake);
+      stakeEl.style.cssText='';
+    }else{
+      stakeEl.textContent='Pro Members Only 🔒';
+      stakeEl.style.cssText='font-size:11px;color:var(--gold);font-weight:700;';
+    }
+  }
   const stakeCell=document.getElementById('tm-stake-cell');
-  if(stakeCell){if(isProUser){stakeCell.style.display='block';}else{stakeCell.innerHTML='<div class="tm-meta-label">Recommended Stake</div><div style="font-size:11px;color:var(--gold);font-weight:700;">Pro Members Only 🔒</div>';}}
+  if(stakeCell)stakeCell.style.display='block';
   const bkEl=document.getElementById('tm-bookmaker'),mkEl=document.getElementById('tm-market');
   if(bkEl)bkEl.textContent=bookLabel(tip)||'Best available';
   if(mkEl)mkEl.textContent=tip.market||'Match winner';
