@@ -280,7 +280,7 @@ td{padding:9px 11px;}
         <div class="fg"><label>Selection @ Odds</label>
           <div style="display:flex;gap:8px;">
             <input type="text" class="acca-sel" aria-label="Accumulator leg — selection" placeholder="Liverpool Win" style="flex:2;">
-            <input type="number" class="acca-odds" aria-label="Accumulator leg — odds" placeholder="1.65" step="0.01" style="flex:1;">
+            <input type="number" class="acca-odds" aria-label="Accumulator leg — odds" placeholder="1.65" step="0.01" min="1.01" style="flex:1;">
           </div>
         </div>
       </div>
@@ -1297,7 +1297,7 @@ function addAccaRow() {
   row.style.marginBottom = '10px';
   row.innerHTML = `<div class="fg"><label>Match</label><input type="text" class="acca-match" aria-label="Accumulator leg — match" placeholder="Match name"></div>
     <div class="fg"><label>Selection @ Odds</label>
-      <div style="display:flex;gap:8px;"><input type="text" class="acca-sel" aria-label="Accumulator leg — selection" placeholder="Selection" style="flex:2;"><input type="number" class="acca-odds" aria-label="Accumulator leg — odds" placeholder="Odds" step="0.01" style="flex:1;"></div>
+      <div style="display:flex;gap:8px;"><input type="text" class="acca-sel" aria-label="Accumulator leg — selection" placeholder="Selection" style="flex:2;"><input type="number" class="acca-odds" aria-label="Accumulator leg — odds" placeholder="Odds" step="0.01" min="1.01" style="flex:1;"></div>
     </div>`;
   document.getElementById('accaRows').appendChild(row);
 }
@@ -1307,16 +1307,28 @@ async function saveSaturdayOverride() {
   const alert = document.getElementById('ovSatAlert');
   const rows = document.querySelectorAll('.acca-row');
   const selections = [];
+  const rejected = [];
   let combined = 1;
-  rows.forEach(row => {
+  rows.forEach((row, i) => {
     const match = row.querySelector('.acca-match').value.trim();
     const sel   = row.querySelector('.acca-sel').value.trim();
-    const odds  = parseFloat(row.querySelector('.acca-odds').value);
-    if (match && sel && odds) {
-      selections.push({ match, selection: sel, odds });
-      combined *= odds;
+    const raw   = row.querySelector('.acca-odds').value.trim();
+    const odds  = parseFloat(raw);
+    // An untouched row is not a mistake; a half-filled one is.
+    if (!match && !sel && !raw) return;
+    // `if (odds)` used to gate this, which is a truthy test: 0.5 and -2 passed
+    // it and multiplied the combined price down or negative, while a mistyped
+    // "1.8o" became NaN and the leg vanished without a word. Four legs entered,
+    // three saved, and the count check below only asks for three.
+    if (!match || !sel) { rejected.push('leg ' + (i + 1) + ' is missing the match or the selection'); return; }
+    if (!Number.isFinite(odds) || odds <= 1) {
+      rejected.push('leg ' + (i + 1) + ' has odds of "' + raw + '" — decimal odds are above 1');
+      return;
     }
+    selections.push({ match, selection: sel, odds });
+    combined *= odds;
   });
+  if (rejected.length) { showAlert(alert, 'Nothing saved: ' + rejected.join('; ') + '.', 'error'); return; }
   if (selections.length < 3) { showAlert(alert, 'Add at least 3 complete selections.', 'error'); return; }
   // Next Saturday in the UK calendar. getDay()/setDate() work in the browser's
   // local day and toISOString() then formats in UTC, so the two could disagree
