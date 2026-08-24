@@ -2462,13 +2462,24 @@ async function handleLogout(){await db.auth.signOut();updateNavAuth();}
 // column for subscription_status to live in, so they can never resolve as Pro
 // even after paying. The engine creates it with the service role.
 async function ensureProfile(session){
+  // Bounded, like startCheckout beside it. The catch below only ever saw a
+  // refused connection: a stalled one throws nothing and waits as long as the
+  // network allows, which on Render's free tier -- asleep after fifteen idle
+  // minutes -- is the ordinary state of the first signup of an evening.
+  const c=new AbortController();
+  const t=setTimeout(()=>c.abort(),20000);
   try{
     const res=await fetch(ENGINE_URL+'/ensure-profile',{
       method:'POST',
-      headers:{'Authorization':'Bearer '+session.access_token}
+      headers:{'Authorization':'Bearer '+session.access_token},
+      signal:c.signal
     });
     return res.ok;
-  }catch(e){ console.error('ensure-profile failed:',e.message); return false; }
+  }catch(e){
+    console.error('ensure-profile failed:', e.name==='AbortError'
+      ? 'the engine did not answer within 20 seconds' : e.message);
+    return false;
+  }finally{ clearTimeout(t); }
 }
 
 async function updateNavAuth(){

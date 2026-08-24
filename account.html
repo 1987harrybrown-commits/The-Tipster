@@ -410,18 +410,34 @@ function renderProfileError() {
 // Idempotent and race-tolerant on the engine side, so it costs one request
 // and is a no-op whenever the trigger did its job.
 async function ensureProfile(session) {
+  // Bounded, because this is awaited before the page renders. The catch
+  // below is only reachable for a refused connection; a stalled one throws
+  // nothing and waits as long as the network allows, which on Render's free
+  // tier -- fifteen minutes idle and it is asleep -- is the normal state of
+  // the first visit of an evening. That left a subscriber on the spinner with
+  // no timeout, no message and no way forward.
+  //
+  // Safe to abort: this returns false, and loadProfile reads the row from
+  // Supabase directly rather than through the engine, so the page still comes
+  // up. Twenty seconds, matching startCheckout and manageSubscription.
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 20000);
   try {
     const res = await fetch(ENGINE_URL + '/ensure-profile', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + session.access_token },
+      signal: controller.signal,
     });
     return res.ok;
   } catch (e) {
     // Not fatal: loadProfile below reports a missing row honestly, and the
     // next visit tries again. Failing the whole page here would hide an
     // account that exists perfectly well.
-    console.error('ensure-profile failed:', e.message);
+    console.error('ensure-profile failed:', e.name === 'AbortError'
+      ? 'the engine did not answer within 20 seconds' : e.message);
     return false;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -503,10 +519,19 @@ async function reconcileSubscription() {
     if (se) { console.warn('Subscription not reconciled — session unreadable:', se.message); return null; }
     const session = sd && sd.session;
     if (!session) return null;
-    const res = await fetch(ENGINE_URL + '/verify-pro', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
-    });
+    // Not awaited by the boot, so a stall here leaks a request rather than
+    // holding the page -- but it never resolves either, and the status stays
+    // whatever the row said. Bounded for the same reason as the rest.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 20000);
+    let res;
+    try {
+      res = await fetch(ENGINE_URL + '/verify-pro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + session.access_token },
+        signal: controller.signal,
+      });
+    } finally { clearTimeout(timer); }
     if (!res.ok) return null;
     const data = await res.json();
     if (!data || data.verified !== true) return null;
