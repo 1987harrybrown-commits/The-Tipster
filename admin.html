@@ -422,7 +422,7 @@ const ENGINE_URL    = 'https://tipster-engine-1.onrender.com';
 // thing to do, since the key can be set after the page has loaded. A constant
 // that looks like the source of truth and holds an empty string is worth more
 // as an absence than as a convenience.
-function adminKey() { return localStorage.getItem('tipster_admin_key') || ''; }
+function adminKey() { return store.get('tipster_admin_key') || ''; }
 
 const { createClient } = supabase;
 // Every query through this client is bounded.
@@ -440,6 +440,35 @@ const { createClient } = supabase;
 //
 // Realtime is a WebSocket and does not pass through fetch, so the live
 // subscription is unaffected.
+// localStorage that cannot throw.
+//
+// It is not guaranteed to exist or to accept a write: Safari's private mode
+// threw QuotaExceededError on every call for years, and a browser with site
+// storage restricted still does. Twelve calls across these pages were
+// unguarded, and the first one the boot makes is applyStoredOddsFormat() --
+// so the throw rejected the boot promise and nothing after it ran. Measured:
+// an empty tips grid, no empty state, allTips never loaded, one uncaught
+// rejection in the console.
+//
+// The memory fallback is not decoration. On admin.html the value being stored
+// is the admin key, and a session that cannot keep it is a dashboard that
+// stops working after the first navigation.
+const _memStore = new Map();
+const store = {
+  get(k) {
+    try { const v = localStorage.getItem(k); return v === null ? (_memStore.has(k) ? _memStore.get(k) : null) : v; }
+    catch (e) { return _memStore.has(k) ? _memStore.get(k) : null; }
+  },
+  set(k, v) {
+    _memStore.set(k, String(v));
+    try { localStorage.setItem(k, v); } catch (e) { /* memory only for this visit */ }
+  },
+  remove(k) {
+    _memStore.delete(k);
+    try { localStorage.removeItem(k); } catch (e) { /* nothing to do */ }
+  },
+};
+
 const DB_TIMEOUT_MS = 20000;
 function timedFetch(input, init = {}) {
   const controller = new AbortController();
@@ -512,7 +541,7 @@ function isAdmin(user) {
     // showing them once the session that authorised it has gone.
     db.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
-        localStorage.removeItem('tipster_admin_key');
+        store.remove('tipster_admin_key');
         window.location.reload();
       }
     });
@@ -528,7 +557,7 @@ function isAdmin(user) {
     // Signed in, but not an admin. Drop the session so the page cannot be
     // left in a half-authorised state, and say why.
     await db.auth.signOut();
-    localStorage.removeItem('tipster_admin_key');
+    store.remove('tipster_admin_key');
     const el = document.getElementById('loginAlert');
     if (el) showAlert(el, 'That account is not an administrator.', 'error');
     return;
@@ -590,7 +619,7 @@ async function adminLogin() {
     btn.disabled = false; btn.textContent = 'Sign In';
     return;
   }
-  localStorage.setItem('tipster_admin_key', key.trim());
+  store.set('tipster_admin_key', key.trim());
   if (verdict === 'unreachable') {
     // Stored, but say so: the engine buttons may still fail.
     sessionStorage.setItem('tipster_admin_key_unverified', '1');
@@ -620,7 +649,7 @@ async function verifyAdminKey(key) {
 
 async function adminLogout() {
   await db.auth.signOut();
-  localStorage.removeItem('tipster_admin_key');
+  store.remove('tipster_admin_key');
   location.reload();
 }
 

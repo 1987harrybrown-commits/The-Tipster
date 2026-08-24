@@ -267,6 +267,35 @@ const { createClient } = supabase;
 //
 // Realtime is a WebSocket and does not pass through fetch, so the live
 // subscription is unaffected.
+// localStorage that cannot throw.
+//
+// It is not guaranteed to exist or to accept a write: Safari's private mode
+// threw QuotaExceededError on every call for years, and a browser with site
+// storage restricted still does. Twelve calls across these pages were
+// unguarded, and the first one the boot makes is applyStoredOddsFormat() --
+// so the throw rejected the boot promise and nothing after it ran. Measured:
+// an empty tips grid, no empty state, allTips never loaded, one uncaught
+// rejection in the console.
+//
+// The memory fallback is not decoration. On admin.html the value being stored
+// is the admin key, and a session that cannot keep it is a dashboard that
+// stops working after the first navigation.
+const _memStore = new Map();
+const store = {
+  get(k) {
+    try { const v = localStorage.getItem(k); return v === null ? (_memStore.has(k) ? _memStore.get(k) : null) : v; }
+    catch (e) { return _memStore.has(k) ? _memStore.get(k) : null; }
+  },
+  set(k, v) {
+    _memStore.set(k, String(v));
+    try { localStorage.setItem(k, v); } catch (e) { /* memory only for this visit */ }
+  },
+  remove(k) {
+    _memStore.delete(k);
+    try { localStorage.removeItem(k); } catch (e) { /* nothing to do */ }
+  },
+};
+
 const DB_TIMEOUT_MS = 20000;
 function timedFetch(input, init = {}) {
   const controller = new AbortController();
@@ -867,7 +896,7 @@ async function renderPage() {
           <div class="pref-sub" id="pref-sub-fractional">Display odds as fractions (e.g. 5/2) instead of decimals (3.50). Display only — no calculations change.</div>
         </div>
         <label class="toggle">
-          <input type="checkbox" id="pref-fractional" aria-labelledby="pref-label-fractional" aria-describedby="pref-sub-fractional" ${typeof window !== 'undefined' && localStorage.getItem('oddsFormat') === 'fractional' ? 'checked' : ''} onchange="setOddsFormat(this.checked)">
+          <input type="checkbox" id="pref-fractional" aria-labelledby="pref-label-fractional" aria-describedby="pref-sub-fractional" ${typeof window !== 'undefined' && store.get('oddsFormat') === 'fractional' ? 'checked' : ''} onchange="setOddsFormat(this.checked)">
           <span class="toggle-slider"></span>
         </label>
       </div>
@@ -1125,7 +1154,7 @@ function showAlert(el, msg, type) {
 // Stores preference in localStorage. Display only — no calculations change.
 // The toggle on the page reads this on render. index.html also reads it.
 function setOddsFormat(isFractional) {
-  localStorage.setItem('oddsFormat', isFractional ? 'fractional' : 'decimal');
+  store.set('oddsFormat', isFractional ? 'fractional' : 'decimal');
   // The confirmation goes in the row's own subtitle rather than the page's
   // alert bar. This used to call showAlert with a throwaway object literal as
   // the element, which set textContent on nothing anyone could see and left a
@@ -1142,7 +1171,7 @@ function setOddsFormat(isFractional) {
 // Set the toggle state from localStorage on page load
 window.addEventListener('DOMContentLoaded', () => {
   const toggle = document.getElementById('pref-fractional');
-  if (toggle) toggle.checked = localStorage.getItem('oddsFormat') === 'fractional';
+  if (toggle) toggle.checked = store.get('oddsFormat') === 'fractional';
 });
 </script>
 <footer style="max-width:900px;margin:40px auto 0;padding:18px 20px 28px;border-top:1px solid #1c2535;font-size:11px;line-height:1.8;color:var(--muted);text-align:center;">
