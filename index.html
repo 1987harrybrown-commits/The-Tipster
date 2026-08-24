@@ -2067,8 +2067,30 @@ setInterval(refreshIfStale, 30000);
 
 // The common case is a phone that has been in a pocket: the timer has been
 // throttled or stopped, so check on the way back rather than waiting.
+//
+// refreshIfStale only re-RENDERS: it compares the rendered signature against
+// allTips in memory. That is right for a fixture that has kicked off, which was
+// what it was written for, and useless for a tip published while the phone was
+// away or a result settled since. Nothing was re-reading, because the only
+// thing that re-reads is the subscription below -- which may well have died
+// while the tab was hidden.
+//
+// So a long gap re-reads. Sixty seconds, so flicking to another tab and back
+// still costs nothing.
+let _hiddenSince = null;
+const AWAY_LONG_ENOUGH_MS = 60000;
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) refreshIfStale();
+  if (document.hidden) { _hiddenSince = Date.now(); return; }
+  const away = _hiddenSince ? Date.now() - _hiddenSince : 0;
+  _hiddenSince = null;
+  refreshIfStale();
+  if (away < AWAY_LONG_ENOUGH_MS) return;
+  console.log(`Back after ${Math.round(away / 1000)}s — re-reading`);
+  // The same three the subscription refreshes. Each owns its own state and
+  // reports its own failure, so a catch here would only duplicate that.
+  loadTips();
+  loadLiveBar();
+  loadHistory();
 });
 
 // Live updates are an enhancement: every panel this refreshes is also loaded
@@ -2082,10 +2104,28 @@ document.addEventListener('visibilitychange', () => {
 // hit; it is a single point of failure sitting in front of the entire page
 // for the sake of a nice-to-have.
 try {
+  // subscribe() took no callback, so a channel that failed to join, timed out
+  // or closed did it silently: the board simply stopped updating and the page
+  // went on looking fine. Say which it is, and re-read on a RE-join, because
+  // whatever changed while the socket was down was missed.
+  let _joinedOnce = false;
   db.channel('live-updates')
     .on('postgres_changes',{event:'*',schema:'public',table:'tips'},          ()=>{loadTips();loadLiveBar();})
     .on('postgres_changes',{event:'*',schema:'public',table:'results_history'},()=>{loadHistory();loadLiveBar();})
-    .subscribe();
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        if (_joinedOnce) {
+          console.log('Live updates reconnected — re-reading what was missed');
+          loadTips(); loadLiveBar(); loadHistory();
+        }
+        _joinedOnce = true;
+        return;
+      }
+      // CHANNEL_ERROR, TIMED_OUT, CLOSED. The client retries on its own; this
+      // is so a board that has quietly stopped moving is explicable.
+      console.warn('Live updates:', status, '— the page still works, but it '
+        + 'will not update on its own until this reconnects');
+    });
 } catch (e) {
   console.error('Live updates unavailable, the page still loads normally:', e && e.message);
 }
