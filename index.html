@@ -2086,11 +2086,30 @@ document.addEventListener('visibilitychange', () => {
   refreshIfStale();
   if (away < AWAY_LONG_ENOUGH_MS) return;
   console.log(`Back after ${Math.round(away / 1000)}s — re-reading`);
-  // The same three the subscription refreshes. Each owns its own state and
-  // reports its own failure, so a catch here would only duplicate that.
-  loadTips();
-  loadLiveBar();
-  loadHistory();
+  reread();
+});
+
+// The same three the subscription refreshes. Each owns its own state and
+// reports its own failure, so a catch here would only duplicate that.
+function reread() { loadTips(); loadLiveBar(); loadHistory(); }
+
+// The back button, when the browser restores rather than re-parses.
+//
+// bfcache freezes the whole JS heap and resumes it, so the board comes back
+// exactly as the reader left it however long ago that was — and Safari, which
+// is the aggressive one about this, fires pageshow WITHOUT visibilitychange, so
+// the handler above never runs on that path.
+//
+// I could not reproduce a restore in the browser used to test this: navigating
+// away and back re-parsed the page, the boot ran again and the data was fresh.
+// That is one browser's choice rather than a guarantee, and this costs nothing
+// when it was not restored, because `persisted` is false on an ordinary load.
+window.addEventListener('pageshow', (e) => {
+  if (!e.persisted) return;
+  console.log('Restored from the back/forward cache — re-reading');
+  _hiddenSince = null;
+  refreshIfStale();
+  reread();
 });
 
 // Live updates are an enhancement: every panel this refreshes is also loaded
