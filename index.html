@@ -988,7 +988,32 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
 const SUPABASE_URL  = 'https://eyhlzzaaxrwisrtwyoyh.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV5aGx6emFheHJ3aXNydHd5b3loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMzNzkyNzcsImV4cCI6MjA4ODk1NTI3N30.iqIk52att2Lv2o6m70Ht1LVWVgqbmLwptDqTxDq12AI';
 const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+// Every query through this client is bounded.
+//
+// supabase-js calls fetch with no timeout, so a connection that is accepted and
+// then goes quiet never settles: no error, no rejection, nothing for a catch to
+// catch. Measured with a stalled database, account.html sat on its loading
+// spinner at 0s, 12s and 26s -- the same failure the engine calls had, one
+// layer down, and there are 38 of these rather than five.
+//
+// So it is fixed at the client rather than at the call sites: this covers every
+// read, every write, every auth call, and anything added later. Twenty seconds
+// matches the engine calls; the largest read here is 500 rows of
+// results_history, which is far inside that on a slow phone.
+//
+// Realtime is a WebSocket and does not pass through fetch, so the live
+// subscription is unaffected.
+const DB_TIMEOUT_MS = 20000;
+function timedFetch(input, init = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), DB_TIMEOUT_MS);
+  // Respect a signal the caller already supplied rather than replacing it.
+  if (init.signal) init.signal.addEventListener('abort', () => controller.abort());
+  return fetch(input, { ...init, signal: controller.signal })
+    .finally(() => clearTimeout(timer));
+}
+
+const db = createClient(SUPABASE_URL, SUPABASE_ANON, { global: { fetch: timedFetch } });
 
 const SPORT_ICONS = {'Football':'⚽','Basketball':'🏀','Tennis':'🎾','NFL':'🏈','Baseball':'⚾','Ice Hockey':'🏒','Horse Racing':'🏇','Boxing / MMA':'🥊','Golf':'🏌️','Rugby':'🏉','Cricket':'🏏','Snooker':'🎱'};
 const sportIcon = s => SPORT_ICONS[s] || '🏅';
