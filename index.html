@@ -1158,7 +1158,12 @@ function fmtOdds(decimal) {
   // it is here because the failure is silent, visible to the reader, and about
   // a number they would be staking money on.
   const n = parseFloat(decimal);
-  if (!Number.isFinite(n)) return '—';
+  // Finite is not enough: 0 and -3.5 are both finite and neither is a price.
+  // Decimal odds are above 1 by definition -- at 1.00 the stake comes back and
+  // nothing else -- so anything at or below it is a data fault, and a dash is
+  // honest where "0.00" beside a selection is not. Checked against the live
+  // data first: no row anywhere is at or below 1, and the lowest is 1.10.
+  if (!Number.isFinite(n) || n <= 1) return '—';
   return store.get('oddsFormat') === 'fractional'
     ? decimalToFractional(n)
     : n.toFixed(2);
@@ -1689,6 +1694,17 @@ function visibleTips(now) {
 
   // Filter: hide games already started + apply day filter + sport filter
   let list=allTips.filter(t=>{
+    // A tip we cannot price is not a tip -- the same rule api/tips.js and the
+    // three sport pages already apply, in those words. advisedPrice returns NaN
+    // for a row with neither advised_odds nor odds, and 0 and -3.5 are finite
+    // without being prices, since decimal odds are above 1 by definition.
+    //
+    // Checked against the live data before adding it: of 139 tips none has a
+    // null price and none is at or below 1, so nothing that exists disappears.
+    // Before the free-tier fallback on purpose: a row nobody can bet should not
+    // take one of the three free slots.
+    const price = advisedPrice(t);
+    if (!Number.isFinite(price) || price <= 1) return false;
     if(new Date(t.event_time)<=now) return false; // hide started games
     if(activeDayFilter==='all') return true;
     const tipDay=ukDateString(new Date(t.event_time));

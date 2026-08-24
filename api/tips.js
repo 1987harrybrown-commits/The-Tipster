@@ -42,7 +42,17 @@ function esc(v) {
 
 const SPORT_ICONS = { Football: '⚽', Basketball: '🏀', 'Ice Hockey': '🏒' };
 
-function fmtOdds(o) { return parseFloat(o).toFixed(2); }
+// A price this cannot render honestly gets a dash rather than a number.
+//
+// parseFloat(null).toFixed(2) is the string "NaN", and this page is served
+// as plain HTML to readers with no JavaScript, so there is nothing to catch
+// it afterwards. Finite is not enough either: 0 and -3.5 are both finite and
+// neither is a price, since decimal odds are above 1 by definition. Checked
+// against the live data: no row anywhere is at or below 1, lowest is 1.10.
+function fmtOdds(o) {
+  const n = parseFloat(o);
+  return (!Number.isFinite(n) || n <= 1) ? '—' : n.toFixed(2);
+}
 function fmtDate(d) { return new Date(d).toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric', timeZone:'Europe/London' }); }
 function fmtTime(d) { return new Date(d).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone:'Europe/London' }); }
 
