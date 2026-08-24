@@ -506,6 +506,17 @@ function isAdmin(user) {
 }
 
 (async () => {
+    // A sign-out in another tab, or a session that expires while this is
+    // open, reaches here because supabase-js broadcasts to every tab. The
+    // dashboard shows subscriber email addresses, so it should not still be
+    // showing them once the session that authorised it has gone.
+    db.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('tipster_admin_key');
+        window.location.reload();
+      }
+    });
+
     const { data: sd, error: se } = await db.auth.getSession();
     // The login screen is the right place to land either way, but 'not signed
     // in' and 'could not ask' are different things, and only one of them is

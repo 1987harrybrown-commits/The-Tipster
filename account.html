@@ -344,6 +344,14 @@ function readHashParams() {
   isRecovery = hash.type === 'recovery' && !!hash.access_token;
   db.auth.onAuthStateChange((event) => {
     if (event === 'PASSWORD_RECOVERY') { isRecovery = true; applyRecoveryMode(); }
+    // supabase-js broadcasts to every tab on the origin, so this fires here
+    // when somebody signs out in another one. Without it this page went on
+    // showing their email, their plan and their subscription status after they
+    // had pressed Log Out somewhere else -- which on a shared computer is
+    // exactly the thing they pressed it to stop.
+    if (event === 'SIGNED_OUT') {
+      window.location.href = '/?auth=login';
+    }
   });
   if (window.location.hash && window.location.hash.includes('access_token')) {
     // Let Supabase exchange the token automatically
