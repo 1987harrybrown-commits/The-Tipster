@@ -54,7 +54,17 @@ function fmtOdds(o) {
   return (!Number.isFinite(n) || n <= 1) ? '—' : n.toFixed(2);
 }
 function fmtDate(d) { return new Date(d).toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric', timeZone:'Europe/London' }); }
-function fmtTime(d) { return new Date(d).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone:'Europe/London' }); }
+// A kickoff we do not have is not a kickoff.
+//
+// new Date(null) is the epoch and formats as "01:00" -- a missing time reads as
+// a match in the early hours rather than as missing -- and an unparseable one
+// renders the words "Invalid Date" beside the fixture. Same rule as fmtOdds:
+// show a dash rather than a number nobody should act on.
+function fmtTime(d) {
+  const t = new Date(d);
+  if (d == null || Number.isNaN(t.getTime())) return '—';
+  return t.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', timeZone:'Europe/London' });
+}
 
 // The price we advised at publication — the same number the ledger settles at.
 // Mirrors advisedPrice() in the engine. Showing t.odds here meant these pages
