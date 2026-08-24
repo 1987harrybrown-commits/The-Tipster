@@ -698,6 +698,26 @@ footer{background:var(--bg2);border-top:1px solid var(--border);padding:40px 24p
           <div class="update-tag"><div class="live-dot"></div>Updates every 15 mins</div>
         </div>
       </div>
+      <!-- With scripting off this grid stays empty and the figures above stay
+           dashes, which reads as a broken page rather than a disabled one. The
+           server-rendered card at /tips is the same tips with no JavaScript at
+           all, so say so rather than leaving a blank. -->
+      <noscript>
+        <div class="empty-state" style="border:1px solid var(--border);border-radius:10px;padding:28px 20px;text-align:center;">
+          <div style="font-size:15px;font-weight:700;margin-bottom:8px;">This board is built in your browser</div>
+          <p style="color:var(--muted);font-size:13px;margin:0 0 14px;">
+            With JavaScript turned off it cannot draw the card, and the record above
+            stays blank. Nothing is wrong with the site.
+          </p>
+          <p style="margin:0;">
+            <a href="/tips" style="color:var(--green);font-weight:700;">Today&rsquo;s tips, without JavaScript &rarr;</a>
+          </p>
+          <p style="color:var(--muted);font-size:12px;margin:10px 0 0;">
+            <a href="/results" style="color:var(--muted);">Results</a> &middot;
+            <a href="/betting-stats" style="color:var(--muted);">Statistics</a>
+          </p>
+        </div>
+      </noscript>
       <div class="tips-grid" id="tipsGrid"></div>
     </div>
   </div>

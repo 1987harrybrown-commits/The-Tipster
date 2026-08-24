@@ -231,6 +231,19 @@ nav{height:60px;display:flex;align-items:center;justify-content:space-between;pa
 </nav>
 
 <div class="page" id="pageContent">
+  <!-- This page is built entirely in the browser, so without scripting it is
+       a spinner for ever. Say so rather than spinning. -->
+  <noscript>
+    <div class="acard" style="margin-top:18px">
+      <h2 style="margin:0 0 8px;font-size:16px">This page needs JavaScript</h2>
+      <p style="color:var(--muted);font-size:13px;margin:0 0 14px">
+        Your account details are loaded in the browser, so with scripting turned
+        off there is nothing to show. The tips themselves do not need it:
+        <a href="/tips" style="color:var(--green)">today&rsquo;s card</a> is served as
+        plain HTML.
+      </p>
+    </div>
+  </noscript>
   <div class="loading">
     <div class="spinner"></div>
     <p>Loading your account...</p>
